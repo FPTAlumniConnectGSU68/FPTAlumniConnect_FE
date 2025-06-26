@@ -256,5 +256,6 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
         />
       )}
     </div>
+    //thêm chức năng
   );
 }
