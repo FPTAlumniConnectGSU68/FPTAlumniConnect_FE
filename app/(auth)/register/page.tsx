@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,28 +10,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@/contexts/auth-context";
+import { useMajorCodes } from "@/hooks/use-major-codes";
+import { ROLES } from "@/lib/api-client/constants";
 import {
-  Eye,
-  EyeOff,
-  User,
-  Lock,
-  Mail,
-  GraduationCap,
   AlertCircle,
   ArrowLeft,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  User,
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+import { useState } from "react";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
-    name: "",
+    code: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
-    role: "student" as "student" | "alumni" | "teacher",
-    graduationYear: "",
-    major: "",
-    studentId: "",
+    roleId: 0,
+    majorId: 0,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -42,13 +42,14 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
     await register(formData);
   };
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  const { data: majors } = useMajorCodes();
 
   return (
     <div className="min-h-screen flex">
@@ -85,19 +86,60 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label
-                htmlFor="name"
+                htmlFor="code"
                 className="text-sm font-medium text-gray-700"
               >
-                Full Name
+                Code
               </Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  id="name"
+                  id="code"
+                  type="text"
+                  placeholder="Enter your code"
+                  value={formData.code}
+                  onChange={(e) => handleChange("code", e.target.value)}
+                  className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="firstName"
+                className="text-sm font-medium text-gray-700"
+              >
+                First Name
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="firstName"
                   type="text"
                   placeholder="Enter your full name"
-                  value={formData.name}
-                  onChange={(e) => handleChange("name", e.target.value)}
+                  value={formData.firstName}
+                  onChange={(e) => handleChange("firstName", e.target.value)}
+                  className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="lastName"
+                className="text-sm font-medium text-gray-700"
+              >
+                Last Name
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="lastName"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={formData.lastName}
+                  onChange={(e) => handleChange("lastName", e.target.value)}
                   className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                   required
                 />
@@ -167,108 +209,55 @@ export default function RegisterPage() {
                 Role
               </Label>
               <Select
-                value={formData.role}
-                onValueChange={(value) => handleChange("role", value)}
+                value={formData.roleId.toString()}
+                onValueChange={(value) => handleChange("roleId", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select your role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="alumni">Alumni</SelectItem>
-                  <SelectItem value="teacher">Teacher</SelectItem>
+                  <SelectItem value={ROLES.STUDENT.toString()}>
+                    Student
+                  </SelectItem>
+                  <SelectItem value={ROLES.ALUMNI.toString()}>
+                    Alumni
+                  </SelectItem>
+                  <SelectItem value={ROLES.LECTURER.toString()}>
+                    Lecturer
+                  </SelectItem>
+                  <SelectItem value={ROLES.RECRUITER.toString()}>
+                    Recruiter
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {(formData.role === "student" || formData.role === "alumni") && (
-              <>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="studentId"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Student ID
-                  </Label>
-                  <div className="relative">
-                    <GraduationCap className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="studentId"
-                      type="text"
-                      placeholder="Enter your student ID"
-                      value={formData.studentId}
-                      onChange={(e) =>
-                        handleChange("studentId", e.target.value)
-                      }
-                      className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="major"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Major
-                  </Label>
-                  <Select
-                    value={formData.major}
-                    onValueChange={(value) => handleChange("major", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your major" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="software-engineering">
-                        Software Engineering
-                      </SelectItem>
-                      <SelectItem value="computer-science">
-                        Computer Science
-                      </SelectItem>
-                      <SelectItem value="information-security">
-                        Information Security
-                      </SelectItem>
-                      <SelectItem value="artificial-intelligence">
-                        Artificial Intelligence
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="graduationYear"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    {formData.role === "student"
-                      ? "Expected Graduation Year"
-                      : "Graduation Year"}
-                  </Label>
-                  <Select
-                    value={formData.graduationYear}
-                    onValueChange={(value) =>
-                      handleChange("graduationYear", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: 10 }, (_, i) => {
-                        const year = new Date().getFullYear() + i - 4;
-                        return (
-                          <SelectItem key={year} value={year.toString()}>
-                            {year}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            )}
+            <div className="space-y-2">
+              <Label
+                htmlFor="majorId"
+                className="text-sm font-medium text-gray-700"
+              >
+                Major
+              </Label>
+              <Select
+                value={formData.majorId.toString()}
+                onValueChange={(value) => handleChange("majorId", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your major" />
+                </SelectTrigger>
+                <SelectContent>
+                  {majors?.items?.map((major: any) => (
+                    <SelectItem
+                      key={major.majorId}
+                      value={major.majorId.toString()}
+                    >
+                      {major.majorName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             {error && (
               <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
