@@ -9,18 +9,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDateToDMY, formatTime } from "@/lib/utils";
-import { Event, SuccessRes } from "@/types/interfaces";
+import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
+import { formatDateToDMY, formatTime, isApiSuccess } from "@/lib/utils";
+import { Event } from "@/types/interfaces";
 import Image from "next/image";
 import React from "react";
 
 interface EventTableProps {
-  events: SuccessRes<Event[]> | undefined;
+  events: ApiResponse<PaginatedData<Event>> | undefined;
   isLoading: boolean;
   currentPage: number;
   onPageChange: (page: number) => void;
 }
-
 const EventTable = ({
   events,
   isLoading,
@@ -31,11 +31,16 @@ const EventTable = ({
     return <LoadingSpinner text="Loading..." />;
   }
 
-  if (!events || events.items.length === 0) {
+  if (
+    !events ||
+    !isApiSuccess(events) ||
+    !events.data ||
+    events.data.items.length === 0
+  ) {
     return <div className="text-center py-4">No events found</div>;
   }
 
-  const eventItems = events.items as unknown as Event[];
+  const { items: eventItems, totalPages, page } = events.data;
 
   return (
     <div className="space-y-4">
@@ -82,7 +87,7 @@ const EventTable = ({
       </div>
       <Pagination
         currentPage={currentPage}
-        totalPages={events.totalPages}
+        totalPages={totalPages}
         onPageChange={onPageChange}
       />
     </div>

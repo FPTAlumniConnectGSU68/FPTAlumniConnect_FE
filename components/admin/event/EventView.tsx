@@ -26,6 +26,3 @@ const EventView = () => {
 };
 
 export default EventView;
-
-
-//fasdasd

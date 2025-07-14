@@ -1,4 +1,4 @@
-export type RequestMethod = "GET" | "POST" | "PUT" | "DELETE";
+export type RequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export const END_POINTS: {
   [key: string]: {
@@ -9,15 +9,18 @@ export const END_POINTS: {
   };
 } = {
   // Auth
-  signIn: { path: "/api/v1/auth/login", method: "POST" },
-  signUp: { path: "/api/v1/auth/register", method: "POST" },
-  getMajors: { path: "/api/v1/majorcodes", method: "GET" },
+  signIn: { path: "/v1/auth/login", method: "POST" },
+  signUp: { path: "/v1/auth/register", method: "POST" },
+  getMajors: { path: "/v1/majorcodes", method: "GET" },
 
   //home
-  getEvents: { path: "/api/v1/events", method: "GET" },
-  getJobs: { path: "/api/v1/jobposts", method: "GET" },
-  getPosts: { path: "/api/v1/posts", method: "GET" },
-  getUsers: { path: "/api/v1/users", method: "GET" },
+  getEvents: { path: "/v1/events", method: "GET" },
+  getJobs: { path: "/v1/jobposts", method: "GET" },
+  getPosts: { path: "/v1/posts", method: "GET" },
+  getUsers: { path: "/v1/users", method: "GET" },
+  getMentors: { path: "/v1/mentors", method: "GET" },
+  // User
+  patchMentorUser: { path: "/v1/users", method: "PATCH" },
 
   // Tests
   buildTest: { path: "/tests/build", method: "POST", secure: true },
@@ -46,6 +49,18 @@ export const END_POINTS: {
     method: "POST",
     secure: true,
   },
+
+  // Notifications
+  getUserNotifications: {
+    path: "/Notification/user",
+    method: "GET",
+    secure: true,
+  },
+  markNotificationAsRead: {
+    path: "/Notification/mark-as-read",
+    method: "PATCH",
+    secure: true,
+  },
 };
 
 export enum ACTIONS {
@@ -59,15 +74,22 @@ export enum ACTIONS {
   CREATE_PROJECT = "createProject",
 
   //Home
-  GET_LATEST_JOBS = "getJobs",
+  GET_JOBS = "getJobs",
   GET_UPCOMMING_EVENTS = "getEvents",
   GET_FORUMS = "getPosts",
   GET_USER = "getUsers",
+  GET_MENTORS = "getMentors",
   GET_MAJORS = "getMajors",
+
+  // User
+  PATCH_MENTOR_USER = "patchMentorUser",
+
+  // Notifications
+  GET_USER_NOTIFICATIONS = "getUserNotifications",
+  MARK_NOTIFICATION_AS_READ = "markNotificationAsRead",
 }
 
-export const API_URL =
-  "https://fptalumniconnectapi20250627230412-f0gcc6b8e3axcfe2.canadacentral-01.azurewebsites.net";
+export const API_URL = "http://localhost:5000/api";
 
 export const ROLES = {
   ADMIN: 1,

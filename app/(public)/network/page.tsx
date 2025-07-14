@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import MainLayout from "@/components/layout/main-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,10 @@ import {
   MessageCircle,
   UserPlus,
 } from "lucide-react";
-
+import { useUsers } from "@/hooks/use-user";
+import AlumniCard from "@/components/network/AlumniCard";
+import { User } from "@/types/interfaces";
+import { isApiSuccess } from "@/lib/utils";
 // Mock alumni data
 const alumniData = [
   {
@@ -122,37 +125,74 @@ export default function NetworkPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [skillFilter, setSkillFilter] = useState("all");
-  const [alumni, setAlumni] = useState(alumniData);
+  const [alumni, setAlumni] = useState<any[]>();
+  const [query, setQuery] = useState("");
 
-  const handleConnect = (alumniId: string) => {
-    setAlumni(
-      alumni.map((person) =>
-        person.id === alumniId
-          ? { ...person, isConnected: !person.isConnected }
-          : person
-      )
-    );
-  };
-
-  const filteredAlumni = alumni.filter((person) => {
-    const matchesSearch =
-      person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      person.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      person.position.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesLocation =
-      locationFilter === "all" || person.location.includes(locationFilter);
-
-    const matchesSkill =
-      skillFilter === "all" ||
-      person.skills.some((skill) =>
-        skill.toLowerCase().includes(skillFilter.toLowerCase())
-      );
-
-    return matchesSearch && matchesLocation && matchesSkill;
+  const { data: users, isLoading } = useUsers({
+    page: 1,
+    role: "2",
+    query: {
+      query,
+    },
   });
 
-  const connectedAlumni = alumni.filter((person) => person.isConnected);
+  useEffect(() => {
+    if (users && isApiSuccess(users) && users.data?.items) {
+      const enriched = users.data.items.map((user) => ({
+        ...user,
+        isConnected: Math.random() < 0.5,
+      }));
+      setAlumni(enriched);
+    }
+  }, [users]);
+
+  const handleConnect = (alumniId: string) => {
+    console.log("connect to: " + alumniId);
+
+    // if (alumni) {
+    //   setAlumni(
+    //     alumni.map((person) =>
+    //       person.id === alumniId
+    //         ? { ...person, isConnected: !person.isConnected }
+    //         : person
+    //     )
+    //   );
+    // }
+  };
+
+  const handleMsg = (alumniId: string) => {
+    console.log("msg to:" + alumniId);
+  };
+
+  const filteredAlumni = useMemo(() => {
+    return alumni;
+  }, [alumni, searchTerm, locationFilter, skillFilter]);
+
+  const connectedAlumni = useMemo(() => {
+    if (alumni) {
+      return alumni.filter((person) => person.isConnected);
+    }
+  }, [alumni, searchTerm, locationFilter, skillFilter]);
+
+  // const filteredAlumni = alumni.filter((person) => {
+  //   const matchesSearch =
+  //     person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     person.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     person.position.toLowerCase().includes(searchTerm.toLowerCase());
+
+  //   const matchesLocation =
+  //     locationFilter === "all" || person.location.includes(locationFilter);
+
+  //   const matchesSkill =
+  //     skillFilter === "all" ||
+  //     person.skills.some((skill) =>
+  //       skill.toLowerCase().includes(skillFilter.toLowerCase())
+  //     );
+
+  //   return matchesSearch && matchesLocation && matchesSkill;
+  // });
+
+  // const connectedAlumni = alumni.filter((person) => person.isConnected);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -165,7 +205,7 @@ export default function NetworkPage() {
         </div>
       </div>
       <div className="bg-white mt-4 flex flex-col md:flex-row gap-4 items-center">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 w-full">
           {/* Search and Filters */}
           <Card>
             <CardContent className="pt-6">
@@ -225,170 +265,56 @@ export default function NetworkPage() {
             {/* Discover Tab */}
             <TabsContent value="discover">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredAlumni.map((person) => (
-                  <Card
-                    key={person.id}
-                    className="hover:shadow-lg transition-shadow"
-                  >
-                    <CardContent className="pt-6">
-                      <div className="flex items-start space-x-4">
-                        <Avatar className="w-16 h-16">
-                          <AvatarImage
-                            src={person.avatar || "/placeholder.svg"}
-                            alt={person.name}
-                          />
-                          <AvatarFallback>
-                            {person.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg truncate">
-                            {person.name}
-                          </h3>
-                          <p className="text-sm text-gray-600 truncate">
-                            {person.position}
-                          </p>
-                          <p className="text-sm font-medium text-blue-600 truncate">
-                            {person.company}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 space-y-2">
-                        <div className="flex items-center text-sm text-gray-500">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {person.location}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <GraduationCap className="h-4 w-4 mr-1" />
-                          Class of {person.graduationYear} • {person.major}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Briefcase className="h-4 w-4 mr-1" />
-                          {person.connections} connections
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {person.skills.slice(0, 3).map((skill) => (
-                            <Badge
-                              key={skill}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {skill}
-                            </Badge>
-                          ))}
-                          {person.skills.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{person.skills.length - 3}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant={person.isConnected ? "outline" : "default"}
-                            onClick={() => handleConnect(person.id)}
-                            className="flex-1"
-                          >
-                            {person.isConnected ? (
-                              <>
-                                <MessageCircle className="h-4 w-4 mr-1" />
-                                Message
-                              </>
-                            ) : (
-                              <>
-                                <UserPlus className="h-4 w-4 mr-1" />
-                                Connect
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                {!isLoading && (
+                  <>
+                    {filteredAlumni &&
+                      filteredAlumni.map((person, index) => (
+                        <AlumniCard
+                          person={person}
+                          handleButtonClick={
+                            person.isConnected ? handleMsg : handleConnect
+                          }
+                          key={index}
+                        />
+                      ))}
+                  </>
+                )}
               </div>
             </TabsContent>
 
             {/* Connections Tab */}
             <TabsContent value="connections">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {connectedAlumni.map((person) => (
-                  <Card
-                    key={person.id}
-                    className="hover:shadow-lg transition-shadow"
-                  >
-                    <CardContent className="pt-6">
-                      <div className="flex items-start space-x-4">
-                        <Avatar className="w-16 h-16">
-                          <AvatarImage
-                            src={person.avatar || "/placeholder.svg"}
-                            alt={person.name}
+              {!isLoading && (
+                <>
+                  {connectedAlumni && (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {connectedAlumni.map((person, index) => (
+                          <AlumniCard
+                            person={person}
+                            handleButtonClick={
+                              person.isConnected ? handleMsg : handleConnect
+                            }
+                            key={index}
                           />
-                          <AvatarFallback>
-                            {person.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg truncate">
-                            {person.name}
-                          </h3>
-                          <p className="text-sm text-gray-600 truncate">
-                            {person.position}
-                          </p>
-                          <p className="text-sm font-medium text-blue-600 truncate">
-                            {person.company}
-                          </p>
-                        </div>
+                        ))}
                       </div>
-
-                      <div className="mt-4 space-y-2">
-                        <div className="flex items-center text-sm text-gray-500">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {person.location}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <GraduationCap className="h-4 w-4 mr-1" />
-                          Class of {person.graduationYear}
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {person.interests.slice(0, 2).map((interest) => (
-                            <Badge
-                              key={interest}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {interest}
-                            </Badge>
-                          ))}
-                        </div>
-                        <Button size="sm" className="w-full">
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          Send Message
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              {connectedAlumni.length === 0 && (
-                <Card>
-                  <CardContent className="pt-6 text-center">
-                    <p className="text-gray-500">
-                      You haven't connected with any alumni yet.
-                    </p>
-                    <p className="text-sm text-gray-400 mt-2">
-                      Start building your network by connecting with fellow
-                      alumni!
-                    </p>
-                  </CardContent>
-                </Card>
+                      {connectedAlumni.length === 0 && (
+                        <Card>
+                          <CardContent className="pt-6 text-center">
+                            <p className="text-gray-500">
+                              You haven't connected with any alumni yet.
+                            </p>
+                            <p className="text-sm text-gray-400 mt-2">
+                              Start building your network by connecting with
+                              fellow alumni!
+                            </p>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </>
+                  )}
+                </>
               )}
             </TabsContent>
           </Tabs>

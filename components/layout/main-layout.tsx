@@ -1,9 +1,9 @@
 "use client";
 
-import type React from "react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/notification/notification-bell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,39 +12,50 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/auth-context";
+import { useNotificationSetup } from "@/hooks/use-notification-socket";
+import { useNotificationStore } from "@/store/notification";
+import type { UserInfo } from "@/types/auth";
+import Cookies from "js-cookie";
 import {
-  Users,
-  Briefcase,
-  MessageSquare,
   Calendar,
-  UserCheck,
   Home,
-  User,
-  Menu,
-  Settings,
   LogOut,
+  Menu,
+  MessageSquare,
+  Settings,
+  User,
+  UserCheck,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useAuth } from "@/contexts/auth-context";
 import { usePathname, useRouter } from "next/navigation";
+import type React from "react";
+import { useState, useEffect } from "react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  currentUser?: {
-    name: string;
-    email: string;
-    role: "admin" | "alumni" | "student" | "teacher";
-    avatar?: string;
-  };
+  currentUser?: UserInfo;
 }
 
-const navigation = [{ name: "Profile", href: "/profile", icon: User }];
+const navigation = [
+  { name: "Profile", href: "/profile", icon: User },
+  { name: "Chat", href: "/chat", icon: MessageSquare },
+];
 
-// Thêm admin navigation
 const adminNavigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: Home },
   { name: "User Management", href: "/admin/users-management", icon: Users },
+  {
+    name: "Post Management",
+    href: "/admin/posts-management",
+    icon: MessageSquare,
+  },
+  {
+    name: "Event Management",
+    href: "/admin/events-management",
+    icon: Calendar,
+  },
 ];
 
 const alumniNavigation = [
@@ -56,9 +67,29 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
   const { logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const isAdminPage = pathname.startsWith("/admin");
-  const isAlumniPage = pathname.startsWith("/alumni");
-  const isStudentPage = pathname.startsWith("/student");
+  const { addNotification } = useNotificationStore();
+
+  // Initialize SignalR connection using our new hook
+  const token = Cookies.get("auth-token");
+
+  // Debug log
+  useEffect(() => {
+    if (!token) {
+      console.log("No auth token found");
+      return;
+    }
+    if (!currentUser) {
+      console.log("No current user found");
+      return;
+    }
+    console.log(
+      "Attempting to connect with token:",
+      token.substring(0, 10) + "..."
+    );
+  }, [token, currentUser]);
+
+  // Only setup notification if we have both token and user
+  useNotificationSetup(token && currentUser ? token : "", addNotification);
 
   const isActive = (href: string) => {
     return pathname.startsWith(href);
@@ -69,22 +100,17 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
     router.push("/");
   };
 
-  const user = currentUser || {
-    name: "Admin User",
-    email: "admin@fpt.edu.vn",
-    role: "admin" as const,
-    avatar: "/images/FPTHCM.jpg",
-  };
+  const user = currentUser || null;
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case "admin":
+      case "Admin":
         return "bg-red-100 text-red-800";
-      case "alumni":
+      case "Alumni":
         return "bg-blue-100 text-blue-800";
-      case "teacher":
+      case "Teacher":
         return "bg-green-100 text-green-800";
-      case "student":
+      case "Student":
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -119,9 +145,14 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
           </div>
 
           <div className="flex items-center gap-4">
-            <Badge className={getRoleBadgeColor(user.role)}>
-              {user.role.toUpperCase()}
-            </Badge>
+            {user && (
+              <>
+                <Badge className={getRoleBadgeColor(user.roleName)}>
+                  {user.roleName.toUpperCase()}
+                </Badge>
+                <NotificationBell />
+              </>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -131,12 +162,14 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                   <Avatar className="h-8 w-8">
                     <AvatarImage
                       src={
-                        user.avatar ||
+                        // user?.avatar ||
                         "https://cdn.dribbble.com/users/13929796/avatars/normal/6d7cf73c0502578c420474f6adc6cc0d.png?1707433135"
                       }
-                      alt={user.name}
+                      alt={user?.firstName || ""}
                     />
-                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>
+                      {user?.firstName?.charAt(0)}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -144,10 +177,10 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {user.name}
+                      {user?.firstName} {user?.lastName}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {user.email}
+                      {user?.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -158,7 +191,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
-                {user.role === "admin" && (
+                {user?.roleName === "Admin" && (
                   <DropdownMenuItem asChild>
                     <Link href="/admin/dashboard" className="flex items-center">
                       <Settings className="mr-2 h-4 w-4" />
@@ -178,7 +211,6 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
       </header>
 
       <div className="flex h-[calc(100vh-65px)]">
-        {/* Sidebar */}
         <aside
           className={`${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -190,13 +222,15 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900"
+                  className={`flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 ${
+                    isActive(item.href) && "bg-gray-100"
+                  }`}
                 >
                   <item.icon className="mr-3 h-5 w-5" />
                   {item.name}
                 </Link>
               ))}
-              {user.role === "admin" && (
+              {user?.roleName === "Admin" && (
                 <>
                   <div className="pt-4">
                     <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -217,7 +251,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                   ))}
                 </>
               )}
-              {user.role === "alumni" && (
+              {user?.roleName === "Alumni" && (
                 <>
                   <div className="pt-4">
                     <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -242,13 +276,11 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
           </div>
         </aside>
 
-        {/* Main content */}
         <main className="flex-1 lg:ml-0">
           <div className="p-6">{children}</div>
         </main>
       </div>
 
-      {/* Overlay for mobile */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black bg-opacity-25 lg:hidden"
@@ -256,6 +288,5 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
         />
       )}
     </div>
-    //thêm chức năng
   );
 }

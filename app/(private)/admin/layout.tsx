@@ -15,7 +15,7 @@ export default function AdminLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "admin")) {
+    if (!isLoading && (!user || user.roleName !== "Admin")) {
       router.push("/admin/dashboard");
     }
   }, [user, isLoading, router]);
@@ -26,7 +26,7 @@ export default function AdminLayout({
         <LoadingSpinner text="Please wait..." />
       </div>
     );
-  } else if (user.role !== "admin") {
+  } else if (user.roleName !== "Admin") {
     return <Unauthorized />;
   }
 

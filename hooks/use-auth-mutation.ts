@@ -7,36 +7,47 @@ import type {
   SignInResponse,
   SignUpResponse,
 } from "@/types/auth";
+import { ApiResponse } from "@/lib/apiResponse";
 
 export function useAuthMutation() {
   const signIn = useMutation({
     mutationFn: async (params: LoginData) => {
-      const response = (await APIClient.invoke({
+      const response = await APIClient.invoke<
+        ApiResponse<{ id: SignInResponse }>
+      >({
         action: ACTIONS["SIGN_IN"],
         data: {
           email: params.email,
           password: params.password,
         },
-      })) as SignInResponse;
+      });
+
       return response;
     },
   });
 
-  const signUp = useMutation({
-    mutationFn: async (params: RegisterData) => {
-      const response = (await APIClient.invoke({
-        action: ACTIONS["SIGN_UP"],
+  const signUp = useMutation<SignUpResponse, Error, RegisterData>({
+    mutationFn: async ({
+      email,
+      password,
+      code,
+      firstName,
+      lastName,
+      roleId,
+      majorId,
+    }) => {
+      return await APIClient.invoke<SignUpResponse>({
+        action: ACTIONS.SIGN_UP,
         data: {
-          email: params.email,
-          password: params.password,
-          code: params.code,
-          firstName: params.firstName,
-          lastName: params.lastName,
-          roleId: params.roleId,
-          majorId: params.majorId,
+          email,
+          password,
+          code,
+          firstName,
+          lastName,
+          roleId,
+          majorId,
         },
-      })) as SignUpResponse;
-      return response;
+      });
     },
   });
 

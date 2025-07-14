@@ -15,7 +15,7 @@ export default function StudentLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "student")) {
+    if (!isLoading && (!user || user.roleName !== "Student")) {
       router.push("/student/courses");
     }
   }, [user, isLoading, router]);
@@ -26,7 +26,7 @@ export default function StudentLayout({
         <LoadingSpinner text="Please wait..." />
       </div>
     );
-  } else if (user.role !== "student") {
+  } else if (user.roleName !== "Student") {
     return <Unauthorized />;
   }
 

@@ -1,6 +1,6 @@
 import { APIClient } from "@/lib/api-client";
 import { ACTIONS } from "@/lib/api-client/constants";
-import { SuccessRes } from "@/types/interfaces";
+import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { useQuery } from "@tanstack/react-query";
 
 export interface Major {
@@ -13,14 +13,16 @@ export interface Major {
 }
 
 export function useMajorCodes() {
-  return useQuery<SuccessRes<Major[]>>({
+  return useQuery<ApiResponse<PaginatedData<Major>>>({
     queryKey: ["majors"],
     queryFn: async () => {
-      const response = await APIClient.invoke<SuccessRes<Major[]>>({
+      const response = await APIClient.invoke<
+        ApiResponse<PaginatedData<Major>>
+      >({
         action: ACTIONS.GET_MAJORS,
       });
 
-      return response as SuccessRes<Major[]>;
+      return response as ApiResponse<PaginatedData<Major>>;
     },
   });
 }

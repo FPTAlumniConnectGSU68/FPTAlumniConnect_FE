@@ -17,6 +17,29 @@ import { LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+const navItems = [
+  {
+    href: "/network",
+    label: "Network",
+  },
+  {
+    href: "/mentoring",
+    label: "Mentoring",
+  },
+  {
+    href: "/jobs",
+    label: "Jobs",
+  },
+  {
+    href: "/events",
+    label: "Events",
+  },
+
+  {
+    href: "/forums",
+    label: "Forums",
+  },
+];
 const Header = () => {
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -36,45 +59,24 @@ const Header = () => {
               <p className="text-xs text-gray-500">FPT University</p>
             </div>
           </Link>
-
+          {/*------------ navigation ------------ */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/network"
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-            >
-              Network
-            </Link>
-            <Link
-              href="/jobs"
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-            >
-              Jobs
-            </Link>
-            <Link
-              href="/events"
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-            >
-              Events
-            </Link>
-            <Link
-              href="/mentoring"
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-            >
-              Mentoring
-            </Link>
-            <Link
-              href="/forums"
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-            >
-              Forums
-            </Link>
+            {navItems.map((item, idx) => (
+              <Link
+                key={idx}
+                href={item.href}
+                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
-
+          {/*----------------------- */}
           <div className="flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-3">
-                <Badge className={getRoleBadgeColor(user.role)}>
-                  {user.role.toUpperCase()}
+                <Badge className={getRoleBadgeColor(user.roleName)}>
+                  {user.roleName.toUpperCase()}
                 </Badge>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -84,11 +86,11 @@ const Header = () => {
                     >
                       <Avatar className="h-8 w-8">
                         <AvatarImage
-                          src={user.avatar || "/placeholder.svg"}
-                          alt={user.name}
+                          src={"/placeholder.svg"}
+                          alt={user.firstName || ""}
                         />
                         <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                          {user.name.charAt(0)}
+                          {user.firstName?.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -101,7 +103,7 @@ const Header = () => {
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none text-gray-900">
-                          {user.name}
+                          {user.firstName} {user.lastName}
                         </p>
                         <p className="text-xs leading-none text-gray-500">
                           {user.email}
@@ -115,7 +117,7 @@ const Header = () => {
                         <span>Profile</span>
                       </Link>
                     </DropdownMenuItem>
-                    {user.role === "admin" && (
+                    {user.roleName === "admin" && (
                       <DropdownMenuItem asChild>
                         <Link
                           href="/admin/dashboard"

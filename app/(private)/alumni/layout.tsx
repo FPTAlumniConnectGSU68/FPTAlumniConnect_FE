@@ -15,7 +15,7 @@ export default function AlumniLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "alumni")) {
+    if (!isLoading && (!user || user.roleName !== "Alumni")) {
       router.push("/alumni/mentoring");
     }
   }, [user, isLoading, router]);
@@ -26,7 +26,7 @@ export default function AlumniLayout({
         <LoadingSpinner text="Please wait..." />
       </div>
     );
-  } else if (user.role !== "alumni") {
+  } else if (user.roleName !== "Alumni") {
     return <Unauthorized />;
   }
 

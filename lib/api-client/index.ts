@@ -7,7 +7,8 @@ export class APIClient {
     method: RequestMethod,
     data?: Record<string, unknown>,
     headers?: Record<string, string>,
-    query?: Record<string, string>
+    query?: Record<string, string>,
+    idQuery?: string
   ): Promise<unknown> {
     const queryParams = new URLSearchParams(query || {}).toString();
     const options: RequestInit = {
@@ -21,6 +22,10 @@ export class APIClient {
       body: data ? JSON.stringify(data) : undefined,
     };
 
+    if (idQuery) {
+      url = `${url}/${idQuery}`;
+    }
+
     const fullUrl = `${url}${queryParams ? `?${queryParams}` : ""}`;
 
     const response = await fetch(fullUrl, options);
@@ -31,8 +36,9 @@ export class APIClient {
     action: keyof typeof END_POINTS;
     data?: Record<string, unknown>;
     query?: Record<string, string>;
+    idQuery?: string;
   }): Promise<T> {
-    const { action, data, query } = params;
+    const { action, data, query, idQuery } = params;
 
     if (!END_POINTS[action]) {
       throw new Error(`Invalid action: ${action}`);
@@ -51,6 +57,13 @@ export class APIClient {
     }
 
     const url = `${API_URL}${path}`;
-    return this.request(url, method, data, headers, query) as Promise<T>;
+    return this.request(
+      url,
+      method,
+      data,
+      headers,
+      query,
+      idQuery
+    ) as Promise<T>;
   }
 }

@@ -79,10 +79,10 @@ export default function LoginPage() {
                   }`}
                   {...register("email", {
                     required: "Email is required",
-                    pattern: {
-                      value: /@fpt\.edu\.vn$/,
-                      message: "Email must be from fpt.edu.vn domain",
-                    },
+                    // pattern: {
+                    //   value: /@fpt\.edu\.vn$/,
+                    //   message: "Email must be from fpt.edu.vn domain",
+                    // },
                   })}
                 />
               </div>

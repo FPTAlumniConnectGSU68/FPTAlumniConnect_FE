@@ -4,36 +4,42 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ROLES } from "@/lib/api-client/constants";
 
 export default function MiddleCheckPage() {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
-  console.log(user);
-  useEffect(() => {
-    if (!isLoading && user) {
-      // Determine the route based on user role
-      switch (user.role) {
-        case "admin":
-          router.push("/admin/dashboard"); // Admin dashboard with user management
-          break;
-        case "alumni":
-          router.push("/alumni/mentoring"); // Alumni dashboard with mentoring focus
-          break;
-        case "student":
-          router.push("/student/courses"); // Student dashboard with courses
-          break;
-        default:
-          router.push("/dashboard"); // Fallback to general dashboard
-      }
-    } else if (!isLoading && !user) {
-      // If no user is found, redirect to login
-      router.push("/login");
-    }
-  }, [user, isLoading, router]);
 
-  // Show loading spinner while determining route
+  useEffect(() => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    // Role-based routing
+    switch (user.roleId) {
+      case ROLES.ADMIN:
+        router.push("/admin/dashboard");
+        break;
+      case ROLES.ALUMNI:
+        router.push("/alumni/mentoring");
+        break;
+      case ROLES.STUDENT:
+        router.push("/student");
+        break;
+      case ROLES.LECTURER:
+        router.push("/lecturer");
+        break;
+      case ROLES.RECRUITER:
+        router.push("/recruiter");
+        break;
+      default:
+        router.push("/");
+    }
+  }, [user, router]);
+
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="fixed inset-0 bg-white flex justify-center items-center min-h-screen w-full">
       <LoadingSpinner text="Loading..." />
     </div>
   );

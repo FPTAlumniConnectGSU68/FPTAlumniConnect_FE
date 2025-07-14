@@ -12,11 +12,11 @@ export default function ProfilePage() {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case "admin":
+      case "Admin":
         return "bg-red-100 text-red-800";
-      case "alumni":
+      case "Alumni":
         return "bg-blue-100 text-blue-800";
-      case "student":
+      case "Student":
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -33,16 +33,18 @@ export default function ProfilePage() {
           <div className="flex items-start gap-4">
             <Avatar className="h-20 w-20">
               <AvatarImage
-                src={user.avatar || "/placeholder-user.jpg"}
-                alt={user.name}
+                src={"/placeholder.svg"}
+                alt={user.firstName || ""}
               />
-              <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{user.firstName?.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-semibold">{user.name}</h2>
-                <Badge className={getRoleBadgeColor(user.role)}>
-                  {user.role.toUpperCase()}
+                <h2 className="text-xl font-semibold">
+                  {user.firstName} {user.lastName}
+                </h2>
+                <Badge className={getRoleBadgeColor(user.roleName)}>
+                  {user.roleName.toUpperCase()}
                 </Badge>
               </div>
               <p className="text-gray-600">{user.email}</p>
@@ -55,7 +57,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Role-specific sections */}
-          {user.role === "admin" && (
+          {user.roleName === "Admin" && (
             <div className="mt-6">
               <h3 className="font-semibold mb-2">Administrative Access</h3>
               <p className="text-gray-600">
@@ -65,26 +67,26 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {user.role === "alumni" && (
+          {user.roleName === "Alumni" && (
             <div className="mt-6">
               <h3 className="font-semibold mb-2">Alumni Information</h3>
               <p className="text-gray-600">
-                Graduation Year: {user.graduationYear || "Not specified"}
+                Graduation Year: {"Not specified"}
                 <br />
                 Current Position: {"Not specified"}
                 <br />
-                Company: {user.company || "Not specified"}
+                Company: {"Not specified"}
               </p>
             </div>
           )}
 
-          {user.role === "student" && (
+          {user.roleName === "Student" && (
             <div className="mt-6">
               <h3 className="font-semibold mb-2">Student Information</h3>
               <p className="text-gray-600">
-                Student ID: {user.studentId || "Not specified"}
+                Student ID: {"Not specified"}
                 <br />
-                Major: {user.major || "Not specified"}
+                Major: {"Not specified"}
                 <br />
                 Expected Graduation: {"Not specified"}
               </p>

@@ -1,16 +1,14 @@
-import { APIError } from "@/types/interfaces";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { ApiResponse, ApiSuccess } from "./apiResponse";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const isError = (res: any): res is APIError => {
-  return (
-    res && typeof res.StatusCode === "number" && typeof res.Error === "string"
-  );
-};
+export function isApiSuccess<T>(res: ApiResponse<T>): res is ApiSuccess<T> {
+  return res.status === "success";
+}
 
 export function formatDateToDMY(dateStr: string): string {
   const date = new Date(dateStr);

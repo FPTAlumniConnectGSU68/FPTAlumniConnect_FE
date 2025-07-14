@@ -1,7 +1,10 @@
+"use client";
+
+import UserView from "@/components/admin/user/UserView";
 import React from "react";
 
 const UserManagement = () => {
-  return <div>UserManagement</div>;
+  return <UserView />;
 };
 
 export default UserManagement;
