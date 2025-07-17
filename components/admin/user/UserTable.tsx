@@ -119,16 +119,17 @@ const EditUserSheet = ({
   user,
   onRoleChange,
   setIsOpen,
-  isOpenSheet,
-  setIsOpenSheet,
+  isOpen,
+  onOpenChange,
 }: {
   user: User;
   onRoleChange: (value: string, userId: number) => void;
   setIsOpen: (value: boolean) => void;
-  isOpenSheet: boolean;
-  setIsOpenSheet: (value: boolean) => void;
+  isOpen: boolean;
+  onOpenChange: (value: boolean) => void;
 }) => {
   const [role, setRole] = useState(user.isMentor ? "Mentor" : "None");
+
   const handleRoleChange = (value: string) => {
     setRole(value);
   };
@@ -136,11 +137,10 @@ const EditUserSheet = ({
   const handleSave = () => {
     onRoleChange(role, user.userId);
     setIsOpen(true);
-    // setIsOpenSheet(false);
   };
 
   return (
-    <Sheet open={isOpenSheet} onOpenChange={setIsOpenSheet}>
+    <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
         <Button variant="outline">Edit</Button>
       </SheetTrigger>
@@ -172,11 +172,19 @@ const EditUserSheet = ({
             </div>
             <div className="flex flex-col gap-2">
               <Label>Mentoring</Label>
-              <RoleSelector user={user} onRoleChange={onRoleChange} />
+              <Select defaultValue={role} onValueChange={handleRoleChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an option" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Mentor">Mentor</SelectItem>
+                  <SelectItem value="None">None</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <SheetFooter className="mb-4">
-            <Button variant="outline" onClick={() => setIsOpenSheet(false)}>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button onClick={handleSave}>Update</Button>
@@ -193,18 +201,12 @@ const UserTable = ({
   onPageChange,
   currentPage,
 }: UserTableProps) => {
-  const [isOpenSheet, setIsOpenSheet] = useState(false);
+  const [openSheetId, setOpenSheetId] = useState<number | null>(null);
   const [isOpenConfirm, setIsOpenConfirm] = useState(false);
-
   const [termChoice, setTermChoice] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const { mutate: patchMentorUser, isPending } = usePatchMentorUser({
-    onSuccess: () => {
-      setIsOpenConfirm(false);
-      setIsOpenSheet(false);
-    },
-  });
+  const { mutate: patchMentorUser, isPending } = usePatchMentorUser();
 
   const handleRoleChange = useCallback(
     (value: string, userId: number) => {
@@ -214,13 +216,12 @@ const UserTable = ({
       if (user) {
         setSelectedUser(user);
         setTermChoice(value);
-        // setIsOpenConfirm(true); // enable when needed
       }
     },
     [users]
   );
 
-  const handleConfirm = useCallback(() => {
+  const handleConfirm = useCallback(async () => {
     if (!selectedUser) return;
 
     const userData: UserData = {
@@ -231,10 +232,19 @@ const UserTable = ({
       profilePicture: selectedUser.profilePicture || "",
     };
 
-    patchMentorUser({
-      userId: selectedUser.userId.toString(),
-      userData,
-    });
+    try {
+      await patchMentorUser({
+        userId: selectedUser.userId.toString(),
+        userData,
+      });
+
+      setIsOpenConfirm(false);
+      setOpenSheetId(null);
+      setSelectedUser(null);
+      setTermChoice("");
+    } catch (error) {
+      console.error("Failed to update user:", error);
+    }
   }, [selectedUser, termChoice, patchMentorUser]);
 
   if (isLoading) {
@@ -250,7 +260,7 @@ const UserTable = ({
     return <div className="text-center py-4">No users found</div>;
   }
 
-  const { items: userItems, totalPages: totalPages } = users.data;
+  const { items: userItems, totalPages } = users.data;
 
   return (
     <div className="space-y-4">
@@ -295,8 +305,10 @@ const UserTable = ({
                     user={user}
                     onRoleChange={handleRoleChange}
                     setIsOpen={setIsOpenConfirm}
-                    isOpenSheet={isOpenSheet}
-                    setIsOpenSheet={setIsOpenSheet}
+                    isOpen={openSheetId === user.userId}
+                    onOpenChange={(open) =>
+                      setOpenSheetId(open ? user.userId : null)
+                    }
                   />
                 </TableCell>
               </TableRow>

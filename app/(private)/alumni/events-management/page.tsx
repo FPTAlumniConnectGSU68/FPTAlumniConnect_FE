@@ -3,9 +3,9 @@
 import { EventsManagement } from "@/components/shared/events/EventsManagement";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 
-export default function AdminEventsManagementPage() {
+export default function AlumniEventsManagementPage() {
   return (
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute allowedRoles={["alumni"]}>
       <div className="space-y-6">
         <EventsManagement />
       </div>

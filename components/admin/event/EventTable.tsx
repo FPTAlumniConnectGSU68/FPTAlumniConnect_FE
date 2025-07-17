@@ -13,7 +13,10 @@ import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { formatDateToDMY, formatTime, isApiSuccess } from "@/lib/utils";
 import { Event } from "@/types/interfaces";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
+import EditEventSheet from "./EditEventSheet";
+import { useUpdateEvent } from "@/hooks/use-event";
+import { useToast } from "@/components/ui/toast";
 
 interface EventTableProps {
   events: ApiResponse<PaginatedData<Event>> | undefined;
@@ -21,12 +24,35 @@ interface EventTableProps {
   currentPage: number;
   onPageChange: (page: number) => void;
 }
+
 const EventTable = ({
   events,
   isLoading,
   currentPage,
   onPageChange,
 }: EventTableProps) => {
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const { mutate: updateEvent } = useUpdateEvent();
+  const toast = useToast();
+  const handleEditClick = (event: Event) => {
+    setSelectedEvent(event);
+  };
+
+  const handleSave = async (eventData: Partial<Event>) => {
+    if (!selectedEvent) return;
+
+    try {
+      await updateEvent({
+        eventId: selectedEvent.eventId.toString(),
+        eventData,
+      });
+      toast.success("Event updated successfully");
+      setSelectedEvent(null);
+    } catch (error) {
+      toast.error("Failed to update event");
+    }
+  };
+
   if (isLoading) {
     return <LoadingSpinner text="Loading..." />;
   }
@@ -40,7 +66,7 @@ const EventTable = ({
     return <div className="text-center py-4">No events found</div>;
   }
 
-  const { items: eventItems, totalPages, page } = events.data;
+  const { items: eventItems, totalPages } = events.data;
 
   return (
     <div className="space-y-4">
@@ -78,18 +104,28 @@ const EventTable = ({
                     formatTime(event.endDate)}
                 </TableCell>
                 <TableCell>
-                  <Button>Edit</Button>
+                  <Button onClick={() => handleEditClick(event)}>Edit</Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={onPageChange}
       />
+
+      {selectedEvent && (
+        <EditEventSheet
+          event={selectedEvent}
+          isOpen={!!selectedEvent}
+          onOpenChange={(open) => !open && setSelectedEvent(null)}
+          onSave={handleSave}
+        />
+      )}
     </div>
   );
 };

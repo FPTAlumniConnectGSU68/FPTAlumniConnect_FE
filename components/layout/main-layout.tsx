@@ -60,6 +60,11 @@ const adminNavigation = [
 
 const alumniNavigation = [
   { name: "Mentoring", href: "/alumni/mentoring", icon: UserCheck },
+  {
+    name: "Event Management",
+    href: "/alumni/events-management",
+    icon: Calendar,
+  },
 ];
 
 export default function MainLayout({ children, currentUser }: MainLayoutProps) {

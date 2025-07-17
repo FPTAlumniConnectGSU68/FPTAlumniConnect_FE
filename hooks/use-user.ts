@@ -63,7 +63,7 @@ export function useUsers({
 }
 
 // Update user role
-export function usePatchMentorUser(p0: { onSuccess: () => void }) {
+export function usePatchMentorUser() {
   const queryClient = useQueryClient();
   const toast = useToast();
   return useMutation({
@@ -85,6 +85,7 @@ export function usePatchMentorUser(p0: { onSuccess: () => void }) {
       return response;
     },
     onSuccess: () => {
+      console.log("onSuccess");
       toast.success("User role updated successfully");
       queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.all });
     },

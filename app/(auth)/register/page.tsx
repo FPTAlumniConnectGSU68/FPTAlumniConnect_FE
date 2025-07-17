@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/auth-context";
-import { useMajorCodes } from "@/hooks/use-major-codes";
+import { MajorSelect } from "@/components/ui/major-select";
 import { ROLES } from "@/lib/api-client/constants";
 import {
   AlertCircle,
@@ -48,8 +48,6 @@ export default function RegisterPage() {
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
-
-  const { data: majors } = useMajorCodes();
 
   return (
     <div className="min-h-screen flex">
@@ -239,24 +237,11 @@ export default function RegisterPage() {
               >
                 Major
               </Label>
-              <Select
+              <MajorSelect
                 value={formData.majorId.toString()}
                 onValueChange={(value) => handleChange("majorId", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your major" />
-                </SelectTrigger>
-                <SelectContent>
-                  {majors?.items?.map((major: any) => (
-                    <SelectItem
-                      key={major.majorId}
-                      value={major.majorId.toString()}
-                    >
-                      {major.majorName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                disabled={isLoading}
+              />
             </div>
 
             {error && (

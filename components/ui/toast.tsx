@@ -119,6 +119,5 @@ export function useToast() {
     info: (message: string) => context.showToast(message, "info"),
     warning: (message: string) => context.showToast(message, "warning"),
   };
-
   return toast;
 }

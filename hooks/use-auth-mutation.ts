@@ -1,53 +1,45 @@
 import { APIClient } from "@/lib/api-client";
 import { ACTIONS } from "@/lib/api-client/constants";
-import { useMutation } from "@tanstack/react-query";
+import { ApiResponse } from "@/lib/apiResponse";
 import type {
   LoginData,
   RegisterData,
   SignInResponse,
   SignUpResponse,
 } from "@/types/auth";
-import { ApiResponse } from "@/lib/apiResponse";
+import { useMutation } from "@tanstack/react-query";
 
 export function useAuthMutation() {
   const signIn = useMutation({
     mutationFn: async (params: LoginData) => {
-      const response = await APIClient.invoke<
-        ApiResponse<{ id: SignInResponse }>
-      >({
-        action: ACTIONS["SIGN_IN"],
+      const response = await APIClient.invoke<ApiResponse<SignInResponse>>({
+        action: ACTIONS.SIGN_IN,
         data: {
           email: params.email,
           password: params.password,
         },
       });
 
-      return response;
+      return response as ApiResponse<SignInResponse>;
     },
   });
 
-  const signUp = useMutation<SignUpResponse, Error, RegisterData>({
-    mutationFn: async ({
-      email,
-      password,
-      code,
-      firstName,
-      lastName,
-      roleId,
-      majorId,
-    }) => {
-      return await APIClient.invoke<SignUpResponse>({
+  const signUp = useMutation({
+    mutationFn: async (params: RegisterData) => {
+      const response = await APIClient.invoke<ApiResponse<SignUpResponse>>({
         action: ACTIONS.SIGN_UP,
         data: {
-          email,
-          password,
-          code,
-          firstName,
-          lastName,
-          roleId,
-          majorId,
+          email: params.email,
+          password: params.password,
+          code: params.code,
+          firstName: params.firstName,
+          lastName: params.lastName,
+          roleId: params.roleId,
+          majorId: params.majorId,
         },
       });
+
+      return response as ApiResponse<SignUpResponse>;
     },
   });
 

@@ -15,6 +15,7 @@ export const END_POINTS: {
 
   //home
   getEvents: { path: "/v1/events", method: "GET" },
+  updateEvent: { path: "/v1/events", method: "PUT", secure: true },
   getJobs: { path: "/v1/jobposts", method: "GET" },
   getPosts: { path: "/v1/posts", method: "GET" },
   getUsers: { path: "/v1/users", method: "GET" },
@@ -76,6 +77,7 @@ export enum ACTIONS {
   //Home
   GET_JOBS = "getJobs",
   GET_UPCOMMING_EVENTS = "getEvents",
+  UPDATE_EVENT = "updateEvent",
   GET_FORUMS = "getPosts",
   GET_USER = "getUsers",
   GET_MENTORS = "getMentors",
