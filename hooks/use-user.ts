@@ -95,3 +95,16 @@ export function usePatchMentorUser() {
     },
   });
 }
+
+export function useGetUser(userId: number) {
+  return useQuery<ApiResponse<User>>({
+    queryKey: ["user", userId],
+    queryFn: async () => {
+      const response = await APIClient.invoke<ApiResponse<User>>({
+        action: ACTIONS.GET_USER,
+        idQuery: userId.toString(),
+      });
+      return response;
+    },
+  });
+}

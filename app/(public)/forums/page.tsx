@@ -10,154 +10,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CirclePlus, MessageSquare, Pin, Plus, TrendingUp } from "lucide-react";
+import { CirclePlus, MessageSquare, Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Bookmark, Search } from "lucide-react";
 import { useAuthGuard } from "@/hooks/use-auth-guard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CreateNewDiscussionModal from "@/components/forum/CreateNewDiscussionModal";
+import { usePosts } from "@/hooks/use-post";
+import { formatDateToDMY, isApiSuccess } from "@/lib/utils";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import usePostService from "@/lib/services/post.service";
+import { Comment } from "@/types/interfaces";
+import { useAuth } from "@/contexts/auth-context";
 
-const categories = [
-  {
-    id: 1,
-    name: "Career Development",
-    slug: "career-development",
-    description:
-      "Discuss career growth, job opportunities, and professional development",
-    topics: 156,
-    posts: 1240,
-    lastActivity: "2 hours ago",
-    color: "bg-blue-100 text-blue-800",
-  },
-  {
-    id: 2,
-    name: "Technology & Innovation",
-    slug: "technology-innovation",
-    description:
-      "Share insights about latest tech trends, tools, and innovations",
-    topics: 89,
-    posts: 567,
-    lastActivity: "1 hour ago",
-    color: "bg-green-100 text-green-800",
-  },
-  {
-    id: 3,
-    name: "Entrepreneurship",
-    slug: "entrepreneurship",
-    description:
-      "Connect with fellow entrepreneurs and discuss startup experiences",
-    topics: 67,
-    posts: 423,
-    lastActivity: "3 hours ago",
-    color: "bg-purple-100 text-purple-800",
-  },
-  {
-    id: 4,
-    name: "Class Reunions",
-    slug: "class-reunions",
-    description: "Organize and discuss class reunions and alumni gatherings",
-    topics: 45,
-    posts: 234,
-    lastActivity: "5 hours ago",
-    color: "bg-orange-100 text-orange-800",
-  },
-  {
-    id: 5,
-    name: "Study Abroad",
-    slug: "study-abroad",
-    description:
-      "Share experiences and advice about studying and working abroad",
-    topics: 78,
-    posts: 456,
-    lastActivity: "4 hours ago",
-    color: "bg-pink-100 text-pink-800",
-  },
-  {
-    id: 6,
-    name: "General Discussion",
-    slug: "general-discussion",
-    description: "Open discussions about life, hobbies, and general topics",
-    topics: 123,
-    posts: 890,
-    lastActivity: "30 minutes ago",
-    color: "bg-gray-100 text-gray-800",
-  },
-];
-
-const recentTopics = [
-  {
-    id: 1,
-    title: "Best practices for remote work in tech companies",
-    author: "Nguyen Van An",
-    authorClass: "Class of 2018",
-    category: "Career Development",
-    replies: 23,
-    views: 156,
-    lastReply: "2 hours ago",
-    isPinned: false,
-    isHot: true,
-  },
-  {
-    id: 2,
-    title: "AI and Machine Learning career opportunities in Vietnam",
-    author: "Tran Thi Binh",
-    authorClass: "Class of 2019",
-    category: "Technology & Innovation",
-    replies: 18,
-    views: 234,
-    lastReply: "1 hour ago",
-    isPinned: true,
-    isHot: true,
-  },
-  {
-    id: 3,
-    title: "Starting a tech startup in Southeast Asia - Lessons learned",
-    author: "Le Minh Duc",
-    authorClass: "Class of 2017",
-    category: "Entrepreneurship",
-    replies: 31,
-    views: 445,
-    lastReply: "3 hours ago",
-    isPinned: false,
-    isHot: true,
-  },
-  {
-    id: 4,
-    title: "Class of 2020 - 5 year reunion planning",
-    author: "Pham Thu Ha",
-    authorClass: "Class of 2020",
-    category: "Class Reunions",
-    replies: 12,
-    views: 89,
-    lastReply: "5 hours ago",
-    isPinned: false,
-    isHot: false,
-  },
-  {
-    id: 5,
-    title: "Working in Singapore as an FPT graduate - AMA",
-    author: "Hoang Van Khai",
-    authorClass: "Class of 2016",
-    category: "Study Abroad",
-    replies: 27,
-    views: 312,
-    lastReply: "4 hours ago",
-    isPinned: false,
-    isHot: true,
-  },
-];
 export default function ForumsPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const { requireAuth, AuthGuard } = useAuthGuard();
   const [openCreateNewDiscussion, setOpenCreateNewDiscussion] = useState(false);
+  const [selected, setSelected] = useState<number | string>();
+  const [search, setSearch] = useState("");
+
   const handleStartNewDiscussion = () => {
     if (
       !requireAuth({
@@ -168,8 +42,20 @@ export default function ForumsPage() {
       })
     )
       return;
+
     setOpenCreateNewDiscussion(true);
   };
+
+  const {
+    data: posts,
+    isLoading: postLoading,
+    refetch,
+  } = usePosts({
+    size: 10,
+    query: { title: search },
+  });
+  const postItems = posts && isApiSuccess(posts) ? posts.data?.items ?? [] : [];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -190,85 +76,36 @@ export default function ForumsPage() {
             {/* Categories */}
             <Card>
               <CardHeader>
-                <CardTitle>Discussion Categories</CardTitle>
+                <CardTitle>Discussion</CardTitle>
                 <CardDescription>
-                  Choose a category to explore topics and join conversations
+                  Explore topics and join conversations
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <CommandDesktop />
-                {categories.map((category) => (
+                <CommandDesktop
+                  search={search}
+                  setSearch={setSearch}
+                  onSubmit={refetch}
+                />
+                {postItems.map((post) => (
                   <div
-                    key={category.id}
+                    key={post.postId}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() => router.push(`/forums/${category.slug}`)}
+                    onClick={() => {
+                      setSelected(post.postId);
+                    }}
                   >
                     <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <Badge className={category.color}>
-                          {category.name}
-                        </Badge>
+                      <p className="text-sm text-gray-600 mb-2">{post.title}</p>
+                      <div className="flex items-center space-x-4 text-xs text-gray-500 mb-2">
+                        {post.content}
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {category.description}
-                      </p>
                       <div className="flex items-center space-x-4 text-xs text-gray-500">
-                        <span>{category.topics} topics</span>
-                        <span>{category.posts} posts</span>
-                        <span>Last activity: {category.lastActivity}</span>
+                        <span>{post.views} views</span>
+                        <span>
+                          Last activity: {formatDateToDMY(post.updatedAt)}
+                        </span>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Recent Topics */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Discussions</CardTitle>
-                <CardDescription>
-                  Latest topics and active conversations
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {recentTopics.map((topic) => (
-                  <div
-                    key={topic.id}
-                    className="border-b last:border-b-0 pb-4 last:pb-0"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          {topic.isPinned && (
-                            <Pin className="h-4 w-4 text-blue-600" />
-                          )}
-                          {topic.isHot && (
-                            <TrendingUp className="h-4 w-4 text-red-500" />
-                          )}
-                          <h3 className="font-medium text-gray-900 hover:text-blue-600 cursor-pointer">
-                            {topic.title}
-                          </h3>
-                        </div>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <span>
-                            by {topic.author} ({topic.authorClass})
-                          </span>
-                          <Badge variant="outline" className="text-xs">
-                            {topic.category}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-1">
-                          <MessageSquare className="h-4 w-4" />
-                          <span>{topic.replies} replies</span>
-                        </div>
-                        <span>{topic.views} views</span>
-                      </div>
-                      <span>Last reply: {topic.lastReply}</span>
                     </div>
                   </div>
                 ))}
@@ -346,58 +183,206 @@ export default function ForumsPage() {
           </div>
         </div>
       </div>
+
       <AuthGuard />
-      <CreateNewDiscussionModal
-        isOpen={openCreateNewDiscussion}
-        onClose={() => setOpenCreateNewDiscussion(false)}
-      />
+      {user && (
+        <CreateNewDiscussionModal
+          isOpen={openCreateNewDiscussion}
+          onClose={() => setOpenCreateNewDiscussion(false)}
+          user={user}
+          onCreated={refetch}
+        />
+      )}
+      {user && (
+        <CommentDialog id={selected} setSelected={setSelected} user={user} />
+      )}
     </div>
   );
 }
 
-const CommandDesktop = () => {
+const CommandDesktop = ({ search, setSearch, onSubmit }: any) => {
+  const handleSubmit = () => {
+    onSubmit();
+  };
   return (
     <div className="flex items-center gap-2 mb-6">
-      {/* Topic Filter */}
-      <Select defaultValue="all">
-        <SelectTrigger className="w-[10rem] bg-white border-gray-200">
-          <SelectValue placeholder="Topic" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Topics</SelectItem>
-          <SelectItem value="tech">Technology</SelectItem>
-          <SelectItem value="career">Career</SelectItem>
-          <SelectItem value="education">Education</SelectItem>
-          <SelectItem value="events">Events</SelectItem>
-        </SelectContent>
-      </Select>
-
-      {/* Sort Filter */}
-      <Select defaultValue="recent">
-        <SelectTrigger className="w-[10rem] bg-white border-gray-200">
-          <SelectValue placeholder="Sort" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="recent">Most Recent</SelectItem>
-          <SelectItem value="popular">Most Popular</SelectItem>
-          <SelectItem value="comments">Most Comments</SelectItem>
-          <SelectItem value="likes">Most Likes</SelectItem>
-        </SelectContent>
-      </Select>
-
-      {/* Bookmarks Button */}
-      <Button variant="outline" size="icon" className="bg-white">
-        <Bookmark className="h-4 w-4" />
-      </Button>
-
-      {/* Search Input */}
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
           placeholder="Search forums..."
           className="pl-10 bg-white border-gray-200"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
       </div>
+      <Button
+        type="submit"
+        className="w-20 bg-gradient-to-r from-blue-600 to-purple-600"
+        onClick={handleSubmit}
+      >
+        Search
+      </Button>
     </div>
+  );
+};
+
+const CommentDialog = ({ id, setSelected, user }: any) => {
+  const { GET_POST_DETAIL, GET_POST_COMMENTS, GET_CHILD_CMTS, POST_COMMENT } =
+    usePostService();
+  const [data, setData] = useState<any>(null);
+  const [isOpen, setisOpen] = useState(false);
+
+  const [newComment, setNewComment] = useState("");
+
+  const handleAddComment = async (e: any) => {
+    const cmt: Comment = {
+      postId: id,
+      authorId: user?.userId,
+      content: newComment,
+      parentCommentId: null,
+      type: "Comment",
+    };
+    const res = await POST_COMMENT(cmt);
+    if (isApiSuccess(res)) {
+      setNewComment("");
+      fetch();
+    }
+  };
+
+  useEffect(() => {
+    setisOpen(!!id);
+  }, [id]);
+
+  useEffect(() => {
+    fetch();
+  }, [id]);
+
+  const fetch = async () => {
+    try {
+      const res = await GET_POST_DETAIL(id);
+      if (isApiSuccess(res) && res.data) {
+        const cmt = await fetchPostCmts(res.data.postId);
+        const userId = user.userId;
+        const userComments = cmt.items.filter(
+          (c: any) => c.authorId === userId
+        );
+        const otherComments = cmt.items.filter(
+          (c: any) => c.authorId !== userId
+        );
+        const sortedComments = [...userComments, ...otherComments];
+        setData({ ...res.data, comments: sortedComments });
+      }
+    } catch (error) {}
+  };
+  const fetchPostCmts = async (id: number | string) => {
+    const cmt = await GET_POST_COMMENTS(id);
+    if (isApiSuccess(cmt)) {
+      return cmt.data;
+    }
+    return null;
+  };
+
+  return (
+    <Dialog
+      open={isOpen}
+      onOpenChange={() => {
+        setisOpen(false);
+        setSelected(null);
+      }}
+    >
+      <DialogContent className="max-w-2xl">
+        <DialogTitle>{"Detail"}</DialogTitle>
+        {data && (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                {/* <Avatar>
+                      <AvatarImage src={selectedThread.author.avatar} />
+                      <AvatarFallback>
+                        {selectedThread.author.name[0]}
+                      </AvatarFallback>
+                    </Avatar> */}
+                <div>
+                  <h2 className="text-xl font-semibold">{data.title}</h2>
+                  {/* <p className="text-sm text-gray-500">
+                        Posted by {selectedThread.author.name} •{" "}
+                        {formatDate(selectedThread.createdAt)}
+                      </p> */}
+                </div>
+              </div>
+              <p className="text-gray-700">{data.content}</p>
+              <div className="flex items-center gap-6 pt-2 border-t">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <MessageSquare className="h-4 w-4 mr-1" />
+                  Views ({data.views})
+                </Button>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Share2 className="h-4 w-4" />
+                  Share
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-semibold">
+                Comments ({data.comments.length})
+              </h3>
+
+              <div className="flex gap-4">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src={"/placeholder.svg"}
+                    alt={user.firstName || ""}
+                  />
+                  <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                    {user.firstName?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-2">
+                  <Input
+                    placeholder="Add a comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                  />
+                  <Button
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim()}
+                  >
+                    Comment
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-4 mt-6 overflow-y-auto max-h-96">
+                {data.comments.map((comment: any) => (
+                  <div key={comment.commentId} className="flex gap-4">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={"/placeholder.svg"}
+                        alt={comment.author?.firstName || ""}
+                      />
+                      <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                        {comment.author?.firstName?.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          {/* {comment.author.name} */}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {formatDateToDMY(comment.createdAt)}
+                        </span>
+                      </div>
+                      <p className="text-gray-700 mt-1">{comment.content}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };

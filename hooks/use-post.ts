@@ -7,9 +7,14 @@ import { useQuery } from "@tanstack/react-query";
 interface UsePostsOptions {
   page?: number;
   size?: number;
+  query?: Record<string, string | number | boolean | undefined>;
 }
 
-export function usePosts({ page = 1, size = 5 }: UsePostsOptions = {}) {
+export function usePosts({
+  page = 1,
+  size = 5,
+  query = {},
+}: UsePostsOptions = {}) {
   return useQuery<ApiResponse<PaginatedData<Post>>>({
     queryKey: ["posts", page, size],
     queryFn: async () => {
@@ -19,6 +24,7 @@ export function usePosts({ page = 1, size = 5 }: UsePostsOptions = {}) {
           query: {
             Page: page.toString(),
             Size: size.toString(),
+            ...query,
           },
         }
       );

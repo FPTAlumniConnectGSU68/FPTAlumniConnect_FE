@@ -85,3 +85,19 @@ export interface Notification {
   timestamp: string;
   isRead: boolean;
 }
+
+export interface MentoringRequest {
+  id: number;
+  aumniId: number;
+  requestMessage: string;
+  type: string;
+  status: string;
+}
+
+export interface Comment {
+  postId: number;
+  authorId: number | undefined;
+  content: string;
+  parentCommentId: number | null;
+  type: string;
+}

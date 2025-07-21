@@ -34,7 +34,7 @@ export class APIClient {
 
   static async invoke<T = unknown>(params: {
     action: keyof typeof END_POINTS;
-    data?: Record<string, unknown>;
+    data?: any;
     query?: Record<string, string>;
     idQuery?: string;
   }): Promise<T> {

@@ -22,7 +22,7 @@ const HeroSection = ({ searchTerm, setSearchTerm }: HeroProps) => {
             Join thousands of FPT University alumni worldwide. Network, find
             opportunities, share knowledge, and grow your career together.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+          {/* <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
               <Input
@@ -39,7 +39,7 @@ const HeroSection = ({ searchTerm, setSearchTerm }: HeroProps) => {
               <Search className="h-5 w-5 mr-2" />
               Explore Network
             </Button>
-          </div>
+          </div> */}
         </div>
 
         {/* Stats */}

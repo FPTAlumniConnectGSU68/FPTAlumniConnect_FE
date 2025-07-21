@@ -20,6 +20,12 @@ export const END_POINTS: {
   getPosts: { path: "/v1/posts", method: "GET" },
   getUsers: { path: "/v1/users", method: "GET" },
   getMentors: { path: "/v1/mentors", method: "GET" },
+  //
+  getForumDetail: { path: "/v1/posts", method: "GET" },
+  getComments: { path: "/v1/comments", method: "GET" },
+  getChildCmts: { path: "", method: "GET" },
+  postCmt: { path: "/v1/comments", method: "POST" },
+  createPost: { path: "/v1/posts", method: "POST" },
   // User
   patchMentorUser: { path: "/v1/users", method: "PATCH" },
 
@@ -62,6 +68,12 @@ export const END_POINTS: {
     method: "PATCH",
     secure: true,
   },
+
+  // Mentorship Requests
+  getMentorshipRequests: {
+    path: "/v1/mentorships",
+    method: "GET",
+  },
 };
 
 export enum ACTIONS {
@@ -83,12 +95,22 @@ export enum ACTIONS {
   GET_MENTORS = "getMentors",
   GET_MAJORS = "getMajors",
 
+  //
+  GET_FORUM_DETAIL = "getForumDetail",
+  GET_FORUM_CMTS = "getComments",
+  GET_CHILD_CMTS = "getChildCmts",
+  POST_CMT = "postCmt",
+  CREATE_POST = "createPost",
+
   // User
   PATCH_MENTOR_USER = "patchMentorUser",
 
   // Notifications
   GET_USER_NOTIFICATIONS = "getUserNotifications",
   MARK_NOTIFICATION_AS_READ = "markNotificationAsRead",
+
+  // Mentorship Requests
+  GET_MENTORSHIP_REQUESTS = "getMentorshipRequests",
 }
 
 export const API_URL = "http://localhost:5000/api";

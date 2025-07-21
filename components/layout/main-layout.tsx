@@ -19,6 +19,7 @@ import type { UserInfo } from "@/types/auth";
 import Cookies from "js-cookie";
 import {
   Calendar,
+  Briefcase,
   Home,
   LogOut,
   Menu,
@@ -55,6 +56,16 @@ const adminNavigation = [
     name: "Event Management",
     href: "/admin/events-management",
     icon: Calendar,
+  },
+  {
+    name: "Job Post Management",
+    href: "/admin/jobposts-management",
+    icon: Briefcase,
+  },
+  {
+    name: "Mentorship Requests",
+    href: "/admin/mentorship-requests",
+    icon: UserCheck,
   },
 ];
 
