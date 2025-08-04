@@ -20,6 +20,7 @@ import {
 import { useMajorCodes } from "@/hooks/use-major-codes";
 import { isApiSuccess } from "@/lib/utils";
 import usePostService from "@/lib/services/post.service";
+import { useRouter } from "next/navigation";
 
 interface CreateNewDiscussionModalProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ const CreateNewDiscussionModal = ({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const { NEW_POST } = usePostService();
+  const router = useRouter();
 
   if (!majors || !isApiSuccess(majors) || !majors.data) return null;
 
@@ -61,10 +63,10 @@ const CreateNewDiscussionModal = ({
     const res = await NEW_POST(newPost);
     if (isApiSuccess(res)) {
       onCreated();
-      console.log("refetch");
-
       onClose();
     }
+    if (res.status === "success")
+      router.push(`/forums?openModal=true&postId=${res.data.id}`);
   };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

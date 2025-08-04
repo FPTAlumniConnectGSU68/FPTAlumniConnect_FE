@@ -16,7 +16,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import EditEventSheet from "./EditEventSheet";
 import { useUpdateEvent } from "@/hooks/use-event";
-import { useToast } from "@/components/ui/toast";
+import { toast } from "sonner";
 
 interface EventTableProps {
   events: ApiResponse<PaginatedData<Event>> | undefined;
@@ -33,7 +33,6 @@ const EventTable = ({
 }: EventTableProps) => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const { mutate: updateEvent } = useUpdateEvent();
-  const toast = useToast();
   const handleEditClick = (event: Event) => {
     setSelectedEvent(event);
   };

@@ -87,17 +87,130 @@ export interface Notification {
 }
 
 export interface MentoringRequest {
+  [x: string]: any;
   id: number;
   aumniId: number;
   requestMessage: string;
-  type: string;
-  status: string;
+  status: "Active" | "Pending" | "Cancelled" | "Completed";
+  alumniName: string;
 }
 
+export interface MentoringRequestCreate {
+  aumniId: number;
+  requestMessage: string;
+  type: null;
+  status: "Active" | "Pending" | "Cancelled" | "Completed";
+}
 export interface Comment {
   postId: number;
   authorId: number | undefined;
   content: string;
   parentCommentId: number | null;
   type: string;
+}
+
+export interface CommentType  {
+  commentId:  number;
+  parentCommentId: number | null;
+  authorName: string;
+  authorAvatar?: string;
+  content: string;
+  createdAt: string;
+  childComments?: CommentType[]; // child comments
+};
+
+export interface Schedule {
+  scheduleId: number;
+  mentorShipId: number;
+  mentorId: number;
+  alumniId: number;
+  mentorName: string;
+  alumniName: string;
+  startTime: string;
+  endTime: string;
+  content: string;
+  status: "Completed" | "Active" | "Failed";
+  rating: number | null;
+  comment: string | null;
+}
+
+export interface ScheduleCreate {
+  mentorShipId: number;
+  mentorId: number;
+  startTime: string;
+  endTime: string;
+  content: string;
+  status: "Completed" | "Active" | "Failed";
+  rating: number | null;
+  comment: string | null;
+}
+
+export interface CV {
+  id: number;
+  userId: number;
+  fullName: string;
+  address: string;
+  birthday: string;
+  gender: string;
+  email: string;
+  phone: string;
+  city: string;
+  company: string;
+  primaryDuties: string;
+  jobLevel: string;
+  startAt: string;
+  endAt: string;
+  language: string;
+  languageLevel: string;
+  minSalary: number;
+  maxSalary: number;
+  isDeal: boolean;
+  desiredJob: string;
+  position: string;
+  majorId: string;
+  majorName: string;
+  additionalContent: string;
+  status: "Deleted" | "Public" | "Private";
+  skillIds: number[];
+  skillNames: string[];
+}
+
+export interface CVCreate {
+  userId: number;
+  fullName: string;
+  address: string;
+  birthday: string;
+  gender: string;
+  email: string;
+  phone: string;
+  city: string;
+  company: string;
+  primaryDuties: string;
+  jobLevel: string;
+  startAt: string;
+  endAt: string;
+  language: string;
+  languageLevel: string;
+  minSalary: number;
+  maxSalary: number;
+  isDeal: boolean;
+  desiredJob: string;
+  position: string;
+  majorId: number;
+  additionalContent: string;
+  status: string;
+  skillIds: number[];
+}
+export interface Skill {
+  skillId: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface JobApplicationCreate {
+  jobPostId: number;
+  cvid: number;
+  letterCover: string;
+  status: "Pending" | "Approved" | "Rejected";
 }

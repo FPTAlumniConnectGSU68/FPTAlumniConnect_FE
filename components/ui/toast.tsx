@@ -59,7 +59,7 @@ function ToastPortal({
   if (!mounted) return null;
 
   return createPortal(
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+    <div className="fixed top-16 right-4 z-50 flex flex-col gap-2">
       {toasts.map((toast) => (
         <div
           key={toast.id}

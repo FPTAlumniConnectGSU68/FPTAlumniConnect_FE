@@ -78,6 +78,8 @@ const alumniNavigation = [
   },
 ];
 
+const studentNavigation = [{ name: "CV", href: "/student/CV", icon: User }];
+
 export default function MainLayout({ children, currentUser }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { logout } = useAuth();
@@ -275,6 +277,27 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                     </h3>
                   </div>
                   {alumniNavigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 ${
+                        isActive(item.href) && "bg-gray-100"
+                      }`}
+                    >
+                      <item.icon className="mr-3 h-5 w-5" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </>
+              )}
+              {user?.roleName === "Student" && (
+                <>
+                  <div className="pt-4">
+                    <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Student
+                    </h3>
+                  </div>
+                  {studentNavigation.map((item) => (
                     <Link
                       key={item.name}
                       href={item.href}

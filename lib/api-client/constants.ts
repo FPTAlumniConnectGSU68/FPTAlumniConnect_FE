@@ -26,36 +26,12 @@ export const END_POINTS: {
   getChildCmts: { path: "", method: "GET" },
   postCmt: { path: "/v1/comments", method: "POST" },
   createPost: { path: "/v1/posts", method: "POST" },
+
+  //event
+  getEventDetail:{path: "/v1/events", method: "GET" },
+  joinEvent:{path: "/v1/user-join-events", method: "POST"},
   // User
   patchMentorUser: { path: "/v1/users", method: "PATCH" },
-
-  // Tests
-  buildTest: { path: "/tests/build", method: "POST", secure: true },
-  getTests: {
-    path: "/tests",
-    method: "GET",
-    secure: true,
-  },
-  createTest: {
-    path: "/tests",
-    method: "POST",
-    secure: true,
-  },
-  getTestDetails: {
-    path: "/tests/details",
-    method: "GET",
-    secure: true,
-  },
-  runTest: {
-    path: "/tests/run",
-    method: "POST",
-    secure: true,
-  },
-  runScheduleTest: {
-    path: "/tests/schedule",
-    method: "POST",
-    secure: true,
-  },
 
   // Notifications
   getUserNotifications: {
@@ -73,6 +49,52 @@ export const END_POINTS: {
   getMentorshipRequests: {
     path: "/v1/mentorships",
     method: "GET",
+  },
+  getMentorshipAlumniRequestById: {
+    path: "/v1/mentorships/alumni",
+    method: "GET",
+  },
+  createMentorshipRequest: {
+    path: "/v1/mentorships",
+    method: "POST",
+  },
+
+  // Schedule
+  getSchedules: {
+    path: "/schedules",
+    method: "GET",
+  },
+  acceptSchedule: {
+    path: "/schedules/mentorship/accept",
+    method: "POST",
+  },
+
+  // CV
+  getCV: {
+    path: "/v1/cvs",
+    method: "GET",
+  },
+  getCVById: {
+    path: "/v1/cvs",
+    method: "GET",
+  },
+  createCV: {
+    path: "/v1/cvs",
+    method: "POST",
+  },
+  updateCV: {
+    path: "/v1/cvs",
+    method: "PATCH",
+  },
+  // Skills
+  getSkills: {
+    path: "/v1/skills",
+    method: "GET",
+  },
+  // Job Applications
+  createJobApplication: {
+    path: "/v1/jobapplications",
+    method: "POST",
   },
 };
 
@@ -102,6 +124,9 @@ export enum ACTIONS {
   POST_CMT = "postCmt",
   CREATE_POST = "createPost",
 
+  GET_EVENT_DETAIL='getEventDetail',
+  JOIN_EVENT='joinEvent',
+
   // User
   PATCH_MENTOR_USER = "patchMentorUser",
 
@@ -111,6 +136,23 @@ export enum ACTIONS {
 
   // Mentorship Requests
   GET_MENTORSHIP_REQUESTS = "getMentorshipRequests",
+  GET_MENTORSHIP_ALUMNI_REQUEST_BY_ID = "getMentorshipAlumniRequestById",
+  CREATE_MENTORSHIP_REQUEST = "createMentorshipRequest",
+
+  // Schedule
+  GET_SCHEDULES = "getSchedules",
+  ACCEPT_SCHEDULE = "acceptSchedule",
+
+  // CV
+  GET_CV = "getCV",
+  GET_CV_BY_ID = "getCVById",
+  CREATE_CV = "createCV",
+  UPDATE_CV = "updateCV",
+  // Skills
+  GET_SKILLS = "getSkills",
+
+  // Job Applications
+  CREATE_JOB_APPLICATION = "createJobApplication",
 }
 
 export const API_URL = "http://localhost:5000/api";

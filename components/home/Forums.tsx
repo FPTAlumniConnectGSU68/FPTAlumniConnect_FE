@@ -9,7 +9,7 @@ import { MessageSquare, ArrowRight, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 interface ForumProps {
   forumPosts: any[];
-  handleClick: () => any;
+  handleClick: (param: any) => any;
 }
 const Forums = ({ forumPosts, handleClick }: ForumProps) => {
   const router = useRouter();
@@ -22,7 +22,7 @@ const Forums = ({ forumPosts, handleClick }: ForumProps) => {
         <Button
           variant="outline"
           className="border-pink-200 text-pink-700 hover:bg-pink-50"
-          onClick={() => router.push("/forums")}
+          onClick={() => router.push("/forums?openModal=true")}
         >
           Start Discussion
           <ArrowRight className="h-4 w-4 ml-2" />
@@ -33,7 +33,7 @@ const Forums = ({ forumPosts, handleClick }: ForumProps) => {
           <Card
             key={index}
             className="hover:shadow-md transition-all duration-300 border border-gray-200 bg-white hover:border-pink-300"
-            onClick={handleClick}
+            onClick={() => handleClick(post.postId)}
           >
             <CardContent className="pt-6">
               <div className="flex items-start justify-between">

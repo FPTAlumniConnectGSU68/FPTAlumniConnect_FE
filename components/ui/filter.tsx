@@ -29,6 +29,7 @@ interface FilterProps {
   searchWidth?: string;
   selects?: SelectConfig[];
   className?: string;
+  clearAllRef?: React.RefObject<HTMLButtonElement>;
 }
 
 export function Filter({
@@ -38,6 +39,7 @@ export function Filter({
   searchWidth = "w-[300px]",
   selects = [],
   className = "",
+  clearAllRef,
 }: FilterProps) {
   return (
     <div className={`flex gap-4 items-center ${className}`}>
@@ -70,6 +72,7 @@ export function Filter({
       ))}
       {/* button to clear all filters */}
       <Button
+        ref={clearAllRef}
         variant="outline"
         onClick={() => {
           selects.forEach((select) => {

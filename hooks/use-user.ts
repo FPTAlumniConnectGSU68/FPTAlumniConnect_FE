@@ -1,9 +1,9 @@
 import { APIClient } from "@/lib/api-client";
 import { ACTIONS } from "@/lib/api-client/constants";
-import { useToast } from "@/components/ui/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { User } from "@/types/interfaces";
+import { toast } from "sonner";
 
 export const USER_QUERY_KEYS = {
   all: ["users"] as const,
@@ -65,7 +65,6 @@ export function useUsers({
 // Update user role
 export function usePatchMentorUser() {
   const queryClient = useQueryClient();
-  const toast = useToast();
   return useMutation({
     mutationFn: async ({ userId, userData }: UserMutationParams) => {
       const data: Record<string, unknown> = {

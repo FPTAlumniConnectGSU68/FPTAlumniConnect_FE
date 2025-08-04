@@ -1,3 +1,4 @@
+import { MentorSearchDialog } from "@/components/mentoring/MentorSearchDialog";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Pagination from "@/components/ui/pagination";
@@ -9,21 +10,81 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useCreateSchedule } from "@/hooks/use-schedules";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
-import { isApiSuccess } from "@/lib/utils";
-import { MentoringRequest, User } from "@/types/interfaces";
+import { cn, isApiSuccess } from "@/lib/utils";
+import { MentoringRequest } from "@/types/interfaces";
+import { SquareArrowOutUpRight } from "lucide-react";
+import { useState } from "react";
 
-const MentorshipRequestsTable = ({
-  mentoringRequests,
-  isLoading,
-  onPageChange,
-  users,
-}: {
+interface StatusChipProps {
+  status: "Active" | "Pending" | "Cancelled" | "Completed";
+}
+
+export function StatusChip({ status }: StatusChipProps) {
+  const statusStyles = {
+    Active: "bg-green-100 text-green-800 border-green-200",
+    Pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    Cancelled: "bg-red-100 text-red-800 border-red-200",
+    Completed: "bg-blue-100 text-blue-800 border-blue-200",
+  };
+
+  return (
+    <span
+      className={cn(
+        "px-2.5 py-0.5 rounded-full text-xs font-medium border",
+        statusStyles[status]
+      )}
+    >
+      {status}
+    </span>
+  );
+}
+
+interface MentorshipRequestsTableProps {
   mentoringRequests: ApiResponse<PaginatedData<MentoringRequest>> | undefined;
   isLoading: boolean;
   onPageChange: (page: number) => void;
-  users: ApiResponse<PaginatedData<User>> | undefined;
-}) => {
+}
+
+export default function MentorshipRequestsTable({
+  mentoringRequests,
+  isLoading,
+  onPageChange,
+}: MentorshipRequestsTableProps) {
+  const [isMentorSearchOpen, setIsMentorSearchOpen] = useState(false);
+  const [selectedRequestId, setSelectedRequestId] = useState<number | null>(
+    null
+  );
+  const { mutate: createSchedule } = useCreateSchedule();
+
+  const handleReview = (requestId: number) => {
+    setSelectedRequestId(requestId);
+    setIsMentorSearchOpen(true);
+  };
+
+  const handleSelectMentor = (
+    mentorId: number,
+    startDate: Date | undefined,
+    endDate: Date | undefined,
+    content: string
+  ) => {
+    if (selectedRequestId && startDate && endDate) {
+      createSchedule({
+        mentorShipId: selectedRequestId,
+        mentorId: mentorId,
+        content: content || "Mentorship session",
+        startTime: startDate.toISOString(),
+        endTime: endDate.toISOString(),
+        status: "Active",
+        rating: null,
+        comment: null,
+      });
+    }
+    setIsMentorSearchOpen(false);
+    setSelectedRequestId(null);
+  };
+
   if (isLoading) {
     return <LoadingSpinner text="Loading..." />;
   }
@@ -37,39 +98,21 @@ const MentorshipRequestsTable = ({
     return <div className="text-center py-4">No mentoring requests found</div>;
   }
 
-  if (
-    !users ||
-    !isApiSuccess(users) ||
-    !users.data ||
-    users.data.items.length === 0
-  ) {
-    return <div className="text-center py-4">No users found</div>;
-  }
-
   const {
     items: mentoringRequestItems,
     totalPages,
     page,
   } = mentoringRequests.data;
-  const { items: userItems } = users.data;
-  const getAumniName = (aumniId: number) => {
-    const aumni = userItems.find((user: User) => user.userId === aumniId);
-    if (!aumni) {
-      return "Unknown";
-    }
-    return aumni.firstName + " " + aumni.lastName;
-  };
 
   return (
-    <div>
+    <>
       <div className="rounded-md border">
         <Table className="w-full bg-white">
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>
-              <TableHead>Aumni</TableHead>
-              <TableHead>Request Message</TableHead>
-              <TableHead>Type</TableHead>
+              <TableHead>Alumni</TableHead>
+              <TableHead>Message</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -78,27 +121,41 @@ const MentorshipRequestsTable = ({
             {mentoringRequestItems.map((request) => (
               <TableRow key={request.id}>
                 <TableCell>{request.id}</TableCell>
-                <TableCell>{getAumniName(request.aumniId)}</TableCell>
+                <TableCell>{request.alumniName}</TableCell>
                 <TableCell>{request.requestMessage}</TableCell>
-                <TableCell>{request.type}</TableCell>
-                <TableCell>{request.status}</TableCell>
                 <TableCell>
-                  <Button>View</Button>
+                  <StatusChip
+                    status={request.status as StatusChipProps["status"]}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleReview(request.id)}
+                  >
+                    <SquareArrowOutUpRight className="w-4 h-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
-      <div className="flex justify-center">
+
+      <div className="flex justify-center mt-4">
         <Pagination
           currentPage={page}
           totalPages={totalPages}
           onPageChange={onPageChange}
         />
       </div>
-    </div>
-  );
-};
 
-export default MentorshipRequestsTable;
+      <MentorSearchDialog
+        isOpen={isMentorSearchOpen}
+        onOpenChange={setIsMentorSearchOpen}
+        onSelectMentor={handleSelectMentor}
+        requestId={selectedRequestId}
+      />
+    </>
+  );
+}

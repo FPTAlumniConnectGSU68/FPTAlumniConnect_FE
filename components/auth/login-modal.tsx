@@ -1,41 +1,51 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useAuth } from "@/contexts/auth-context"
-import { Eye, EyeOff, User, Lock, AlertCircle } from "lucide-react"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useAuth } from "@/contexts/auth-context";
+import { Eye, EyeOff, User, Lock, AlertCircle } from "lucide-react";
 
 interface LoginModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSwitchToRegister: () => void
+  isOpen: boolean;
+  onClose: () => void;
+  onSwitchToRegister: () => void;
 }
 
-export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
-  const { login, isLoading } = useAuth()
+export function LoginModal({
+  isOpen,
+  onClose,
+  onSwitchToRegister,
+}: LoginModalProps) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const { login, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
-    const success = await login(email, password)
+    const success = await login(email, password);
     if (success) {
-      onClose()
-      setEmail("")
-      setPassword("")
+      onClose();
+      setEmail("");
+      setPassword("");
     } else {
-      setError("Invalid email or password")
+      setError("Invalid email or password");
     }
-  }
+  };
 
   const testAccounts = [
     {
@@ -66,18 +76,20 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
       color: "bg-purple-100 text-purple-800",
       studentId: null,
     },
-  ]
+  ];
 
   const handleTestLogin = (testEmail: string, testPassword: string) => {
-    setEmail(testEmail)
-    setPassword(testPassword)
-  }
+    setEmail(testEmail);
+    setPassword(testPassword);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px] bg-white">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center text-gray-900">Welcome Back</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-center text-gray-900">
+            Welcome Back
+          </DialogTitle>
           <DialogDescription className="text-center text-gray-600">
             Sign in to your FPT Alumni Connection account
           </DialogDescription>
@@ -124,7 +136,10 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <Label
+                htmlFor="email"
+                className="text-sm font-medium text-gray-700"
+              >
                 Email Address
               </Label>
               <div className="relative">
@@ -142,7 +157,10 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+              <Label
+                htmlFor="password"
+                className="text-sm font-medium text-gray-700"
+              >
                 Password
               </Label>
               <div className="relative">
@@ -203,5 +221,5 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
