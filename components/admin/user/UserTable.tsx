@@ -40,6 +40,7 @@ import { usePatchMentorUser, UserData } from "@/hooks/use-user";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { isApiSuccess } from "@/lib/utils";
 import { User } from "@/types/interfaces";
+import { PencilIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 
 interface UserTableProps {
@@ -142,7 +143,9 @@ const EditUserSheet = ({
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
-        <Button variant="outline">Edit</Button>
+        <Button variant="outline">
+          <PencilIcon className="w-4 h-4" />
+        </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>

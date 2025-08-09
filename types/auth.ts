@@ -18,6 +18,7 @@ export interface UserInfo {
   email: string;
   roleId: number;
   roleName: string;
+  isMentor: boolean;
   googleId: string | null;
   firstName: string | null;
   lastName: string | null;

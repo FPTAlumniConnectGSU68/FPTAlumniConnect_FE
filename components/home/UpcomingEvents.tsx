@@ -7,7 +7,7 @@ import { formatDateToDMY, formatTime } from "@/lib/utils";
 
 interface UpcomingEventsProp {
   upcomingEvents: any[];
-  handleClick: () => any;
+  handleClick: (e: any) => any;
 }
 const UpcomingEvents = ({
   upcomingEvents,
@@ -65,7 +65,7 @@ const UpcomingEvents = ({
               </div>
               <Button
                 className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
-                onClick={handleClick}
+                onClick={() => handleClick(event.eventId)}
               >
                 Register Now
               </Button>

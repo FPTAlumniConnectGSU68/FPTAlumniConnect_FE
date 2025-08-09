@@ -13,6 +13,12 @@ export type ApiError = {
   }[];
 };
 
+export type ApiPartialSuccess<T = unknown> = {
+  status: "partial_success";
+  message: string;
+  data?: T;
+};
+
 export type PaginatedData<T> = {
   size: number;
   page: number;
@@ -21,4 +27,7 @@ export type PaginatedData<T> = {
   items: T[];
 };
 
-export type ApiResponse<T = unknown> = ApiSuccess<T> | ApiError;
+export type ApiResponse<T = unknown> =
+  | ApiSuccess<T>
+  | ApiPartialSuccess<T>
+  | ApiError;

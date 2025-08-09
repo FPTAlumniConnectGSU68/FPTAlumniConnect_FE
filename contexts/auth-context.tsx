@@ -1,13 +1,13 @@
 "use client";
 
-import { useToast } from "@/components/ui/toast";
 import { useAuthMutation } from "@/hooks/use-auth-mutation";
+import { useRouteHistory } from "@/hooks/use-route-history";
 import { ApiError } from "@/lib/apiResponse";
 import { AuthService } from "@/lib/services/auth.service";
 import type { LoginData, RegisterData, UserInfo } from "@/types/auth";
 import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useEffect, useState } from "react";
-
+import { toast } from "sonner";
 interface AuthContextType {
   user: UserInfo | null;
   isLoading: boolean;
@@ -38,9 +38,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const toast = useToast();
   const { signIn, signUp } = useAuthMutation();
-
+  const { navigateBack, getLastRoute } = useRouteHistory();
   useEffect(() => {
     // Check for existing auth on mount
     const currentUser = AuthService.getUserInfo();
@@ -70,7 +69,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     AuthService.setToken(accessToken);
     AuthService.setUserInfo(userInfo);
     setUser(userInfo);
-    router.push("/middlecheck");
+    const lastRoute = getLastRoute();
+    if (lastRoute && lastRoute !== "/login") {
+      navigateBack();
+    } else {
+      router.push("/middlecheck");
+    }
     toast.success(
       `${action === "login" ? "Sign in" : "Registration"} successful`
     );
@@ -162,5 +166,3 @@ export function useAuth() {
   }
   return context;
 }
-//hahah
-//hehehe

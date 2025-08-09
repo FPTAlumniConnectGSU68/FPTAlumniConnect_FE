@@ -25,7 +25,7 @@ export default function MiddleCheckPage() {
         router.push("/alumni/mentoring");
         break;
       case ROLES.STUDENT:
-        router.push("/student");
+        router.push("/student/CV");
         break;
       case ROLES.LECTURER:
         router.push("/lecturer");

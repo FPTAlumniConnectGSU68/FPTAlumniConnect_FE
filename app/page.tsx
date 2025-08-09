@@ -103,7 +103,7 @@ export default function HomePage() {
       return;
   };
 
-  const handleRegisterEventClick = () => {
+  const handleRegisterEventClick = (id: string | number) => {
     if (
       !requireAuth({
         title: "Register for Events",
@@ -113,6 +113,7 @@ export default function HomePage() {
       })
     )
       return;
+    router.push(`/events?openModal=true&eventId=${id}`);
   };
 
   const handleBookMentorClick = () => {
@@ -127,7 +128,7 @@ export default function HomePage() {
       return;
   };
 
-  const handleStartDiscussionClick = () => {
+  const handleOpenDiscussionClick = (id: string | number) => {
     if (
       !requireAuth({
         title: "Join Discussions",
@@ -137,9 +138,7 @@ export default function HomePage() {
       })
     )
       return;
-
-    // Handle discussion logic here
-    console.log("Starting discussion...");
+    router.push(`/forums?openModal=true&postId=${id}`);
   };
 
   const tabItems = [
@@ -213,7 +212,7 @@ export default function HomePage() {
       ) : (
         <Forums
           forumPosts={postItems}
-          handleClick={handleStartDiscussionClick}
+          handleClick={handleOpenDiscussionClick}
         />
       ),
     },

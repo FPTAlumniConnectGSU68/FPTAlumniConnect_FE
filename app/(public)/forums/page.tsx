@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CirclePlus, MessageSquare, Share2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Bookmark, Search } from "lucide-react";
 import { useAuthGuard } from "@/hooks/use-auth-guard";
@@ -21,16 +21,29 @@ import { usePosts } from "@/hooks/use-post";
 import { formatDateToDMY, isApiSuccess } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import usePostService from "@/lib/services/post.service";
-import { Comment } from "@/types/interfaces";
+import { Comment, CommentType } from "@/types/interfaces";
 import { useAuth } from "@/contexts/auth-context";
+import { formatDate } from "date-fns";
 
 export default function ForumsPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const { requireAuth, AuthGuard } = useAuthGuard();
   const [openCreateNewDiscussion, setOpenCreateNewDiscussion] = useState(false);
   const [selected, setSelected] = useState<number | string>();
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const openModal = searchParams.get("openModal") === "true";
+    const id = searchParams.get("postId");
+
+    if (openModal && id) {
+      setSelected(id);
+    } else if (openModal) {
+      setOpenCreateNewDiscussion(true);
+    }
+  }, [searchParams]);
 
   const handleStartNewDiscussion = () => {
     if (
@@ -234,14 +247,22 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
 
   const [newComment, setNewComment] = useState("");
 
-  const handleAddComment = async (e: any) => {
-    const cmt: Comment = {
+  const handleAddComment = async (
+    e: any,
+    content: string,
+    parentCommentId?: number
+  ) => {
+    e.preventDefault();
+
+    const cmt = {
       postId: id,
       authorId: user?.userId,
-      content: newComment,
-      parentCommentId: null,
-      type: "Comment",
+      content: content,
+      parentCommentId: parentCommentId ?? null,
+      type: parentCommentId ? "Reply" : "Comment",
     };
+    console.log(cmt);
+
     const res = await POST_COMMENT(cmt);
     if (isApiSuccess(res)) {
       setNewComment("");
@@ -282,6 +303,91 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
     return null;
   };
 
+  function CommentItem({
+    comment,
+    isLast = false,
+  }: {
+    comment: CommentType;
+    isLast?: boolean;
+  }) {
+    const [showReplyInput, setShowReplyInput] = useState(false);
+    const [replyText, setReplyText] = useState("");
+
+    return (
+      <div key={comment.commentId} className="flex flex-col gap-1">
+        {/* Main comment */}
+        <div className="flex gap-4">
+          <Avatar className="h-8 w-8">
+            <AvatarImage
+              src={comment.authorAvatar}
+              alt={comment.authorName || ""}
+            />
+            <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+              {comment.authorName.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{comment.authorName}</span>
+              <span className="text-sm text-gray-500">
+                {formatDateToDMY(comment.createdAt)}
+              </span>
+            </div>
+            <p className="text-gray-700 mt-1">{comment.content}</p>
+            {comment.parentCommentId === null && (
+              <button
+                className="text-xs text-blue-600 mt-1 hover:underline"
+                onClick={() => setShowReplyInput((prev) => !prev)}
+              >
+                Reply
+              </button>
+            )}
+
+            {showReplyInput && (
+              <div className="mt-2 flex gap-2">
+                <Input
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder="Write a reply..."
+                />
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    handleAddComment(e, replyText, comment.commentId);
+                    setShowReplyInput(false);
+                    setReplyText("");
+                  }}
+                  disabled={!replyText.trim()}
+                >
+                  Reply
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {comment.childComments?.map((child, idx) => {
+          const isLastChild = idx === comment.childComments!.length - 1;
+
+          return (
+            <div key={child.commentId} className="relative flex gap-4 ml-6">
+              <div
+                className={`absolute left-0 border-l border-gray-400 ${
+                  isLastChild ? "top-0 h-4" : "top-0 bottom-0"
+                }`}
+              />
+              <div className="absolute left-0 top-4 w-4 border-t border-gray-400" />
+              <div className="flex-1 ml-6">
+                <CommentItem comment={child} isLast={isLastChild} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <Dialog
       open={isOpen}
@@ -296,18 +402,16 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
           <div className="space-y-6">
             <div className="space-y-4">
               <div className="flex items-start gap-4">
-                {/* <Avatar>
-                      <AvatarImage src={selectedThread.author.avatar} />
-                      <AvatarFallback>
-                        {selectedThread.author.name[0]}
-                      </AvatarFallback>
-                    </Avatar> */}
+                <Avatar>
+                  <AvatarImage src={data.authorAvatar} />
+                  <AvatarFallback>{data.authorName}</AvatarFallback>
+                </Avatar>
                 <div>
                   <h2 className="text-xl font-semibold">{data.title}</h2>
-                  {/* <p className="text-sm text-gray-500">
-                        Posted by {selectedThread.author.name} •{" "}
-                        {formatDate(selectedThread.createdAt)}
-                      </p> */}
+                  <p className="text-sm text-gray-500">
+                    Posted by {data.authorName} •{" "}
+                    {formatDateToDMY(data.createdAt)}
+                  </p>
                 </div>
               </div>
               <p className="text-gray-700">{data.content}</p>
@@ -316,10 +420,10 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
                   <MessageSquare className="h-4 w-4 mr-1" />
                   Views ({data.views})
                 </Button>
-                <Button variant="ghost" size="sm" className="gap-2">
+                {/* <Button variant="ghost" size="sm" className="gap-2">
                   <Share2 className="h-4 w-4" />
                   Share
-                </Button>
+                </Button> */}
               </div>
             </div>
 
@@ -331,7 +435,7 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
               <div className="flex gap-4">
                 <Avatar className="h-8 w-8">
                   <AvatarImage
-                    src={"/placeholder.svg"}
+                    src={user.avatar || "/placeholder.svg"}
                     alt={user.firstName || ""}
                   />
                   <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
@@ -345,7 +449,7 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
                     onChange={(e) => setNewComment(e.target.value)}
                   />
                   <Button
-                    onClick={handleAddComment}
+                    onClick={(e) => handleAddComment(e, newComment)}
                     disabled={!newComment.trim()}
                   >
                     Comment
@@ -354,29 +458,8 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
               </div>
 
               <div className="space-y-4 mt-6 overflow-y-auto max-h-96">
-                {data.comments.map((comment: any) => (
-                  <div key={comment.commentId} className="flex gap-4">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={"/placeholder.svg"}
-                        alt={comment.author?.firstName || ""}
-                      />
-                      <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                        {comment.author?.firstName?.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">
-                          {/* {comment.author.name} */}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {formatDateToDMY(comment.createdAt)}
-                        </span>
-                      </div>
-                      <p className="text-gray-700 mt-1">{comment.content}</p>
-                    </div>
-                  </div>
+                {data.comments.map((comment: CommentType) => (
+                  <CommentItem key={comment.commentId} comment={comment} />
                 ))}
               </div>
             </div>

@@ -4,6 +4,7 @@ import { Major } from "@/hooks/use-major-codes";
 import { ROLES } from "@/lib/api-client/constants";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { isApiSuccess } from "@/lib/utils";
+import { PlusIcon } from "lucide-react";
 
 const UserHeader = ({
   searchTerm,
@@ -14,6 +15,7 @@ const UserHeader = ({
   majorCode,
   setMajorCode,
   setCurrentPage,
+  setIsOpen,
 }: {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
@@ -23,6 +25,7 @@ const UserHeader = ({
   majorCode: string;
   setMajorCode: (value: string) => void;
   setCurrentPage: (value: number) => void;
+  setIsOpen: (value: boolean) => void;
 }) => {
   if (!majors) return null;
 
@@ -68,6 +71,13 @@ const UserHeader = ({
             },
           ]}
         />
+        <Button
+          onClick={() => setIsOpen(true)}
+          className="flex items-center gap-2"
+        >
+          <PlusIcon className="w-4 h-4" />
+          Create User
+        </Button>
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 import { APIClient } from "@/lib/api-client";
 import { ACTIONS } from "@/lib/api-client/constants";
-import { useToast } from "@/components/ui/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { User } from "@/types/interfaces";
+import { toast } from "sonner";
 
 export const USER_QUERY_KEYS = {
   all: ["users"] as const,
@@ -65,7 +65,6 @@ export function useUsers({
 // Update user role
 export function usePatchMentorUser() {
   const queryClient = useQueryClient();
-  const toast = useToast();
   return useMutation({
     mutationFn: async ({ userId, userData }: UserMutationParams) => {
       const data: Record<string, unknown> = {
@@ -105,6 +104,43 @@ export function useGetUser(userId: number) {
         idQuery: userId.toString(),
       });
       return response;
+    },
+  });
+}
+
+export interface UserCreateParams {
+  code: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  roleId: number;
+  majorId: number;
+}
+
+export function useCreateUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      code,
+      firstName,
+      lastName,
+      email,
+      password,
+      roleId,
+      majorId,
+    }: UserCreateParams) => {
+      const response = await APIClient.invoke<ApiResponse<User>>({
+        action: ACTIONS.SIGN_UP,
+        data: { code, firstName, lastName, email, password, roleId, majorId },
+      });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.all });
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 }

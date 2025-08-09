@@ -1,19 +1,20 @@
 "use client";
 
+import { useMentorShipRequests } from "@/hooks/use-mentoring-requests";
 import { useState } from "react";
 import MentorshipRequestsHeader from "./MentorshipRequestsHeader";
 import MentorshipRequestsTable from "./MentorshipRequestsTable";
-import { useMentorShipRequests } from "@/hooks/use-mentoring-requests";
-import { useUsers } from "@/hooks/use-user";
 
 const MentorshipRequestsView = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [status, setStatus] = useState("");
+
   const { data: mentoringRequests, isLoading } = useMentorShipRequests({
     page: currentPage,
-  });
-
-  const { data: users } = useUsers({
-    page: currentPage,
+    query: {
+      status,
+    },
   });
 
   const handlePageChange = (page: number) => {
@@ -21,12 +22,16 @@ const MentorshipRequestsView = () => {
   };
   return (
     <div className="flex flex-col gap-4">
-      <MentorshipRequestsHeader />
+      <MentorshipRequestsHeader
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        status={status}
+        setStatus={setStatus}
+      />
       <MentorshipRequestsTable
         mentoringRequests={mentoringRequests}
         isLoading={isLoading}
         onPageChange={handlePageChange}
-        users={users}
       />
     </div>
   );

@@ -129,6 +129,11 @@ export default function EditEventSheet({
                 onChange={handleChange}
               />
             </div>
+            <div>
+              <Button onClick={() => console.log("view timeline?")}>
+                View Timeline
+              </Button>
+            </div>
           </div>
           <SheetFooter className="mb-4">
             <Button variant="outline" onClick={() => onOpenChange(false)}>

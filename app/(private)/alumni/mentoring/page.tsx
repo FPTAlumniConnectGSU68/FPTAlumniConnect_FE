@@ -1,7 +1,7 @@
-import React from "react";
+import MentorshipAlumniRequestsView from "@/components/admin/mentorshiprequest/MentorshipAlumniRequestsView";
 
 const MentoringPage = () => {
-  return <div>MentoringPage</div>;
+  return <MentorshipAlumniRequestsView />;
 };
 
 export default MentoringPage;

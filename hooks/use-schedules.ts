@@ -1,0 +1,113 @@
+import { APIClient } from "@/lib/api-client";
+import { ACTIONS } from "@/lib/api-client/constants";
+import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
+import { Schedule, ScheduleCreate } from "@/types/interfaces";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+interface UseSchedulesOptions {
+  page?: number;
+  size?: number;
+  query?: Record<string, string>;
+}
+
+const invalidateArr = ["schedules", "mentor-ship-requests"];
+
+export function useSchedules({
+  page = 1,
+  size = 5,
+  query = {},
+}: UseSchedulesOptions = {}) {
+  return useQuery<ApiResponse<PaginatedData<Schedule>>>({
+    queryKey: ["schedules", page, size, query],
+    queryFn: async () => {
+      const response = await APIClient.invoke<
+        ApiResponse<PaginatedData<Schedule>>
+      >({
+        action: ACTIONS.GET_SCHEDULES,
+        query: {
+          Page: page.toString(),
+          Size: size.toString(),
+          ...query,
+        },
+      });
+
+      return response as ApiResponse<PaginatedData<Schedule>>;
+    },
+  });
+}
+
+// interface UseMentorShipAlumniRequestOptions {
+//   userId: number;
+// }
+
+// export function useMentorShipAlumniRequest({
+//   userId,
+// }: UseMentorShipAlumniRequestOptions) {
+//   return useQuery<ApiResponse<MentoringRequest>>({
+//     queryKey: ["mentorship-alumni-request", userId],
+//     queryFn: async () => {
+//       const response = await APIClient.invoke<ApiResponse<MentoringRequest>>({
+//         action: ACTIONS.GET_MENTORSHIP_ALUMNI_REQUEST_BY_ID,
+//         idQuery: userId.toString(),
+//       });
+
+//       return response as ApiResponse<MentoringRequest>;
+//     },
+//   });
+// }
+
+export function useCreateSchedule() {
+  const queryClient = useQueryClient();
+  return useMutation<ApiResponse<ScheduleCreate>, Error, ScheduleCreate>({
+    mutationFn: async (data: ScheduleCreate) => {
+      console.log(data);
+      const response = await APIClient.invoke<ApiResponse<ScheduleCreate>>({
+        action: ACTIONS.ACCEPT_SCHEDULE,
+        data,
+      });
+
+      if (!response || response.status === "error") {
+        throw new Error(response?.message || "Failed to create schedule");
+      }
+
+      return response;
+    },
+    onSuccess: (response) => {
+      if (response.status === "success") {
+        toast.success("Accepted request successfully");
+        invalidateArr.forEach((key) => {
+          queryClient.invalidateQueries({ queryKey: [key] });
+        });
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to accept request");
+    },
+  });
+}
+
+export function useCompleteSchedule() {
+  const queryClient = useQueryClient();
+  return useMutation<ApiResponse<Schedule>, Error, number>({
+    mutationFn: async (scheduleId: number) => {
+      const response = await APIClient.invoke<ApiResponse<Schedule>>({
+        action: ACTIONS.COMPLETE_SCHEDULE,
+        idQuery: scheduleId.toString(),
+      });
+
+      return response;
+    },
+    onSuccess: (response) => {
+      if (response.status === "success") {
+        toast.success("Completed schedule successfully");
+        invalidateArr.forEach((key) => {
+          queryClient.invalidateQueries({ queryKey: [key] });
+        });
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to complete schedule");
+    },
+  });
+}

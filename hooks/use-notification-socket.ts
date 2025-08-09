@@ -1,9 +1,10 @@
 import { API_URL } from "@/lib/api-client/constants";
-import * as signalR from "@microsoft/signalr";
 import { Notification } from "@/types/interfaces";
-import { useEffect } from "react";
+import * as signalR from "@microsoft/signalr";
+import { useEffect, useRef } from "react";
 
 let connection: signalR.HubConnection | null = null;
+let startingPromise: Promise<void> | null = null;
 
 export const startNotificationConnection = async (
   token: string,
@@ -15,24 +16,39 @@ export const startNotificationConnection = async (
       return null;
     }
 
-    // If there's an existing connection, stop it first
+    // Prevent race: if a start is in progress, wait and reuse
+    if (startingPromise) {
+      console.log("SignalR start in progress, waiting...");
+      await startingPromise;
+      if (
+        connection &&
+        connection.state === signalR.HubConnectionState.Connected
+      ) {
+        return connection;
+      }
+    }
+
+    // If there is an existing connection, reuse it if possible
     if (connection) {
-      console.log("Stopping existing SignalR connection...");
-      await connection.stop();
+      if (
+        connection.state === signalR.HubConnectionState.Connected ||
+        connection.state === signalR.HubConnectionState.Connecting
+      ) {
+        return connection;
+      }
+      if (connection.state === signalR.HubConnectionState.Disconnecting) {
+        console.log("Waiting for existing SignalR connection to stop...");
+        await connection.stop();
+      }
       connection = null;
     }
 
     console.log("Creating new SignalR connection...");
-
+    const hubBaseUrl = API_URL.replace(/\/api$/, "");
     // Create new connection
     connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${API_URL}/notificationHub`, {
+      .withUrl(`${hubBaseUrl}/notificationHub`, {
         accessTokenFactory: () => token,
-        transport: signalR.HttpTransportType.WebSockets,
-        skipNegotiation: true, // Try skipping negotiation
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       })
       .withAutomaticReconnect([0, 2000, 5000, 10000]) // Retry with increasing delays
       .configureLogging(signalR.LogLevel.Debug) // Enable debug logging
@@ -57,9 +73,11 @@ export const startNotificationConnection = async (
       onNotification(notification);
     });
 
-    // Start the connection
+    // Start the connection with race guard
     console.log("Starting SignalR connection...");
-    await connection.start();
+    startingPromise = connection.start();
+    await startingPromise;
+    startingPromise = null;
     console.log("SignalR connected successfully");
 
     return connection;
@@ -79,6 +97,10 @@ export const startNotificationConnection = async (
 
 export const stopNotificationConnection = async () => {
   try {
+    if (startingPromise) {
+      // Avoid stopping before start completes
+      await startingPromise;
+    }
     if (connection) {
       console.log("Stopping SignalR connection...");
       await connection.stop();
@@ -96,6 +118,11 @@ export const useNotificationSetup = (
   token: string,
   onNotification: (notification: Notification) => void
 ) => {
+  const handlerRef = useRef(onNotification);
+  useEffect(() => {
+    handlerRef.current = onNotification;
+  }, [onNotification]);
+
   useEffect(() => {
     if (!token) {
       console.log("No token provided to useNotificationSetup");
@@ -103,7 +130,10 @@ export const useNotificationSetup = (
     }
 
     console.log("Setting up notification connection...");
-    startNotificationConnection(token, onNotification).catch((error) => {
+    startNotificationConnection(token, (n) => {
+      handlerRef.current(n);
+      console.log("notification in hook", n);
+    }).catch((error) => {
       console.error("Failed to setup notification connection:", error);
     });
 
@@ -112,5 +142,5 @@ export const useNotificationSetup = (
         console.error("Failed to stop notification connection:", error);
       });
     };
-  }, [token, onNotification]);
+  }, [token]);
 };

@@ -15,9 +15,29 @@ export function useEvents({
   size = 5,
   query = {},
 }: UseEventsOptions = {}) {
+  const isJoinedEvents = "UserId" in query && !!query.UserId;
+
   return useQuery<ApiResponse<PaginatedData<Event>>>({
-    queryKey: ["events", page, size, query],
+    queryKey: [isJoinedEvents ? "user-events" : "events", page, size, query],
     queryFn: async () => {
+      if (isJoinedEvents) {
+        // Use joined events endpoint
+        const response = await APIClient.invoke<
+          ApiResponse<PaginatedData<Event>>
+        >({
+          action: ACTIONS.EVENT_JOINED,
+          idQuery: query.UserId.toString(),
+          query: {
+            Page: page.toString(),
+            Size: size.toString(),
+            ...query,
+          },
+        });
+
+        return response;
+      }
+
+      // Normal upcoming events endpoint
       const response = await APIClient.invoke<
         ApiResponse<PaginatedData<Event>>
       >({
@@ -31,6 +51,7 @@ export function useEvents({
 
       return response;
     },
+    enabled: !isJoinedEvents || !!query.UserId, // prevent running if joined events but no UserId
   });
 }
 
