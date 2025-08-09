@@ -8,7 +8,11 @@ import { Event } from "@/types/interfaces";
 import Image from "next/image";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import useEventService from "@/lib/services/event.service";
+<<<<<<< HEAD
 import { toast } from "sonner";
+=======
+import { useToast } from "../ui/toast";
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
 
 interface EventDialogProps {
   eventId: number | string | null;
@@ -17,6 +21,10 @@ interface EventDialogProps {
 }
 
 const EventDialog = ({ eventId, setSelected, userId }: EventDialogProps) => {
+<<<<<<< HEAD
+=======
+  const toast = useToast();
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
   const { GET_EVENT_DETAIL, JOIN_EVENT } = useEventService();
   const [data, setData] = useState<Event | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -39,6 +47,7 @@ const EventDialog = ({ eventId, setSelected, userId }: EventDialogProps) => {
 
   const handleJoin = async () => {
     if (!eventId) return;
+<<<<<<< HEAD
 
     setJoining(true);
     try {
@@ -62,6 +71,18 @@ const EventDialog = ({ eventId, setSelected, userId }: EventDialogProps) => {
       setSelected(null);
       setJoining(false);
     }
+=======
+    setJoining(true);
+    const res = await JOIN_EVENT(eventId, userId);
+    if (isApiSuccess(res)) {
+      toast.success("You have successfully joined the event!");
+    } else {
+      toast.error("Failed to join the event. Please try again.");
+    }
+    setIsOpen(false);
+    setSelected(null);
+    setJoining(false);
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
   };
 
   return (

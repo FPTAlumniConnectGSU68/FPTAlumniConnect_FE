@@ -80,7 +80,11 @@ const alumniNavigation = [
   { name: "CV", href: "/alumni/CV", icon: FileText },
 ];
 
+<<<<<<< HEAD
 const studentNavigation = [{ name: "CV", href: "/student/CV", icon: FileText }];
+=======
+const studentNavigation = [{ name: "CV", href: "/student/CV", icon: User }];
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
 
 export default function MainLayout({ children, currentUser }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);

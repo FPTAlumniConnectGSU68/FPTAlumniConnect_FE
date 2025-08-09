@@ -47,7 +47,11 @@ const MentorshipAlumniRequestsView = () => {
 
   return (
     <div>
+<<<<<<< HEAD
       {user?.roleName === "Alumni" && (
+=======
+      {user?.isMentor && (
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
         <>
           <Button
             variant="outline"

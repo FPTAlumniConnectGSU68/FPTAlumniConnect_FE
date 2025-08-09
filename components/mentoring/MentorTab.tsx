@@ -1,6 +1,10 @@
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ScheduleCard } from "./ScheduleCard";
+<<<<<<< HEAD
 import { useCompleteSchedule, useSchedules } from "@/hooks/use-schedules";
+=======
+import { useSchedules } from "@/hooks/use-schedules";
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
 import { isApiSuccess } from "@/lib/utils";
 
 interface MentorTabProps {
@@ -16,9 +20,12 @@ export function MentorTab({ currentPage, userId }: MentorTabProps) {
     },
   });
 
+<<<<<<< HEAD
   const { mutate: completeSchedule, isPending: isCompleting } =
     useCompleteSchedule();
 
+=======
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
   if (isLoading) {
     return (
       <div className="py-4 flex justify-center items-center h-[50vh]">
@@ -36,6 +43,7 @@ export function MentorTab({ currentPage, userId }: MentorTabProps) {
     return <div className="text-center py-4">No schedules found</div>;
   }
 
+<<<<<<< HEAD
   const handleComplete = (scheduleId: number) => {
     completeSchedule(scheduleId);
   };
@@ -49,6 +57,12 @@ export function MentorTab({ currentPage, userId }: MentorTabProps) {
           onComplete={handleComplete}
           isCompleting={isCompleting}
         />
+=======
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {schedules.data.items.map((schedule) => (
+        <ScheduleCard key={schedule.scheduleId} schedule={schedule} />
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
       ))}
     </div>
   );

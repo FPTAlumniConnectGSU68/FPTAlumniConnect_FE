@@ -1,8 +1,14 @@
 import { APIClient } from "@/lib/api-client";
+<<<<<<< HEAD
 import { ACTIONS, API_URL } from "@/lib/api-client/constants";
 import { ApiResponse } from "@/lib/apiResponse";
 import { Event, EventWithSuggestions } from "@/types/interfaces";
 import Cookies from "js-cookie";
+=======
+import { ACTIONS } from "@/lib/api-client/constants";
+import { ApiResponse } from "@/lib/apiResponse";
+import { Event } from "@/types/interfaces";
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
 
 const useEventService = () => {
   const GET_EVENT_DETAIL = async (
@@ -15,10 +21,14 @@ const useEventService = () => {
     return res;
   };
 
+<<<<<<< HEAD
   const JOIN_EVENT = async (
     eventId: string | number,
     userId: string | number
   ) => {
+=======
+  const JOIN_EVENT = async (eventId: string | number, userId: string | number) => {
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
     const res = await APIClient.invoke<ApiResponse<any>>({
       action: ACTIONS.JOIN_EVENT,
       data: {
@@ -29,6 +39,7 @@ const useEventService = () => {
     return res;
   };
 
+<<<<<<< HEAD
   const CREATE_EVENT = async (
     eventData: Partial<Event>
   ): Promise<ApiResponse<Event>> => {
@@ -85,6 +96,13 @@ const useEventService = () => {
     CREATE_EVENT,
     CREATE_TIMELINES,
     PUT_RATING,
+=======
+  // Other event-related functions if needed (CREATE_EVENT, UPDATE_EVENT, etc.)
+  
+  return {
+    GET_EVENT_DETAIL,
+    JOIN_EVENT,
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
   };
 };
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 
 import { ProtectedRoute } from "@/components/auth/protected-route";
@@ -12,3 +13,12 @@ export default function StudentCVPage() {
     </ProtectedRoute>
   );
 }
+=======
+import CVView from "@/components/user-alumni/CVView";
+
+const CVPage = () => {
+  return <CVView />;
+};
+
+export default CVPage;
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df

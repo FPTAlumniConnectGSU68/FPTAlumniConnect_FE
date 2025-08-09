@@ -28,6 +28,7 @@ export const END_POINTS: {
   createPost: { path: "/v1/posts", method: "POST" },
 
   //event
+<<<<<<< HEAD
   getEventDetail: { path: "/v1/events", method: "GET" },
   joinEvent: { path: "/v1/user-join-events", method: "POST" },
   joinedEvent: { path: "/v1/events/user", method: "GET" },
@@ -38,6 +39,13 @@ export const END_POINTS: {
   // User
   patchMentorUser: { path: "/v1/users", method: "PATCH" },
   createUser: { path: "/v1/users", method: "POST" },
+=======
+  getEventDetail:{path: "/v1/events", method: "GET" },
+  joinEvent:{path: "/v1/user-join-events", method: "POST"},
+  // User
+  patchMentorUser: { path: "/v1/users", method: "PATCH" },
+
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
   // Notifications
   getUserNotifications: {
     path: "/Notification/user",
@@ -71,10 +79,14 @@ export const END_POINTS: {
     path: "/schedules/mentorship/accept",
     method: "POST",
   },
+<<<<<<< HEAD
   completeSchedule: {
     path: "/schedules/complete",
     method: "PATCH",
   },
+=======
+
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
   // CV
   getCV: {
     path: "/v1/cvs",
@@ -129,12 +141,17 @@ export enum ACTIONS {
   POST_CMT = "postCmt",
   CREATE_POST = "createPost",
 
+<<<<<<< HEAD
   GET_EVENT_DETAIL = "getEventDetail",
   JOIN_EVENT = "joinEvent",
   CREATE_EVENT = "createEvent",
   EVENT_JOINED = "joinedEvent",
   CREATE_TIMELINE = "createTimeline",
   PUT_RATING = "putRating",
+=======
+  GET_EVENT_DETAIL='getEventDetail',
+  JOIN_EVENT='joinEvent',
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
 
   // User
   PATCH_MENTOR_USER = "patchMentorUser",
@@ -152,7 +169,11 @@ export enum ACTIONS {
   // Schedule
   GET_SCHEDULES = "getSchedules",
   ACCEPT_SCHEDULE = "acceptSchedule",
+<<<<<<< HEAD
   COMPLETE_SCHEDULE = "completeSchedule",
+=======
+
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
   // CV
   GET_CV = "getCV",
   GET_CV_BY_ID = "getCVById",

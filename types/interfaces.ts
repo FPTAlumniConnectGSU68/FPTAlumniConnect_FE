@@ -123,15 +123,24 @@ export interface Comment {
   type: string;
 }
 
+<<<<<<< HEAD
 export interface CommentType {
   commentId: number;
+=======
+export interface CommentType  {
+  commentId:  number;
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
   parentCommentId: number | null;
   authorName: string;
   authorAvatar?: string;
   content: string;
   createdAt: string;
   childComments?: CommentType[]; // child comments
+<<<<<<< HEAD
 }
+=======
+};
+>>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
 
 export interface Schedule {
   scheduleId: number;
