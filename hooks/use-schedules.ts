@@ -86,7 +86,6 @@ export function useCreateSchedule() {
     },
   });
 }
-<<<<<<< HEAD
 
 export function useCompleteSchedule() {
   const queryClient = useQueryClient();
@@ -112,5 +111,3 @@ export function useCompleteSchedule() {
     },
   });
 }
-=======
->>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df

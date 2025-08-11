@@ -20,11 +20,13 @@ const JobPostTable = ({
   isLoading,
   onPageChange,
   currentPage,
+  onViewApplicants,
 }: {
   jobPosts: ApiResponse<PaginatedData<JobPost>> | undefined;
   isLoading: boolean;
   onPageChange: (page: number) => void;
   currentPage: number;
+  onViewApplicants: (jobPostId: number) => void;
 }) => {
   if (isLoading) {
     return <LoadingSpinner text="Loading..." />;
@@ -66,7 +68,12 @@ const JobPostTable = ({
                 </TableCell>
                 <TableCell>{jobPost.status}</TableCell>
                 <TableCell>
-                  <Button>Edit</Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => onViewApplicants(jobPost.jobPostId)}
+                  >
+                    View Applicants
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

@@ -12,55 +12,39 @@ import { useAuth } from "@/contexts/auth-context";
 import Pagination from "@/components/ui/pagination";
 import CustomTooltip from "@/components/tooltip/CustomToolTip";
 import { useSearchParams } from "next/navigation";
-<<<<<<< HEAD
 import useEventService from "@/lib/services/event.service";
 import { useToast } from "@/components/ui/toast";
-=======
->>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
 
 const locations = ["All Locations", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng"];
 
 export default function EventsPage() {
   const { user } = useAuth();
-<<<<<<< HEAD
   const { PUT_RATING } = useEventService();
   const toast = useToast();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
-=======
-  const searchParams = useSearchParams();
-  const [searchInput, setSearchInput] = useState("");
->>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("All Locations");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
 
-<<<<<<< HEAD
   const { data: majorsRes } = useMajorCodes();
-=======
-  const { data: majorsRes, isLoading: isMajorsLoading } = useMajorCodes();
->>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
   const [major, setMajor] = useState("All Majors");
   const [selectedEventId, setSelectedEventId] = useState<
     number | string | null
   >(null);
   const [showJoinedEvents, setShowJoinedEvents] = useState(false);
   const [ratings, setRatings] = useState<Record<number, number>>({});
-<<<<<<< HEAD
   const [ratingContents, setRatingContents] = useState<Record<number, string>>(
     {}
   );
-=======
->>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
   const majors =
     majorsRes?.status === "success" ? majorsRes.data?.items ?? [] : [];
 
   useEffect(() => {
     const openModal = searchParams.get("openModal") === "true";
     const id = searchParams.get("eventId");
-<<<<<<< HEAD
     if (openModal && id) {
       setSelectedEventId(id);
     }
@@ -123,58 +107,7 @@ export default function EventsPage() {
       toast.error("Failed to submit rating. Please try again.");
     }
   };
-=======
 
-    if (openModal && id) {
-      setSelectedEventId(id);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setSearch(searchInput);
-      setCurrentPage(1);
-    }, 500);
->>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
-
-    return () => clearTimeout(handler);
-  }, [searchInput]);
-
-  const queryParams: Record<string, string> = {};
-  if (search) queryParams.EventName = search;
-  if (location !== "All Locations") queryParams.Location = location;
-  if (major !== "All Majors") queryParams.MajorId = major;
-  if (showJoinedEvents && user?.userId) {
-    queryParams.UserId = user.userId.toString();
-  }
-
-  const { data: eventsRes, isLoading } = useEvents({
-    page: currentPage,
-    size: pageSize,
-    query: queryParams,
-  });
-
-  const eventData =
-    eventsRes && isApiSuccess(eventsRes) ? eventsRes.data : null;
-  const eventItems = eventData?.items ?? [];
-  const totalPages = eventData?.totalPages ?? 0;
-
-  const handleStarSelect = (eventId: number, rating: number) => {
-    setRatings((prev) => ({ ...prev, [eventId]: rating }));
-  };
-
-  const handleCommitRating = async (eventId: number) => {
-    const rating = ratings[eventId];
-    if (!rating) return;
-
-    try {
-      // TODO: Replace with API call
-      console.log(`Submitting rating ${rating} for event ${eventId}`);
-      await new Promise((resolve) => setTimeout(resolve, 800)); // mock API delay
-    } catch (err) {
-      console.error("Failed to submit rating", err);
-    }
-  };
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Events Directory</h1>
@@ -204,7 +137,6 @@ export default function EventsPage() {
             </svg>
           </span>
         </div>
-<<<<<<< HEAD
 
         <div className="relative flex-2">
           <input
@@ -244,8 +176,6 @@ export default function EventsPage() {
             ))}
           </select>
         </div> */}
-=======
->>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
         {/* Major Filter */}
         <div className="w-full md:w-48">
           <select
@@ -265,24 +195,6 @@ export default function EventsPage() {
           </select>
         </div>
 
-<<<<<<< HEAD
-=======
-        {/* Location Filter */}
-        <div className="w-full md:w-48">
-          <select
-            value={location}
-            onChange={(e) => {
-              setLocation(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="w-full border rounded-lg px-3 py-2"
-          >
-            {locations.map((l) => (
-              <option key={l}>{l}</option>
-            ))}
-          </select>
-        </div>
->>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
         {/* My Joined Events Button */}
         <Button
           variant={showJoinedEvents ? "default" : "outline"}
@@ -324,7 +236,6 @@ export default function EventsPage() {
               <p className="text-sm text-gray-500 mb-4 line-clamp-2 min-h-[40px]">
                 {item.description}
               </p>
-<<<<<<< HEAD
               {showJoinedEvents && (
                 <div className="flex items-center text-sm gap-2">
                   <span className="text-gray-600">Average Rating:</span>
@@ -350,23 +261,6 @@ export default function EventsPage() {
                 </div>
               </div>
 
-=======
-
-              <div className="text-sm text-gray-600 mb-4">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  {formatDateToDMY(item.startDate)}
-                  <span className="mx-2">•</span>
-                  <Clock className="h-4 w-4 mr-2" />
-                  {formatTime(item.startDate)}
-                </div>
-                <div className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  {item.location}
-                </div>
-              </div>
-
->>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
               {showJoinedEvents ? (
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex gap-1">
@@ -382,7 +276,6 @@ export default function EventsPage() {
                       />
                     ))}
                   </div>
-<<<<<<< HEAD
                   <input
                     type="text"
                     placeholder="Rating content"
@@ -395,8 +288,6 @@ export default function EventsPage() {
                     }
                     className="w-full pl-2 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
-=======
->>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
                   <CustomTooltip
                     message={
                       new Date() < new Date(item.startDate)
@@ -410,13 +301,9 @@ export default function EventsPage() {
                         !ratings[item.eventId] ||
                         new Date() < new Date(item.startDate)
                       }
-<<<<<<< HEAD
                       onClick={() =>
                         handleCommitRating(item.eventId, item.userJoinEventId)
                       }
-=======
-                      onClick={() => handleCommitRating(item.eventId)}
->>>>>>> a9ec0bae87494269df48cd121356889e5e42d8df
                     >
                       Rate
                     </Button>

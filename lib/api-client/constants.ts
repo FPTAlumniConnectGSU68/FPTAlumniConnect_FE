@@ -102,6 +102,18 @@ export const END_POINTS: {
     path: "/v1/jobapplications",
     method: "POST",
   },
+  updateJobApplication: {
+    path: "/v1/jobapplications",
+    method: "PATCH",
+  },
+  createJobPost: {
+    path: "/v1/jobposts",
+    method: "POST",
+  },
+  getJobApplicationsByJobPostId: {
+    path: "/v1/jobapplications/jobpost",
+    method: "GET",
+  },
 };
 
 export enum ACTIONS {
@@ -163,6 +175,9 @@ export enum ACTIONS {
 
   // Job Applications
   CREATE_JOB_APPLICATION = "createJobApplication",
+  UPDATE_JOB_APPLICATION = "updateJobApplication",
+  CREATE_JOB_POST = "createJobPost",
+  GET_JOB_APPLICATIONS_BY_JOBPOST_ID = "getJobApplicationsByJobPostId",
 }
 
 export const API_URL = "http://localhost:5000/api";
