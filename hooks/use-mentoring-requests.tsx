@@ -2,7 +2,8 @@ import { APIClient } from "@/lib/api-client";
 import { ACTIONS } from "@/lib/api-client/constants";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { MentoringRequest, MentoringRequestCreate } from "@/types/interfaces";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 interface UseMentorShipRequestsOptions {
@@ -56,6 +57,8 @@ export function useMentorShipAlumniRequest({
 }
 
 export function useCreateMentorShipRequest() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   return useMutation<
     ApiResponse<MentoringRequest>,
     Error,
@@ -72,6 +75,10 @@ export function useCreateMentorShipRequest() {
     onSuccess: (response) => {
       if (response.status === "success") {
         toast.success("Mentorship request created successfully");
+        queryClient.invalidateQueries({
+          queryKey: ["mentorship-alumni-request"],
+        });
+        router.push("/mentoring");
       }
     },
     onError: (error) => {

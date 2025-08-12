@@ -233,6 +233,34 @@ export interface CVCreate {
   status: string;
   skillIds: number[];
 }
+
+export interface CVUpdate {
+  id: number;
+  userId: number;
+  fullName: string;
+  address: string;
+  birthday: string;
+  gender: string;
+  email: string;
+  phone: string;
+  city: string;
+  company: string;
+  primaryDuties: string;
+  jobLevel: string;
+  startAt: string;
+  endAt: string;
+  language: string;
+  languageLevel: string;
+  minSalary: number;
+  maxSalary: number;
+  isDeal: boolean;
+  desiredJob: string;
+  position: string;
+  majorId: number;
+  additionalContent: string;
+  status: string;
+  skillIds: number[];
+}
 export interface Skill {
   skillId: number;
   name: string;

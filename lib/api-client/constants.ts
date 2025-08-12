@@ -75,6 +75,10 @@ export const END_POINTS: {
     path: "/schedules/complete",
     method: "PATCH",
   },
+  rateMentorRequest: {
+    path: "/v1/api/schedules/rate",
+    method: "POST",
+  },
   // CV
   getCV: {
     path: "/v1/cvs",
@@ -165,6 +169,7 @@ export enum ACTIONS {
   GET_SCHEDULES = "getSchedules",
   ACCEPT_SCHEDULE = "acceptSchedule",
   COMPLETE_SCHEDULE = "completeSchedule",
+  RATE_MENTOR_REQUEST = "rateMentorRequest",
   // CV
   GET_CV = "getCV",
   GET_CV_BY_ID = "getCVById",

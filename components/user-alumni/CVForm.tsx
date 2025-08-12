@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -12,10 +11,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Major } from "@/hooks/use-major-codes";
-import { useSkills } from "@/hooks/use-skills";
-import { isApiSuccess } from "@/lib/utils";
 import { CV, Skill } from "@/types/interfaces";
-import { X } from "lucide-react";
+import SkillMultiSelect from "@/components/ui/skill-multi-select";
+import { CitySelect } from "@/components/ui/city-select";
 import { useState, useCallback, useMemo, memo } from "react";
 import { toast } from "sonner";
 
@@ -30,16 +28,7 @@ interface FormErrors {
 }
 
 const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
-  const { data: skillsData } = useSkills();
-
-  // Memoize derived data
-  const skillItems = useMemo(
-    () =>
-      skillsData && isApiSuccess(skillsData)
-        ? skillsData.data?.items ?? []
-        : [],
-    [skillsData]
-  );
+  // skills arae fetched inside SkillMultiSelect; we manage only selected skills here
 
   const [formData, setFormData] = useState<CV>(
     initialData || {
@@ -75,7 +64,6 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
 
   const [selectedSkills, setSelectedSkills] = useState<Skill[]>([]);
   const [errors, setErrors] = useState<FormErrors>({});
-  console.log("formData", formData);
 
   const validateForm = useCallback(() => {
     const newErrors: FormErrors = {};
@@ -107,7 +95,13 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value, type } = e.target;
 
-      if (type === "number") {
+      if (type === "checkbox") {
+        const checked = (e.target as HTMLInputElement).checked;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: checked,
+        }));
+      } else if (type === "number") {
         setFormData((prev) => ({
           ...prev,
           [name]: value ? parseInt(value, 10) : 0,
@@ -141,26 +135,9 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
     setErrors((prev) => ({ ...prev, [name]: "" }));
   }, []);
 
-  const handleAddSkill = useCallback(
-    (skill: Skill) => {
-      if (!selectedSkills.some((s) => s.skillId === skill.skillId)) {
-        setSelectedSkills((prev) => [
-          ...prev,
-          {
-            name: skill.name,
-            skillId: skill.skillId,
-            createdAt: skill.createdAt,
-            updatedAt: skill.updatedAt,
-          },
-        ]);
-        setErrors((prev) => ({ ...prev, skills: "" }));
-      }
-    },
-    [selectedSkills]
-  );
-
-  const handleRemoveSkill = useCallback((skillId: number) => {
-    setSelectedSkills((prev) => prev.filter((s) => s.skillId !== skillId));
+  const handleSkillsChange = useCallback((skills: Skill[]) => {
+    setSelectedSkills(skills);
+    setErrors((prev) => ({ ...prev, skills: "" }));
   }, []);
 
   const handleSubmit = useCallback(
@@ -300,12 +277,9 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="city">City</Label>
-          <Input
-            id="city"
-            name="city"
+          <CitySelect
             value={formData.city}
-            onChange={handleInputChange}
-            className={errors.city ? "border-red-500" : ""}
+            onValueChange={(value) => handleSelectChange("city", value)}
           />
           {errors.city && (
             <span className="text-sm text-red-500">{errors.city}</span>
@@ -463,51 +437,12 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
         </div>
       </div>
 
-      {/* Skills Section */}
-      <div className="space-y-4">
+      <div className="space-y-2">
         <Label>Skills</Label>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {useMemo(
-            () =>
-              skillItems.map((skill: Skill) => (
-                <button
-                  key={skill.skillId}
-                  type="button"
-                  onClick={() => handleAddSkill(skill)}
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    selectedSkills.some((s) => s.skillId === skill.skillId)
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 hover:bg-gray-300"
-                  }`}
-                >
-                  {skill.name}
-                </button>
-              )),
-            [skillItems, selectedSkills, handleAddSkill]
-          )}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {useMemo(
-            () =>
-              selectedSkills.map((skill) => (
-                <Badge
-                  key={skill.skillId}
-                  variant="secondary"
-                  className="flex items-center gap-1"
-                >
-                  {skill.name}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSkill(skill.skillId)}
-                    className="ml-1 hover:text-red-500"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              )),
-            [selectedSkills, handleRemoveSkill]
-          )}
-        </div>
+        <SkillMultiSelect
+          value={selectedSkills}
+          onChange={handleSkillsChange}
+        />
         {errors.skills && (
           <span className="text-sm text-red-500">{errors.skills}</span>
         )}
@@ -542,6 +477,18 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
             <span className="text-sm text-red-500">{errors.maxSalary}</span>
           )}
         </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <input
+          id="isDeal"
+          name="isDeal"
+          type="checkbox"
+          checked={formData.isDeal}
+          onChange={handleInputChange}
+          className="h-4 w-4"
+        />
+        <Label htmlFor="isDeal">Negotiable salary</Label>
       </div>
 
       <div>

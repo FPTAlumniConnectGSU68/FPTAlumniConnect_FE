@@ -111,3 +111,37 @@ export function useCompleteSchedule() {
     },
   });
 }
+
+export function useRateMentor() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    ApiResponse<Schedule>,
+    Error,
+    { scheduleId: number; rating: number; comment: string }
+  >({
+    mutationFn: async (data: {
+      scheduleId: number;
+      rating: number;
+      comment: string;
+    }) => {
+      const response = await APIClient.invoke<ApiResponse<Schedule>>({
+        action: ACTIONS.RATE_MENTOR_REQUEST,
+        idQuery: data.scheduleId.toString(),
+        data: {
+          rate: data.rating,
+          comment: data.comment,
+        },
+      });
+
+      return response;
+    },
+    onSuccess: (response) => {
+      if (response.status === "success") {
+        toast.success("Updated schedule rating successfully");
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update schedule rating");
+    },
+  });
+}

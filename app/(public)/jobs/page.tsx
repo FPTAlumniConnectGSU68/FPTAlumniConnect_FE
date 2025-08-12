@@ -54,11 +54,6 @@ export default function JobsPage() {
     setSelectedJob(job);
   };
 
-  const handleApply = (jobId: number) => {
-    // Implement apply logic here
-    console.log("Applying to job:", jobId);
-  };
-
   return (
     <div className="max-w-[1400px] mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Jobs Directory</h1>

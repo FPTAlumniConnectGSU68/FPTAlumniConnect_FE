@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { CitySelect } from "@/components/ui/city-select";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import {
   Dialog,
@@ -9,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -202,10 +204,18 @@ export function JobPostCreateDialog({
           </div>
           <div>
             <label className="text-sm font-medium">City</label>
-            <Input {...register("city")} />
-            {errors.city && (
-              <p className="text-sm text-red-600">{errors.city.message}</p>
-            )}
+            {/* <Input {...register("city")} /> */}
+            <div className="grid gap-2">
+              <CitySelect
+                value={watch("city")}
+                onValueChange={(value) => setValue("city", value)}
+              />
+              {errors.city && (
+                <span className="text-sm text-red-500">
+                  {errors.city.message}
+                </span>
+              )}
+            </div>
           </div>
           <div className="col-span-2">
             <label className="text-sm font-medium">Requirements</label>

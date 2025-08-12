@@ -2,11 +2,15 @@
 
 import { useAuth } from "@/contexts/auth-context";
 import { useCV, useCreateCV, useUpdateCV } from "@/hooks/use-cv";
+import { useMajorCodes } from "@/hooks/use-major-codes";
 import { isApiSuccess } from "@/lib/utils";
-import { CV, CVCreate, User } from "@/types/interfaces";
-import { useState, useRef, useCallback, useMemo } from "react";
-import { Card } from "../ui/card";
+import { CV } from "@/types/interfaces";
+import { Download, Plus } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import generatePDF from "react-to-pdf";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
+import { Card } from "../ui/card";
 import {
   Dialog,
   DialogContent,
@@ -15,17 +19,76 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { Plus, Download } from "lucide-react";
 import CVForm from "./CVForm";
 import CVPreview from "./CVPreview";
-import generatePDF from "react-to-pdf";
-import { toast } from "sonner";
-import { useMajorCodes } from "@/hooks/use-major-codes";
-const MODE = {
+type ViewMode = "create" | "edit" | "preview";
+
+const VIEW_MODE: Record<Uppercase<ViewMode>, ViewMode> = {
   CREATE: "create",
   EDIT: "edit",
   PREVIEW: "preview",
 };
+
+function buildCreateCvPayload(data: CV, currentUserId: number) {
+  return {
+    userId: currentUserId,
+    fullName: data.fullName,
+    address: data.address,
+    birthday: data.birthday,
+    gender: data.gender,
+    email: data.email,
+    phone: data.phone,
+    city: data.city,
+    company: data.company,
+    primaryDuties: data.primaryDuties,
+    jobLevel: data.jobLevel,
+    startAt: data.startAt,
+    endAt: data.endAt,
+    language: data.language,
+    languageLevel: data.languageLevel,
+    minSalary: data.minSalary,
+    maxSalary: data.maxSalary,
+    isDeal: data.isDeal,
+    desiredJob: data.desiredJob,
+    position: data.position,
+    majorId: parseInt(data.majorId),
+    additionalContent: data.additionalContent,
+    status: data.status,
+    skillIds: data.skillIds,
+    skillNames: data.skillNames,
+  };
+}
+
+function buildUpdateCvPayload(data: CV, currentUserId: number) {
+  return {
+    id: data.id,
+    userId: currentUserId,
+    fullName: data.fullName,
+    address: data.address,
+    birthday: data.birthday,
+    gender: data.gender,
+    email: data.email,
+    phone: data.phone,
+    city: data.city,
+    company: data.company,
+    primaryDuties: data.primaryDuties,
+    jobLevel: data.jobLevel,
+    startAt: data.startAt,
+    endAt: data.endAt,
+    language: data.language,
+    languageLevel: data.languageLevel,
+    minSalary: data.minSalary,
+    maxSalary: data.maxSalary,
+    isDeal: data.isDeal,
+    desiredJob: data.desiredJob,
+    position: data.position,
+    majorId: parseInt(data.majorId),
+    additionalContent: data.additionalContent,
+    status: data.status,
+    skillIds: data.skillIds,
+  };
+}
+
 const CVView = () => {
   const pdfRef = useRef<HTMLDivElement>(null);
   const { data: majorCodes } = useMajorCodes();
@@ -50,13 +113,16 @@ const CVView = () => {
     }
   }, []);
 
+  const currentUserId = user?.userId ?? 0;
+  const userIdString = user?.userId ? user.userId.toString() : "";
+
   const {
     data: cvData,
     isLoading,
     refetch,
   } = useCV({
     query: {
-      UserId: user?.userId ? user.userId.toString() : "",
+      UserId: userIdString,
     },
   });
 
@@ -64,137 +130,92 @@ const CVView = () => {
 
   const updateCV = useUpdateCV();
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [selectedCV, setSelectedCV] = useState<CV | null>(null);
-  const [mode, setMode] = useState<string>(MODE.CREATE);
+  const [mode, setMode] = useState<ViewMode>(VIEW_MODE.CREATE);
 
-  const handleCreateClick = useCallback(() => {
+  const handleOpenCreateForm = useCallback(() => {
     setSelectedCV(null);
-    setMode(MODE.CREATE);
-    setIsOpen(true);
+    setMode(VIEW_MODE.CREATE);
+    setIsFormOpen(true);
   }, []);
 
-  const handleEditClick = useCallback((cv: CV) => {
+  const handleOpenEditForm = useCallback((cv: CV) => {
     setSelectedCV(cv);
-    setMode(MODE.EDIT);
-    setIsOpen(true);
+    setMode(VIEW_MODE.EDIT);
+    setIsFormOpen(true);
   }, []);
 
   const handleSubmit = useCallback(
     async (data: CV) => {
-      console.log("Submitting data:", data);
       try {
-        if (mode === MODE.CREATE) {
-          const cvDataCreate = {
-            userId: user?.userId ?? 0,
-            fullName: data.fullName,
-            address: data.address,
-            birthday: data.birthday,
-            gender: data.gender,
-            email: data.email,
-            phone: data.phone,
-            city: data.city,
-            company: data.company,
-            primaryDuties: data.primaryDuties,
-            jobLevel: data.jobLevel,
-            startAt: data.startAt,
-            endAt: data.endAt,
-            language: data.language,
-            languageLevel: data.languageLevel,
-            minSalary: data.minSalary,
-            maxSalary: data.maxSalary,
-            isDeal: data.isDeal,
-            desiredJob: data.desiredJob,
-            position: data.position,
-            majorId: parseInt(data.majorId),
-            additionalContent: data.additionalContent,
-            status: data.status,
-            skillIds: data.skillIds,
-            majorName: data.majorName,
-            skillNames: data.skillNames,
-          } as CVCreate;
-          const result = await createCV.mutateAsync(cvDataCreate);
+        if (mode === VIEW_MODE.CREATE) {
+          const payload = buildCreateCvPayload(data, currentUserId);
+          const result = await createCV.mutateAsync(payload);
 
           if (result.status === "success") {
-            setIsOpen(false);
+            setIsFormOpen(false);
             refetch();
           } else {
             toast.error(result.message || "Failed to create CV");
           }
         } else {
-          const cvDataUpdate = {
-            id: data.id,
-            userId: user?.userId ?? 0,
-            fullName: data.fullName,
-            address: data.address,
-            birthday: data.birthday,
-            gender: data.gender,
-            email: data.email,
-            phone: data.phone,
-            city: data.city,
-            company: data.company,
-            primaryDuties: data.primaryDuties,
-            jobLevel: data.jobLevel,
-            startAt: data.startAt,
-            endAt: data.endAt,
-            language: data.language,
-            languageLevel: data.languageLevel,
-            minSalary: data.minSalary,
-            maxSalary: data.maxSalary,
-            isDeal: data.isDeal,
-            desiredJob: data.desiredJob,
-            position: data.position,
-            majorId: parseInt(data.majorId),
-            additionalContent: data.additionalContent,
-            status: data.status,
-            skillIds: data.skillIds,
-            majorName: data.majorName,
-            skillNames: data.skillNames,
-          };
-          console.log("Modifying CV data:", cvDataUpdate);
-          const result = await updateCV.mutateAsync(cvDataUpdate);
-          console.log("API Response:", result);
+          const payload = buildUpdateCvPayload(data, currentUserId);
+          const result = await updateCV.mutateAsync(payload);
 
           if (result.status === "success") {
-            setIsOpen(false);
+            setIsFormOpen(false);
             refetch();
           } else {
             toast.error(result.message || "Failed to update CV");
           }
         }
       } catch (error) {
-        console.error("Error creating CV:", error);
+        console.error("Error saving CV:", error);
         toast.error(
           error instanceof Error ? error.message : "Failed to save CV"
         );
       }
     },
-    [mode, user, createCV, updateCV, refetch]
+    [mode, currentUserId, createCV, updateCV, refetch]
   );
 
-  const cvItems =
-    cvData && isApiSuccess(cvData) ? cvData.data?.items ?? [] : [];
+  const cvItems = useMemo(
+    () => (cvData && isApiSuccess(cvData) ? cvData.data?.items ?? [] : []),
+    [cvData]
+  );
+
+  const triggerFormSubmit = useCallback(() => {
+    const form = document.getElementById("cv-form") as HTMLFormElement | null;
+    if (form) {
+      const submitEvent = new Event("submit", {
+        bubbles: true,
+        cancelable: true,
+      });
+      form.dispatchEvent(submitEvent);
+    }
+  }, []);
 
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">My CVs</h1>
-        <Button onClick={handleCreateClick}>
+        <Button onClick={handleOpenCreateForm}>
           <Plus className="w-4 h-4 mr-2" />
           Create New CV
         </Button>
       </div>
 
       {/* Edit/Create Dialog */}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {mode === MODE.EDIT ? "Edit CV" : "Create New CV"}
+              {mode === VIEW_MODE.EDIT ? "Edit CV" : "Create New CV"}
             </DialogTitle>
             <DialogDescription>
-              {mode === MODE.EDIT
+              {mode === VIEW_MODE.EDIT
                 ? "Edit your CV details below"
                 : "Fill in your CV details to start your job search"}
             </DialogDescription>
@@ -205,26 +226,15 @@ const CVView = () => {
             majorItems={majorItems}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
+            <Button variant="outline" onClick={() => setIsFormOpen(false)}>
               Cancel
             </Button>
             <Button
               variant="default"
-              disabled={createCV.isPending}
-              onClick={() => {
-                const form = document.getElementById(
-                  "cv-form"
-                ) as HTMLFormElement;
-                if (form) {
-                  const submitEvent = new Event("submit", {
-                    bubbles: true,
-                    cancelable: true,
-                  });
-                  form.dispatchEvent(submitEvent);
-                }
-              }}
+              disabled={createCV.isPending || updateCV.isPending}
+              onClick={triggerFormSubmit}
             >
-              {mode === MODE.EDIT ? "Save Changes" : "Create CV"}
+              {mode === VIEW_MODE.EDIT ? "Save Changes" : "Create CV"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -285,7 +295,7 @@ const CVView = () => {
                     variant="outline"
                     size="sm"
                     className="flex-1"
-                    onClick={() => handleEditClick(cv)}
+                    onClick={() => handleOpenEditForm(cv)}
                   >
                     Edit
                   </Button>

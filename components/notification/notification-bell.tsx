@@ -25,7 +25,6 @@ export function NotificationBell() {
   const { user } = useAuth();
   const initializedRef = useRef(false);
   const seenIdsRef = useRef<Set<number>>(new Set());
-  console.log("user", user);
 
   // Prefetch notifications when user becomes available (so unread badge shows immediately)
   useEffect(() => {

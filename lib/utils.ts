@@ -20,6 +20,7 @@ export function formatDateToDMY(dateStr: string): string {
 }
 
 export function formatTime(dateStr: string): string {
+  if (!dateStr) return "";
   const date = new Date(dateStr);
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");

@@ -1,7 +1,7 @@
 import { APIClient } from "@/lib/api-client";
 import { ACTIONS } from "@/lib/api-client/constants";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
-import { CV, CVCreate } from "@/types/interfaces";
+import { CV, CVCreate, CVUpdate } from "@/types/interfaces";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -65,14 +65,18 @@ export function useCreateCV() {
 
 export function useUpdateCV() {
   const queryClient = useQueryClient();
-  return useMutation<ApiResponse<CVCreate>, Error, CVCreate>({
-    mutationFn: async (cv: CVCreate) => {
-      const response = await APIClient.invoke<ApiResponse<CVCreate>>({
+  return useMutation<ApiResponse<CVUpdate>, Error, CVUpdate>({
+    mutationFn: async (cv: CVUpdate) => {
+      console.log("CV Update inside hook:", cv);
+      const { id, ...dataToUpdate } = cv;
+      console.log("Data to update:", dataToUpdate);
+
+      const response = await APIClient.invoke<ApiResponse<CVUpdate>>({
         action: ACTIONS.UPDATE_CV,
-        idQuery: cv.userId.toString(),
-        data: cv,
+        idQuery: cv.id.toString(),
+        data: dataToUpdate,
       });
-      return response as ApiResponse<CVCreate>;
+      return response as ApiResponse<CVUpdate>;
     },
     onSuccess: (response) => {
       if (response.status === "success") {
