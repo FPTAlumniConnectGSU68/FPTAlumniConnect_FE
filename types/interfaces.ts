@@ -88,26 +88,37 @@ export interface Event {
   eventName: string;
   img: string;
   description: string;
-  startDate: string;
-  endDate: string;
+  startDate: string; // ISO date string
+  endDate: string; // ISO date string
   location: string;
   organizerId: number;
-  createdAt: string;
-  updatedAt: string;
-  averageRating?: number | null;
-  userJoinEventId?: number | null;
+  majorId: number;
+  majorName?: string; // optional for backward compatibility
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+  status: string | null;
+  createdBy: string | null;
+  averageRating: number | null;
+  userJoinEventId: number | null;
+  eventTimeLines?: EventTimeline[];
+}
+
+export interface EventTimeline {
+  eventTimeLineId: number;
+  title: string;
+  description: string;
+  startTime: string; // "HH:mm:ss"
+  endTime: string; // "HH:mm:ss"
 }
 
 export type TimelineSuggestion = {
+  eventTimeLineId?: number; // optional for new timelines
+  eventId: number;
   name: string;
+  title?: string; // fallback to name
   startTime: string; // ISO date string
   endTime: string; // ISO date string
   description?: string;
-};
-
-export type EventWithSuggestions = Omit<Event, "eventId"> & {
-  id: number;
-  timelineSuggestions?: TimelineSuggestion[];
 };
 
 export interface Notification {

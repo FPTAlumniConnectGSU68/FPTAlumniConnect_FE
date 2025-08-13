@@ -1,57 +1,34 @@
 import EventHeader from "@/components/admin/event/EventHeader";
 import EventTable from "@/components/admin/event/EventTable";
-import { useEvents } from "@/hooks/use-event";
-import { ApiResponse } from "@/lib/apiResponse";
-import useEventService from "@/lib/services/event.service";
+import { useEvents, useUpdateEvent } from "@/hooks/use-event";
 import React, { useState } from "react";
-import { Event, TimelineSuggestion } from "@/types/interfaces";
-import CreateEventSheet from "@/components/admin/event/CreateEventSheet";
-import TimelineModal from "@/components/admin/event/TimelineModal";
+import EventFormSheet from "@/components/admin/event/EventFormSheet";
+import { set } from "date-fns";
+import { toast } from "sonner";
 
 export function EventsManagement() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<number | string | null>(
+    null
+  );
+  const [isOpenDetail, setIsOpenDetail] = useState(false);
 
   const { data: events, isLoading } = useEvents({
     page: currentPage,
-    size: 5,
+    size: 4,
     // query: {
     //   search: searchTerm,
     // },
   });
 
-  const { CREATE_EVENT } = useEventService();
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [createdEvent, setCreatedEvent] = useState<Event | null>(null);
-  const [timelineSuggestions, setTimelineSuggestions] = useState<
-    TimelineSuggestion[]
-  >([]);
-
-  const handleCreateEvent = async (eventData: Partial<Event>) => {
-    const res: ApiResponse<
-      Event & { timelineSuggestions?: TimelineSuggestion[]; id?: string }
-    > = await CREATE_EVENT(eventData);
-
-    if (res.status === "success") {
-      alert("Event created successfully!");
-      setIsCreateOpen(false);
-    } else if (res.status === "partial_success") {
-      const eventId = res.data?.id || eventData.eventId;
-      const eventInfo = { ...eventData, eventId } as Event;
-
-      setCreatedEvent(eventInfo);
-      setTimelineSuggestions(res.data?.timelineSuggestions || []);
-      setModalOpen(true);
-      setIsCreateOpen(false);
-    } else {
-      alert(res.message);
-    }
+  const handleOpenCreate = () => {
+    setSelectedEvent(null);
+    setIsOpenDetail(true);
   };
 
-  const handleOpenCreate = () => {
-    setIsCreateOpen(true);
+  const handleSelectedEvent = (eventId: number | string | null) => {
+    setSelectedEvent(eventId);
+    setIsOpenDetail(true);
   };
 
   return (
@@ -62,20 +39,15 @@ export function EventsManagement() {
         isLoading={isLoading}
         onPageChange={setCurrentPage}
         currentPage={currentPage}
+        setSelectedEvent={handleSelectedEvent}
       />
 
-      <CreateEventSheet
-        isOpen={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        onSave={handleCreateEvent}
+      <EventFormSheet
+        eventId={selectedEvent}
+        isOpen={isOpenDetail}
+        onOpenChange={setIsOpenDetail}
+        setSelectedEvent={setSelectedEvent}
       />
-      {isModalOpen && createdEvent && (
-        <TimelineModal
-          event={createdEvent}
-          suggestions={timelineSuggestions}
-          onClose={() => setModalOpen(false)}
-        />
-      )}
     </div>
   );
 }

@@ -35,6 +35,8 @@ export const END_POINTS: {
   createEvent: { path: "/v1/events", method: "POST" },
   createTimeline: { path: "/v1/{eventId}/timelines", method: "POST" },
 
+  getEventDetailWithTimelines: { path: "/v1/events/detail", method: "GET" },
+
   // User
   patchMentorUser: { path: "/v1/users", method: "PATCH" },
   createUser: { path: "/v1/users", method: "POST" },
@@ -151,6 +153,8 @@ export enum ACTIONS {
   EVENT_JOINED = "joinedEvent",
   CREATE_TIMELINE = "createTimeline",
   PUT_RATING = "putRating",
+
+  GET_EVENT_DETAIL_WITH_TIMELINES = "getEventDetailWithTimelines",
 
   // User
   PATCH_MENTOR_USER = "patchMentorUser",

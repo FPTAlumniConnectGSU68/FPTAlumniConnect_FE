@@ -13,16 +13,14 @@ import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { formatDateToDMY, formatTime, isApiSuccess } from "@/lib/utils";
 import { Event } from "@/types/interfaces";
 import Image from "next/image";
-import React, { useState } from "react";
-import EditEventSheet from "./EditEventSheet";
-import { useUpdateEvent } from "@/hooks/use-event";
-import { toast } from "sonner";
+import React from "react";
 
 interface EventTableProps {
   events: ApiResponse<PaginatedData<Event>> | undefined;
   isLoading: boolean;
   currentPage: number;
   onPageChange: (page: number) => void;
+  setSelectedEvent: (eventId: number | string | null) => void;
 }
 
 const EventTable = ({
@@ -30,26 +28,10 @@ const EventTable = ({
   isLoading,
   currentPage,
   onPageChange,
+  setSelectedEvent,
 }: EventTableProps) => {
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const { mutate: updateEvent } = useUpdateEvent();
-  const handleEditClick = (event: Event) => {
-    setSelectedEvent(event);
-  };
-
-  const handleSave = async (eventData: Partial<Event>) => {
-    if (!selectedEvent) return;
-
-    try {
-      await updateEvent({
-        eventId: selectedEvent.eventId.toString(),
-        eventData,
-      });
-      toast.success("Event updated successfully");
-      setSelectedEvent(null);
-    } catch (error) {
-      toast.error("Failed to update event");
-    }
+  const handleEditClick = (eventId: number | string) => {
+    setSelectedEvent(eventId);
   };
 
   if (isLoading) {
@@ -85,7 +67,7 @@ const EventTable = ({
               <TableRow key={event.eventId}>
                 <TableCell>
                   <Image
-                    src={event.img || ""}
+                    src={event?.img || "/images/eventplaceholder.png"}
                     alt={event.eventName}
                     width={100}
                     height={100}
@@ -103,7 +85,9 @@ const EventTable = ({
                     formatTime(event.endDate)}
                 </TableCell>
                 <TableCell>
-                  <Button onClick={() => handleEditClick(event)}>Edit</Button>
+                  <Button onClick={() => handleEditClick(event.eventId)}>
+                    Edit
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -116,15 +100,6 @@ const EventTable = ({
         totalPages={totalPages}
         onPageChange={onPageChange}
       />
-
-      {selectedEvent && (
-        <EditEventSheet
-          event={selectedEvent}
-          isOpen={!!selectedEvent}
-          onOpenChange={(open) => !open && setSelectedEvent(null)}
-          onSave={handleSave}
-        />
-      )}
     </div>
   );
 };
