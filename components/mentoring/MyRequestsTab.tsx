@@ -35,13 +35,13 @@ export function MyRequestsTab({ userId }: MyRequestsTabProps) {
   if (isLoading) {
     return (
       <div className="py-4 flex justify-center items-center h-[50vh]">
-        <LoadingSpinner size="md" text="Loading mentoring requests..." />
+        <LoadingSpinner size="md" text="Đang tải yêu cầu mentoring..." />
       </div>
     );
   }
 
   if (!alumniRequest || !isApiSuccess(alumniRequest) || !alumniRequest.data) {
-    return <div className="text-center py-4">No mentoring requests found</div>;
+    return <div className="text-center py-4">Không có yêu cầu mentoring</div>;
   }
 
   const handleRating = (requestId: number) => {
@@ -57,7 +57,7 @@ export function MyRequestsTab({ userId }: MyRequestsTabProps) {
           size="sm"
           onClick={() => router.push("/alumni/mentoring?isCreate=true")}
         >
-          Create Request
+          Tạo yêu cầu
         </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -128,12 +128,12 @@ const MentoringRatingModal = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Rate your mentor: {scheduleObject?.mentorName}
+            Đánh giá mentor: {scheduleObject?.mentorName}
           </DialogTitle>
         </DialogHeader>
         <div>
           <Textarea
-            placeholder="Enter your comment..."
+            placeholder="Nhập nhận xét của bạn..."
             value={comment}
             onChange={(e) => setComment(e.target.value)}
           />
@@ -166,10 +166,10 @@ const MentoringRatingModal = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            Hủy
           </Button>
           <Button onClick={handleSubmit} disabled={rating === 0}>
-            Submit
+            Gửi đánh giá
           </Button>
         </DialogFooter>
       </DialogContent>

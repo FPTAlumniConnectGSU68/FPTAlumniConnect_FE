@@ -17,16 +17,16 @@ export default function MentoringPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Mentoring Directory</h1>
+      <h1 className="text-3xl font-bold mb-6">Danh mục Mentoring</h1>
 
       <Tabs defaultValue="everyone" className="w-full">
         <TabsList className="w-full">
           <TabsTrigger value="everyone" className="flex-1">
-            Everyone
+            Tất cả
           </TabsTrigger>
           {isAlumni && (
             <TabsTrigger value="my-requests" className="flex-1">
-              My Requests
+              Yêu cầu của tôi
             </TabsTrigger>
           )}
           {isAlumni && isMentor && (

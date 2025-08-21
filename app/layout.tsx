@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   description:
     "Connect, network, and grow with FPT University alumni community",
   generator: "v0.dev",
+  metadataBase: new URL("https://fpt-allumni.vercel.app"),
 };
 
 export default function RootLayout({
@@ -19,6 +20,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <meta
+          httpEquiv="Content-Security-Policy"
+          content="upgrade-insecure-requests"
+        />
+      </head>
       <body suppressHydrationWarning className={inter.className}>
         <Providers>{children}</Providers>
       </body>

@@ -1,7 +1,7 @@
 "use client";
 import { useEvents } from "@/hooks/use-event";
 import { formatDateToDMY, formatTime, isApiSuccess } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
@@ -17,7 +17,7 @@ import { useToast } from "@/components/ui/toast";
 
 const locations = ["All Locations", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng"];
 
-export default function EventsPage() {
+function EventsContent() {
   const { user } = useAuth();
   const { PUT_RATING } = useEventService();
   const toast = useToast();
@@ -113,56 +113,63 @@ export default function EventsPage() {
       <h1 className="text-3xl font-bold mb-6">Events Directory</h1>
 
       {/* Search & filter */}
-      <div className="bg-white rounded-xl shadow p-6 mb-8 flex flex-col md:flex-row gap-4 md:items-center">
-        {/* Search */}
-        <div className="relative flex-1">
-          <input
-            type="text"
-            placeholder="Search by event name..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          <span className="absolute left-3 top-2.5 text-gray-400">
-            <svg
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" />
-            </svg>
-          </span>
-        </div>
+      <Suspense
+        fallback={
+          <div className="bg-white rounded-xl shadow p-6 mb-8">
+            Loading search...
+          </div>
+        }
+      >
+        <div className="bg-white rounded-xl shadow p-6 mb-8 flex flex-col md:flex-row gap-4 md:items-center">
+          {/* Search */}
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search by event name..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <span className="absolute left-3 top-2.5 text-gray-400">
+              <svg
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+            </span>
+          </div>
 
-        <div className="relative flex-2">
-          <input
-            type="text"
-            placeholder="Search by event location..."
-            value={locationInput}
-            onChange={(e) => setLocationInput(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          <span className="absolute left-3 top-2.5 text-gray-400">
-            <svg
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" />
-            </svg>
-          </span>
-        </div>
+          <div className="relative flex-2">
+            <input
+              type="text"
+              placeholder="Search by event location..."
+              value={locationInput}
+              onChange={(e) => setLocationInput(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <span className="absolute left-3 top-2.5 text-gray-400">
+              <svg
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+            </span>
+          </div>
 
-        {/* Location Filter */}
-        {/* <div className="w-full md:w-48">
+          {/* Location Filter */}
+          {/* <div className="w-full md:w-48">
           <select
             value={location}
             onChange={(e) => {
@@ -176,34 +183,35 @@ export default function EventsPage() {
             ))}
           </select>
         </div> */}
-        {/* Major Filter */}
-        <div className="w-full md:w-48">
-          <select
-            value={major}
-            onChange={(e) => {
-              setMajor(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="w-full border rounded-lg px-3 py-2"
-          >
-            <option value="All Majors">All Majors</option>
-            {majors.map((m) => (
-              <option key={m.majorId} value={String(m.majorId)}>
-                {m.majorName}
-              </option>
-            ))}
-          </select>
-        </div>
+          {/* Major Filter */}
+          <div className="w-full md:w-48">
+            <select
+              value={major}
+              onChange={(e) => {
+                setMajor(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full border rounded-lg px-3 py-2"
+            >
+              <option value="All Majors">All Majors</option>
+              {majors.map((m) => (
+                <option key={m.majorId} value={String(m.majorId)}>
+                  {m.majorName}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* My Joined Events Button */}
-        <Button
-          variant={showJoinedEvents ? "default" : "outline"}
-          onClick={() => setShowJoinedEvents((prev) => !prev)}
-          className="whitespace-nowrap"
-        >
-          {showJoinedEvents ? "Show All Events" : "My Joined Events"}
-        </Button>
-      </div>
+          {/* My Joined Events Button */}
+          <Button
+            variant={showJoinedEvents ? "default" : "outline"}
+            onClick={() => setShowJoinedEvents((prev) => !prev)}
+            className="whitespace-nowrap"
+          >
+            {showJoinedEvents ? "Show All Events" : "My Joined Events"}
+          </Button>
+        </div>
+      </Suspense>
 
       {/* Events grid */}
       {isLoading && (
@@ -339,5 +347,17 @@ export default function EventsPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function EventsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-7xl mx-auto px-4 py-8">Loading events...</div>
+      }
+    >
+      <EventsContent />
+    </Suspense>
   );
 }

@@ -88,9 +88,7 @@ export function ScheduleCard({
       <div
         className={`mb-5 rounded-lg px-4 py-3 text-white bg-gradient-to-r ${statusConfig.gradientFrom} ${statusConfig.gradientTo} flex items-center justify-between`}
       >
-        <h3 className="text-base sm:text-lg font-semibold">
-          Mentoring Session
-        </h3>
+        <h3 className="text-base sm:text-lg font-semibold">Phiên mentoring</h3>
         <span className="px-2.5 py-1 rounded-full text-xs sm:text-sm font-medium bg-white/20 text-white border border-white/30">
           {schedule.status}
         </span>
@@ -104,7 +102,7 @@ export function ScheduleCard({
           >
             <User className={`w-3.5 h-3.5 ${statusConfig.text}`} />
           </span>
-          <span className="font-medium text-gray-900">Alumni:</span>
+          <span className="font-medium text-gray-900">Cựu sinh viên:</span>
           <span
             className={`px-2 py-0.5 rounded-md bg-white border ${statusConfig.border} ${statusConfig.text}`}
           >
@@ -130,10 +128,6 @@ export function ScheduleCard({
       <div
         className={`rounded-lg p-4 mb-6 border ${statusConfig.border} bg-gradient-to-br ${statusConfig.panelFrom} ${statusConfig.panelTo}`}
       >
-        <div className="flex items-center gap-2 text-gray-800 mb-2">
-          <CalendarDays className={`w-4 h-4 ${statusConfig.text}`} />
-          <span className="font-medium text-gray-900">Timeline</span>
-        </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 text-gray-800">
             <Clock className={`w-4 h-4 ${statusConfig.text}`} />
@@ -164,7 +158,7 @@ export function ScheduleCard({
             disabled={isCompleting}
             className={`w-full sm:w-auto bg-white ${statusConfig.hover} border ${statusConfig.border} ${statusConfig.text}`}
           >
-            {isCompleting ? "Completing..." : "Mark as Complete"}
+            {isCompleting ? "Đang hoàn tất..." : "Đánh dấu hoàn tất"}
           </Button>
         </div>
       ) : (
@@ -172,7 +166,7 @@ export function ScheduleCard({
           <span
             className={`inline-flex items-center rounded-full px-3 py-1 ${statusConfig.chip} border`}
           >
-            Session completed
+            Đã hoàn tất
           </span>
         </div>
       )}

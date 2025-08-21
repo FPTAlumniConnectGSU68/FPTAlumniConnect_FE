@@ -112,24 +112,28 @@ export function JobPostApplicantsDialog({
                         </p>
                       </div>
                       <div className="shrink-0 flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => handleApprove(app.applicationId)}
-                          className="flex items-center gap-1"
-                          title="Approve"
-                        >
-                          <Check className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleReject(app.applicationId)}
-                          className="flex items-center gap-1"
-                          title="Reject"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
+                        {app.status === "Pending" && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => handleApprove(app.applicationId)}
+                              className="flex items-center gap-1"
+                              title="Approve"
+                            >
+                              <Check className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleReject(app.applicationId)}
+                              className="flex items-center gap-1"
+                              title="Reject"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
                         {cv && (
                           <Button
                             size="sm"

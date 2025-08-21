@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import SkillMultiSelect from "@/components/ui/skill-multi-select";
 import {
   Select,
   SelectContent,
@@ -69,7 +70,7 @@ export function JobPostCreateDialog({
   user: UserInfo;
 }) {
   const queryClient = useQueryClient();
-  const { data: skillsData } = useSkills();
+  const { data: skillsData } = useSkills({ page: 1, size: 100 });
   const { data: majorsData } = useMajorCodes();
 
   const statusItems = {
@@ -120,6 +121,14 @@ export function JobPostCreateDialog({
     },
   });
   const [submitting, setSubmitting] = useState(false);
+  const selectedSkillIds = watch("skillIds");
+  const selectedSkills = useMemo(
+    () =>
+      (skillItems as any[]).filter((s) =>
+        (selectedSkillIds || []).includes(s.skillId)
+      ),
+    [skillItems, selectedSkillIds]
+  );
   const timeValue = watch("time");
   const dateObj = useMemo(
     () => (timeValue ? new Date(timeValue) : undefined),
@@ -153,21 +162,21 @@ export function JobPostCreateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl overflow-y-auto h-[90vh]">
         <DialogHeader>
-          <DialogTitle>Create Job Post</DialogTitle>
+          <DialogTitle>Tạo tin tuyển dụng</DialogTitle>
         </DialogHeader>
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="grid grid-cols-2 gap-4"
         >
           <div className="col-span-2">
-            <label className="text-sm font-medium">Job Title</label>
+            <label className="text-sm font-medium">Chức danh</label>
             <Input {...register("jobTitle")} />
             {errors.jobTitle && (
               <p className="text-sm text-red-600">{errors.jobTitle.message}</p>
             )}
           </div>
           <div className="col-span-2">
-            <label className="text-sm font-medium">Description</label>
+            <label className="text-sm font-medium">Mô tả</label>
             <Textarea rows={4} {...register("jobDescription")} />
             {errors.jobDescription && (
               <p className="text-sm text-red-600">
@@ -176,7 +185,7 @@ export function JobPostCreateDialog({
             )}
           </div>
           <div>
-            <label className="text-sm font-medium">Min Salary</label>
+            <label className="text-sm font-medium">Lương tối thiểu</label>
             <Input
               type="number"
               {...register("minSalary", { valueAsNumber: true })}
@@ -186,7 +195,7 @@ export function JobPostCreateDialog({
             )}
           </div>
           <div>
-            <label className="text-sm font-medium">Max Salary</label>
+            <label className="text-sm font-medium">Lương tối đa</label>
             <Input
               type="number"
               {...register("maxSalary", { valueAsNumber: true })}
@@ -196,14 +205,14 @@ export function JobPostCreateDialog({
             )}
           </div>
           <div>
-            <label className="text-sm font-medium">Location</label>
+            <label className="text-sm font-medium">Địa điểm</label>
             <Input {...register("location")} />
             {errors.location && (
               <p className="text-sm text-red-600">{errors.location.message}</p>
             )}
           </div>
           <div>
-            <label className="text-sm font-medium">City</label>
+            <label className="text-sm font-medium">Thành phố</label>
             {/* <Input {...register("city")} /> */}
             <div className="grid gap-2">
               <CitySelect
@@ -218,7 +227,7 @@ export function JobPostCreateDialog({
             </div>
           </div>
           <div className="col-span-2">
-            <label className="text-sm font-medium">Requirements</label>
+            <label className="text-sm font-medium">Yêu cầu</label>
             <Textarea rows={3} {...register("requirements")} />
             {errors.requirements && (
               <p className="text-sm text-red-600">
@@ -227,14 +236,14 @@ export function JobPostCreateDialog({
             )}
           </div>
           <div className="col-span-2">
-            <label className="text-sm font-medium">Benefits</label>
+            <label className="text-sm font-medium">Quyền lợi</label>
             <Textarea rows={3} {...register("benefits")} />
             {errors.benefits && (
               <p className="text-sm text-red-600">{errors.benefits.message}</p>
             )}
           </div>
           <div className="col-span-2">
-            <label className="text-sm font-medium">Time</label>
+            <label className="text-sm font-medium">Thời gian</label>
             <div className="mt-1">
               <DateTimePicker
                 date={dateObj}
@@ -246,10 +255,10 @@ export function JobPostCreateDialog({
             )}
           </div>
           <div>
-            <label className="text-sm font-medium">Status</label>
+            <label className="text-sm font-medium">Trạng thái</label>
             <Select {...register("status")}>
               <SelectTrigger>
-                <SelectValue placeholder="Select status" />
+                <SelectValue placeholder="Chọn trạng thái" />
               </SelectTrigger>
               <SelectContent>
                 {Object.values(statusItems).map((status) => (
@@ -271,13 +280,13 @@ export function JobPostCreateDialog({
             )}
           </div>
           <div>
-            <label className="text-sm font-medium">Major</label>
+            <label className="text-sm font-medium">Chuyên ngành</label>
             <Select
               onValueChange={(v) => setValue("majorId", Number(v))}
               value={String(watch("majorId") || "")}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select major" />
+                <SelectValue placeholder="Chọn chuyên ngành" />
               </SelectTrigger>
               <SelectContent>
                 {majorItems.map((m: any) => (
@@ -312,37 +321,25 @@ export function JobPostCreateDialog({
             )}
           </div> */}
           <div className="col-span-2">
-            <label className="text-sm font-medium">Skills</label>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {skillItems.map((skill: any) => {
-                const checked = (watch("skillIds") || []).includes(
-                  skill.skillId
-                );
-                return (
-                  <label
-                    key={skill.skillId}
-                    className={`inline-flex items-center gap-2 rounded border px-3 py-1 cursor-pointer ${
-                      checked ? "bg-blue-50 border-blue-400" : "bg-white"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4"
-                      checked={checked}
-                      onChange={(e) => {
-                        const current = new Set(watch("skillIds") || []);
-                        if (e.target.checked) current.add(skill.skillId);
-                        else current.delete(skill.skillId);
-                        setValue("skillIds", Array.from(current));
-                      }}
-                    />
-                    <span className="text-sm">
-                      {skill.name || skill.skillName}
-                    </span>
-                  </label>
-                );
-              })}
+            <label className="text-sm font-medium">Kỹ năng</label>
+            <div className="mt-1">
+              <SkillMultiSelect
+                value={selectedSkills}
+                onChange={(skills) =>
+                  setValue(
+                    "skillIds",
+                    skills.map((s) => s.skillId)
+                  )
+                }
+                placeholder="Chọn kỹ năng yêu cầu"
+                maxDisplay={4}
+              />
             </div>
+            {errors.skillIds && (
+              <p className="text-sm text-red-600">
+                {errors.skillIds.message as any}
+              </p>
+            )}
           </div>
 
           <div className="col-span-2 mt-2 flex justify-end gap-2">
@@ -352,10 +349,10 @@ export function JobPostCreateDialog({
               onClick={() => onOpenChange(false)}
               disabled={submitting || isSubmitting}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type="submit" disabled={submitting || isSubmitting}>
-              {submitting || isSubmitting ? "Creating..." : "Create"}
+              {submitting || isSubmitting ? "Đang tạo..." : "Tạo"}
             </Button>
           </div>
         </form>

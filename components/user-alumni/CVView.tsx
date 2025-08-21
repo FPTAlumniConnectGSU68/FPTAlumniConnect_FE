@@ -320,6 +320,10 @@ const CVView = () => {
           No CVs found. Create a new CV to start your job search.
         </div>
       )}
+
+      <div className="flex justify-between items-center mt-6">
+        <h1 className="text-2xl font-bold">Job I have applied</h1>
+      </div>
     </div>
   );
 };

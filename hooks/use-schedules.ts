@@ -11,7 +11,11 @@ interface UseSchedulesOptions {
   query?: Record<string, string>;
 }
 
-const invalidateArr = ["schedules", "mentor-ship-requests"];
+const invalidateArr = [
+  "schedules",
+  "mentor-ship-requests",
+  "mentorship-alumni-request",
+];
 
 export function useSchedules({
   page = 1,
@@ -138,6 +142,9 @@ export function useRateMentor() {
     onSuccess: (response) => {
       if (response.status === "success") {
         toast.success("Updated schedule rating successfully");
+        invalidateArr.forEach((key) => {
+          queryClient.invalidateQueries({ queryKey: [key] });
+        });
       }
     },
     onError: (error) => {

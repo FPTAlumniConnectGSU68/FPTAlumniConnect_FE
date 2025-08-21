@@ -100,7 +100,6 @@ export function NotificationBell() {
           console.log("res in bell", res);
           const notifications =
             res && isApiSuccess(res) && Array.isArray(res.data) ? res.data : [];
-          console.log("notifications in bell", notifications);
           setNotifications(notifications);
         } catch (error) {
           console.error("Failed to fetch notifications:", error);

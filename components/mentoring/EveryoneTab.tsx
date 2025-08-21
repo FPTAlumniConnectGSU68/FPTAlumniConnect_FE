@@ -137,7 +137,7 @@ export function EveryoneTab({ currentPage, user }: EveryoneTabProps) {
           key={request.id}
           request={request}
           actionButton={
-            user && request.aumniId !== user?.userId
+            user && request.aumniId !== user?.userId && user.isMentor
               ? {
                   label: "Accept the request",
                   onClick: () => {

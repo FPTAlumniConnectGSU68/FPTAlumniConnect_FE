@@ -189,7 +189,7 @@ export enum ACTIONS {
   GET_JOB_APPLICATIONS_BY_JOBPOST_ID = "getJobApplicationsByJobPostId",
 }
 
-export const API_URL = "http://localhost:5000/api";
+export const API_URL = "https://fptalumniii.site/api";
 
 export const ROLES = {
   ADMIN: 1,

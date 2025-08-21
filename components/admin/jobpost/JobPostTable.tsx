@@ -29,7 +29,7 @@ const JobPostTable = ({
   onViewApplicants: (jobPostId: number) => void;
 }) => {
   if (isLoading) {
-    return <LoadingSpinner text="Loading..." />;
+    return <LoadingSpinner text="Đang tải..." />;
   }
 
   if (
@@ -38,7 +38,7 @@ const JobPostTable = ({
     !jobPosts.data ||
     jobPosts.data.items.length === 0
   ) {
-    return <div className="text-center py-4">No job posts found</div>;
+    return <div className="text-center py-4">Không có tin tuyển dụng</div>;
   }
 
   const { items: jobPostItems, totalPages } = jobPosts.data;
@@ -49,11 +49,11 @@ const JobPostTable = ({
         <Table className="w-full bg-white">
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Time</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Tiêu đề</TableHead>
+              <TableHead>Địa điểm</TableHead>
+              <TableHead>Thời gian</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Hành động</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -72,7 +72,7 @@ const JobPostTable = ({
                     variant="outline"
                     onClick={() => onViewApplicants(jobPost.jobPostId)}
                   >
-                    View Applicants
+                    Xem ứng viên
                   </Button>
                 </TableCell>
               </TableRow>

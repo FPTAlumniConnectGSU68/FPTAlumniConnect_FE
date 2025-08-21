@@ -46,7 +46,7 @@ export function JobCard({ job, isSelected, onClick }: JobCardProps) {
           <div className="flex items-center gap-2">
             <CircleDollarSign className="h-4 w-4" />
             <div className="bg-green-100 text-green-800 rounded-md px-2 py-1 font-bold">
-              {`$${job.minSalary.toLocaleString()} - $${job.maxSalary.toLocaleString()} / tháng`}
+              {`${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()} VNĐ / tháng`}
             </div>
           </div>
         </div>

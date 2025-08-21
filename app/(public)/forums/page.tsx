@@ -1,5 +1,6 @@
 "use client";
 
+import CreateNewDiscussionModal from "@/components/forum/CreateNewDiscussionModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,23 +11,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CirclePlus, MessageSquare, Share2 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Bookmark, Search } from "lucide-react";
-import { useAuthGuard } from "@/hooks/use-auth-guard";
-import { useEffect, useState } from "react";
-import CreateNewDiscussionModal from "@/components/forum/CreateNewDiscussionModal";
-import { usePosts } from "@/hooks/use-post";
-import { formatDateToDMY, isApiSuccess } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import usePostService from "@/lib/services/post.service";
-import { Comment, CommentType } from "@/types/interfaces";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/auth-context";
-import { formatDate } from "date-fns";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
+import { usePosts } from "@/hooks/use-post";
+import usePostService from "@/lib/services/post.service";
+import { formatDateToDMY, isApiSuccess } from "@/lib/utils";
+import { CommentType } from "@/types/interfaces";
+import { CirclePlus, MessageSquare, Search } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
-export default function ForumsPage() {
-  const router = useRouter();
+function ForumsContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const { requireAuth, AuthGuard } = useAuthGuard();
@@ -95,11 +92,13 @@ export default function ForumsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <CommandDesktop
-                  search={search}
-                  setSearch={setSearch}
-                  onSubmit={refetch}
-                />
+                <Suspense fallback={<div>Loading...</div>}>
+                  <CommandDesktop
+                    search={search}
+                    setSearch={setSearch}
+                    onSubmit={refetch}
+                  />
+                </Suspense>
                 {postItems.map((post) => (
                   <div
                     key={post.postId}
@@ -210,6 +209,22 @@ export default function ForumsPage() {
         <CommentDialog id={selected} setSelected={setSelected} user={user} />
       )}
     </div>
+  );
+}
+
+export default function ForumsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="text-center">Loading forums...</div>
+          </div>
+        </div>
+      }
+    >
+      <ForumsContent />
+    </Suspense>
   );
 }
 

@@ -58,7 +58,7 @@ export function JobDetails({ job, user }: JobDetailsProps) {
 
   return (
     <>
-      <Card className="sticky top-4">
+      <Card className="sticky top-20">
         <CardContent className="p-6">
           <div className="flex justify-between items-start mb-6">
             <div>
@@ -80,7 +80,7 @@ export function JobDetails({ job, user }: JobDetailsProps) {
                 </div>
                 <div className="flex items-center text-gray-600">
                   <CircleDollarSign className="h-4 w-4 mr-2" />
-                  {`$${job.minSalary.toLocaleString()} - $${job.maxSalary.toLocaleString()}`}
+                  {`${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()} VNĐ `}
                 </div>
               </div>
             </div>

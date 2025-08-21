@@ -14,7 +14,7 @@ import { Major } from "@/hooks/use-major-codes";
 import { CV, Skill } from "@/types/interfaces";
 import SkillMultiSelect from "@/components/ui/skill-multi-select";
 import { CitySelect } from "@/components/ui/city-select";
-import { useState, useCallback, useMemo, memo } from "react";
+import { useState, useCallback, useMemo, memo, useEffect } from "react";
 import { toast } from "sonner";
 
 interface CVFormProps {
@@ -29,40 +29,63 @@ interface FormErrors {
 
 const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
   // skills arae fetched inside SkillMultiSelect; we manage only selected skills here
+  console.log("initialData", initialData);
+  const normalizeCV = (data?: CV | null): CV => {
+    const base: CV = data
+      ? (data as CV)
+      : {
+          id: 0,
+          userId: 0,
+          fullName: "",
+          address: "",
+          birthday: "",
+          gender: "",
+          email: "",
+          phone: "",
+          city: "",
+          company: "",
+          primaryDuties: "",
+          jobLevel: "",
+          startAt: "",
+          endAt: "",
+          language: "",
+          languageLevel: "",
+          minSalary: 0,
+          maxSalary: 0,
+          isDeal: true,
+          desiredJob: "",
+          position: "",
+          majorId: "",
+          majorName: "",
+          additionalContent: "",
+          status: "Public" as CV["status"],
+          skillIds: [],
+          skillNames: [],
+        };
+    return {
+      ...base,
+      majorId:
+        (base as any).majorId !== undefined
+          ? String((base as any).majorId)
+          : "",
+      gender: base.gender ? base.gender.toLowerCase() : "",
+    };
+  };
 
-  const [formData, setFormData] = useState<CV>(
-    initialData || {
-      id: 0,
-      fullName: "",
-      address: "",
-      birthday: "",
-      gender: "",
-      email: "",
-      phone: "",
-      city: "",
-      company: "",
-      primaryDuties: "",
-      jobLevel: "",
-      startAt: "",
-      endAt: "",
-      language: "",
-      languageLevel: "",
-      minSalary: 0,
-      maxSalary: 0,
-      isDeal: true,
-      desiredJob: "",
-      position: "",
-      additionalContent: "",
-      status: "Public",
-      majorId: "",
-      majorName: "",
-      skillIds: [],
-      skillNames: [],
-      userId: 0,
-    }
-  );
+  const [formData, setFormData] = useState<CV>(normalizeCV(initialData));
 
-  const [selectedSkills, setSelectedSkills] = useState<Skill[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<Skill[]>(() => {
+    if (!initialData) return [];
+    const ids = (initialData as any).skillIds as number[] | undefined;
+    const names = (initialData as any).skillNames as string[] | undefined;
+    if (!ids || ids.length === 0) return [];
+    return ids.map((id, idx) => ({
+      skillId: id,
+      name: names && names[idx] ? names[idx] : String(id),
+      createdAt: "",
+      updatedAt: "",
+    })) as Skill[];
+  });
   const [errors, setErrors] = useState<FormErrors>({});
 
   const validateForm = useCallback(() => {
@@ -153,6 +176,32 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
     },
     [formData, selectedSkills, validateForm, onSubmit]
   );
+
+  // Keep form prefill in sync if initialData changes (e.g., when clicking Edit)
+  useEffect(() => {
+    if (!initialData) return;
+    const normalized = {
+      ...(initialData as unknown as CV),
+      majorId:
+        (initialData as any).majorId !== undefined
+          ? String((initialData as any).majorId)
+          : "",
+      gender: initialData.gender ? initialData.gender.toLowerCase() : "",
+    } as CV;
+    setFormData(normalized);
+
+    const ids = (initialData as any).skillIds as number[] | undefined;
+    const names = (initialData as any).skillNames as string[] | undefined;
+    const preselected = ids
+      ? (ids.map((id, idx) => ({
+          skillId: id,
+          name: names && names[idx] ? names[idx] : String(id),
+          createdAt: "",
+          updatedAt: "",
+        })) as Skill[])
+      : [];
+    setSelectedSkills(preselected);
+  }, [initialData]);
 
   return (
     <form id="cv-form" onSubmit={handleSubmit} className="space-y-4">
