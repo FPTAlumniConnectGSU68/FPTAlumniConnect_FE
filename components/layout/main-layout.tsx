@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/auth-context";
 import { useNotificationSetup } from "@/hooks/use-notification-socket";
+import { useGetUser } from "@/hooks/use-user";
 import { useNotificationStore } from "@/store/notification";
 import type { UserInfo } from "@/types/auth";
 import Cookies from "js-cookie";
@@ -104,6 +105,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
 
   // Initialize SignalR connection using our new hook
   const token = Cookies.get("auth-token");
+  const userId = currentUser?.userId ?? 0;
 
   // Debug log
   useEffect(() => {
@@ -133,8 +135,11 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
     router.push("/");
   };
 
-  const user = currentUser || null;
-
+  // Fetch full user profile if we have an ID; always call hook with a number
+  const { data: userData } = useGetUser(userId as number);
+  const fetchedUser =
+    userData?.status === "success" ? (userData?.data as any) : null;
+  const displayUser = fetchedUser ?? currentUser ?? null;
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "Admin":
@@ -178,10 +183,10 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
           </div>
 
           <div className="flex items-center gap-4">
-            {user && (
+            {displayUser && (
               <>
-                <Badge className={getRoleBadgeColor(user.roleName)}>
-                  {user.roleName.toUpperCase()}
+                <Badge className={getRoleBadgeColor(displayUser.roleName)}>
+                  {displayUser.roleName.toUpperCase()}
                 </Badge>
                 <NotificationBell />
               </>
@@ -195,13 +200,17 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                   <Avatar className="h-8 w-8">
                     <AvatarImage
                       src={
-                        // user?.avatar ||
+                        fetchedUser?.profilePicture ||
                         "https://cdn.dribbble.com/users/13929796/avatars/normal/6d7cf73c0502578c420474f6adc6cc0d.png?1707433135"
                       }
-                      alt={user?.firstName || ""}
+                      alt={
+                        (displayUser?.firstName || "") +
+                        " " +
+                        (displayUser?.lastName || "")
+                      }
                     />
                     <AvatarFallback>
-                      {user?.firstName?.charAt(0)}
+                      {displayUser?.firstName?.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -210,10 +219,10 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {user?.firstName} {user?.lastName}
+                      {displayUser?.firstName} {displayUser?.lastName}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {user?.email}
+                      {displayUser?.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -224,7 +233,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
-                {user?.roleName === "Admin" && (
+                {displayUser?.roleName === "Admin" && (
                   <DropdownMenuItem asChild>
                     <Link href="/admin/dashboard" className="flex items-center">
                       <Settings className="mr-2 h-4 w-4" />
@@ -263,7 +272,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                   {item.name}
                 </Link>
               ))}
-              {user?.roleName === "Admin" && (
+              {displayUser?.roleName === "Admin" && (
                 <>
                   <div className="pt-4">
                     <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -284,7 +293,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                   ))}
                 </>
               )}
-              {user?.roleName === "Alumni" && (
+              {displayUser?.roleName === "Alumni" && (
                 <>
                   <div className="pt-4">
                     <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -305,7 +314,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                   ))}
                 </>
               )}
-              {user?.roleName === "Student" && (
+              {displayUser?.roleName === "Student" && (
                 <>
                   <div className="pt-4">
                     <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -326,7 +335,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                   ))}
                 </>
               )}
-              {user?.roleName === "Recruiter" && (
+              {displayUser?.roleName === "Recruiter" && (
                 <>
                   <div className="pt-4">
                     <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">

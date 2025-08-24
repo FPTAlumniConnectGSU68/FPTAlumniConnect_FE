@@ -12,7 +12,7 @@ const UserView = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [role, setRole] = useState("");
   const [majorCode, setMajorCode] = useState("");
-  const { data: majors } = useMajorCodes();
+  const { data: majors } = useMajorCodes({});
   const [isOpen, setIsOpen] = useState(false);
   const [code, setCode] = useState("");
   const [firstName, setFirstName] = useState("");

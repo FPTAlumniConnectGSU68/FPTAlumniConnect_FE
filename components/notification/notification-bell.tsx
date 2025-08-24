@@ -92,12 +92,10 @@ export function NotificationBell() {
     if (isOpen) {
       const fetchNotifications = async () => {
         try {
-          console.log("user?.userId in bell", user?.userId);
           const res = await NotificationService.getUserNotifications(
             user?.userId || 0
           );
 
-          console.log("res in bell", res);
           const notifications =
             res && isApiSuccess(res) && Array.isArray(res.data) ? res.data : [];
           setNotifications(notifications);

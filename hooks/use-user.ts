@@ -144,3 +144,15 @@ export function useCreateUser() {
     },
   });
 }
+
+export function useGetUserCount() {
+  return useQuery<ApiResponse<number>>({
+    queryKey: ["user-count"],
+    queryFn: async () => {
+      const response = await APIClient.invoke<ApiResponse<number>>({
+        action: ACTIONS.GET_USER_COUNT,
+      });
+      return response;
+    },
+  });
+}

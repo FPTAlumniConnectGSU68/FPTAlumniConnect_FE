@@ -50,7 +50,7 @@ export default function EventFormSheet({
 }: EventFormSheetProps) {
   const { user } = useAuth();
   const { GET_EVENT_DETAIL_WITH_TIMELINES } = useEventService();
-  const { data: majorsRes } = useMajorCodes();
+  const { data: majorsRes } = useMajorCodes({});
   const majors =
     majorsRes?.status === "success" ? majorsRes.data?.items ?? [] : [];
 

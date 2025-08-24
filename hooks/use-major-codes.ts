@@ -12,14 +12,24 @@ export interface Major {
   updatedBy: string;
 }
 
-export function useMajorCodes() {
+export function useMajorCodes({
+  searchString = "",
+  query = {},
+}: {
+  searchString?: string;
+  query?: Record<string, any>;
+}) {
   return useQuery<ApiResponse<PaginatedData<Major>>>({
-    queryKey: ["majors"],
+    queryKey: ["majors", searchString, query], // <-- add searchString
     queryFn: async () => {
       const response = await APIClient.invoke<
         ApiResponse<PaginatedData<Major>>
       >({
         action: ACTIONS.GET_MAJORS,
+        query: {
+          MajorName: searchString,
+          ...query,
+        },
       });
 
       return response as ApiResponse<PaginatedData<Major>>;

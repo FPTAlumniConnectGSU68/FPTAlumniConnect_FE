@@ -91,7 +91,7 @@ function buildUpdateCvPayload(data: CV, currentUserId: number) {
 
 const CVView = () => {
   const pdfRef = useRef<HTMLDivElement>(null);
-  const { data: majorCodes } = useMajorCodes();
+  const { data: majorCodes } = useMajorCodes({});
   const { user } = useAuth();
 
   // Memoize derived data

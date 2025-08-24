@@ -71,7 +71,7 @@ export function JobPostCreateDialog({
 }) {
   const queryClient = useQueryClient();
   const { data: skillsData } = useSkills({ page: 1, size: 100 });
-  const { data: majorsData } = useMajorCodes();
+  const { data: majorsData } = useMajorCodes({});
 
   const statusItems = {
     Open: "Open",

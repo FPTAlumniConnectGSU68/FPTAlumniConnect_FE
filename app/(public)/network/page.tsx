@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import MainLayout from "@/components/layout/main-layout";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -15,17 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Search,
-  MapPin,
-  Briefcase,
-  GraduationCap,
-  MessageCircle,
-  UserPlus,
-} from "lucide-react";
+import { Search } from "lucide-react";
 import { useUsers } from "@/hooks/use-user";
 import AlumniCard from "@/components/network/AlumniCard";
-import { User } from "@/types/interfaces";
 import { isApiSuccess } from "@/lib/utils";
 // Mock alumni data
 const alumniData = [

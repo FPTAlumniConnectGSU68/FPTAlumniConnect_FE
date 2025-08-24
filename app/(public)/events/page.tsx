@@ -7,20 +7,23 @@ import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { Calendar, MapPin, Clock, Star } from "lucide-react";
 import { useMajorCodes } from "@/hooks/use-major-codes";
-import EventDialog from "@/components/event/EventDetailModal";
 import { useAuth } from "@/contexts/auth-context";
 import Pagination from "@/components/ui/pagination";
 import CustomTooltip from "@/components/tooltip/CustomToolTip";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import useEventService from "@/lib/services/event.service";
 import { useToast } from "@/components/ui/toast";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
+import AutocompleteDropdown from "@/components/autocomplete/AutocompleteSelect";
 
 const locations = ["All Locations", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng"];
 
 function EventsContent() {
   const { user } = useAuth();
   const { PUT_RATING } = useEventService();
+  const { requireAuth, AuthGuard } = useAuthGuard();
   const toast = useToast();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
@@ -29,8 +32,10 @@ function EventsContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
 
-  const { data: majorsRes } = useMajorCodes();
-  const [major, setMajor] = useState("All Majors");
+  const [majorSearch, setMajorSearch] = useState("");
+  const { data: majorsRes } = useMajorCodes({ searchString: majorSearch });
+  const [major, setMajor] = useState<string | null>("All Majors");
+
   const [selectedEventId, setSelectedEventId] = useState<
     number | string | null
   >(null);
@@ -41,6 +46,11 @@ function EventsContent() {
   );
   const majors =
     majorsRes?.status === "success" ? majorsRes.data?.items ?? [] : [];
+
+  useEffect(() => {
+    if (selectedEventId && user)
+      router.push(`/events/${selectedEventId.toString()}`);
+  }, [selectedEventId]);
 
   useEffect(() => {
     const openModal = searchParams.get("openModal") === "true";
@@ -63,7 +73,7 @@ function EventsContent() {
   const queryParams: Record<string, string> = {};
   if (search) queryParams.EventName = search;
   if (location) queryParams.Location = location;
-  if (major !== "All Majors") queryParams.MajorId = major;
+  if (major && major !== "All Majors") queryParams.MajorId = major;
   if (showJoinedEvents && user?.userId) {
     queryParams.UserId = user.userId.toString();
   }
@@ -184,7 +194,7 @@ function EventsContent() {
           </select>
         </div> */}
           {/* Major Filter */}
-          <div className="w-full md:w-48">
+          {/* <div className="w-full md:w-48">
             <select
               value={major}
               onChange={(e) => {
@@ -200,12 +210,41 @@ function EventsContent() {
                 </option>
               ))}
             </select>
+          </div> */}
+          <div className="w-full md:w-48">
+            <AutocompleteDropdown
+              value={major}
+              onChange={(val) => {
+                setMajor(val);
+              }}
+              onSearch={setMajorSearch}
+              options={[
+                { value: "All Majors", label: "All Majors" },
+                ...majors.map((m) => ({
+                  value: String(m.majorId),
+                  label: m.majorName,
+                })),
+              ]}
+              placeholder="Search majors..."
+              isLoading={isLoading}
+            />
           </div>
-
           {/* My Joined Events Button */}
           <Button
             variant={showJoinedEvents ? "default" : "outline"}
-            onClick={() => setShowJoinedEvents((prev) => !prev)}
+            onClick={() => {
+              if (
+                !requireAuth({
+                  title: "View joined events.",
+                  description: "Sign in to view event you joined",
+                  actionText: "events",
+                })
+              ) {
+                return;
+              } else {
+                setShowJoinedEvents((prev) => !prev);
+              }
+            }}
             className="whitespace-nowrap"
           >
             {showJoinedEvents ? "Show All Events" : "My Joined Events"}
@@ -319,7 +358,9 @@ function EventsContent() {
                 </div>
               ) : (
                 <Button
-                  onClick={() => setSelectedEventId(item.eventId)}
+                  onClick={() => {
+                    setSelectedEventId(item.eventId);
+                  }}
                   className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
                 >
                   Register Now
@@ -339,13 +380,14 @@ function EventsContent() {
         />
       )}
 
-      {user && (
+      {/* {user && (
         <EventDialog
           eventId={selectedEventId}
           setSelected={setSelectedEventId}
           userId={user.userId}
         />
-      )}
+      )} */}
+      <AuthGuard />
     </div>
   );
 }

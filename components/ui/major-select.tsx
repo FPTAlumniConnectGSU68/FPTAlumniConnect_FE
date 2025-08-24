@@ -22,7 +22,7 @@ export function MajorSelect({
     data: majorsResponse,
     isLoading: isMajorsLoading,
     isError: isMajorsError,
-  } = useMajorCodes();
+  } = useMajorCodes({});
 
   const renderContent = () => {
     if (isMajorsLoading) {

@@ -35,7 +35,7 @@ const CreateNewDiscussionModal = ({
   user,
   onCreated,
 }: CreateNewDiscussionModalProps) => {
-  const { data: majors } = useMajorCodes();
+  const { data: majors } = useMajorCodes({});
   const [selectedMajor, setSelectedMajor] = useState<string>(""); // ✅ Call this unconditionally
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");

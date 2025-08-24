@@ -1,7 +1,7 @@
 import { APIClient } from "@/lib/api-client";
 import { ACTIONS, API_URL } from "@/lib/api-client/constants";
-import { ApiResponse } from "@/lib/apiResponse";
-import { Event } from "@/types/interfaces";
+import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
+import { Event, EventRating } from "@/types/interfaces";
 
 const useEventService = () => {
   const GET_EVENT_DETAIL = async (
@@ -59,6 +59,20 @@ const useEventService = () => {
     return res;
   };
 
+  const GET_EVENT_RATING = async (
+    id: string | number
+  ): Promise<ApiResponse<PaginatedData<EventRating>>> => {
+    const res = await APIClient.invoke<ApiResponse<PaginatedData<EventRating>>>(
+      {
+        action: ACTIONS.GET_EVENT_RATING,
+        query: {
+          EventId: id.toString(),
+        },
+      }
+    );
+    return res;
+  };
+
   // Other event-related functions if needed (CREATE_EVENT, UPDATE_EVENT, etc.)
 
   return {
@@ -67,6 +81,7 @@ const useEventService = () => {
     CREATE_EVENT,
     PUT_RATING,
     GET_EVENT_DETAIL_WITH_TIMELINES,
+    GET_EVENT_RATING,
   };
 };
 

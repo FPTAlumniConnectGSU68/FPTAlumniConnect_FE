@@ -78,3 +78,15 @@ export function useUpdateEvent() {
     },
   });
 }
+
+export function useGetEventCount() {
+  return useQuery<ApiResponse<number>>({
+    queryKey: ["event-count"],
+    queryFn: async () => {
+      const response = await APIClient.invoke<ApiResponse<number>>({
+        action: ACTIONS.GET_EVENT_COUNT,
+      });
+      return response;
+    },
+  });
+}

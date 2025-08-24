@@ -12,12 +12,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/auth-context";
-import { getRoleBadgeColor } from "@/utils/get-role-badge-color"; // Declare the variable before using it
+import { useGetUser } from "@/hooks/use-user";
+import { getRoleBadgeColor } from "@/utils/get-role-badge-color";
 import { LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const navItems = [
+type NavItem = { href: string; label: string };
+
+const navItems: NavItem[] = [
   {
     href: "/network",
     label: "Network",
@@ -40,9 +43,79 @@ const navItems = [
     label: "Forums",
   },
 ];
+
+type UserMenuProps = {
+  user: any;
+  userUnique: any;
+  logout: () => void;
+};
+
+const UserMenu = ({ user, userUnique, logout }: UserMenuProps) => {
+  const isAdmin = String(user?.roleName || "").toLowerCase() === "admin";
+  const firstName = userUnique?.firstName || "";
+  const lastName = userUnique?.lastName || "";
+  const email = userUnique?.email || "";
+  const initial = (firstName || lastName || "U").charAt(0);
+
+  return (
+    <div className="flex items-center gap-3">
+      <Badge className={getRoleBadgeColor(user?.roleName)}>
+        {String(user?.roleName || "").toUpperCase()}
+      </Badge>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Avatar className="h-8 w-8">
+              <AvatarImage
+                src={userUnique?.profilePicture || "/placeholder.svg"}
+                alt={firstName}
+              />
+              <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                {initial}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56 bg-white" align="end" forceMount>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none text-gray-900">
+                {firstName} {lastName}
+              </p>
+              <p className="text-xs leading-none text-gray-500">{email}</p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/profile" className="flex items-center">
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </Link>
+          </DropdownMenuItem>
+          {isAdmin && (
+            <DropdownMenuItem asChild>
+              <Link href="/admin/dashboard" className="flex items-center">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Dashboard</span>
+              </Link>
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={logout} className="text-red-600">
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+};
 const Header = () => {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const userId = user?.userId ?? 0;
+  const { data: userData } = useGetUser(userId);
+  const userUnique = userData?.status === "success" && userData?.data;
 
   return (
     <header className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
@@ -74,68 +147,7 @@ const Header = () => {
           {/*----------------------- */}
           <div className="flex items-center gap-3">
             {user ? (
-              <div className="flex items-center gap-3">
-                <Badge className={getRoleBadgeColor(user.roleName)}>
-                  {user.roleName.toUpperCase()}
-                </Badge>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="relative h-8 w-8 rounded-full"
-                    >
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={"/placeholder.svg"}
-                          alt={user.firstName || ""}
-                        />
-                        <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                          {user.firstName?.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-56 bg-white"
-                    align="end"
-                    forceMount
-                  >
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none text-gray-900">
-                          {user.firstName} {user.lastName}
-                        </p>
-                        <p className="text-xs leading-none text-gray-500">
-                          {user.email}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile" className="flex items-center">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    {user.roleName === "admin" && (
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href="/admin/dashboard"
-                          className="flex items-center"
-                        >
-                          <Settings className="mr-2 h-4 w-4" />
-                          <span>Dashboard</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout} className="text-red-600">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              <UserMenu user={user} userUnique={userUnique} logout={logout} />
             ) : (
               <>
                 <Button

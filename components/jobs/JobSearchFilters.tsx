@@ -32,7 +32,7 @@ export function JobSearchFilters({
   onLocationChange,
   clearAllRef,
 }: JobSearchFiltersProps) {
-  const { data: majorCodes } = useMajorCodes();
+  const { data: majorCodes } = useMajorCodes({});
   const majorItems =
     majorCodes && isApiSuccess(majorCodes) ? majorCodes.data?.items ?? [] : [];
   const majorOptions = majorItems.map((major) => ({

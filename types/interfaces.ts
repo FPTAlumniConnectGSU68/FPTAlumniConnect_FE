@@ -1,5 +1,6 @@
 export interface User {
   userId: number;
+  code?: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -54,7 +55,7 @@ export interface JobPost {
   requirements: string;
   benefits: string;
   time: string;
-  status: "Open" | "Closed" | string;
+  status: "Open" | "Closed" | "Deleted" | string;
   email: string;
   userId: number;
   majorId: number;
@@ -296,4 +297,20 @@ export interface JobApplicationByJobPostId {
   createdAt: string;
   updatedAt: string;
   updatedBy: string;
+}
+
+export interface EventRating {
+  id: number;
+  userId: number;
+  userName: string;
+  avatar: string;
+  role: string;
+  code: string; // e.g., "K7"
+  eventId: number;
+  content: string; // feedback text
+  rating: number | null; // can be null if user hasn’t rated yet
+  createdAt: string; // ISO datetime
+  updatedAt: string | null;
+  createdBy: string;
+  updatedBy: string | null;
 }

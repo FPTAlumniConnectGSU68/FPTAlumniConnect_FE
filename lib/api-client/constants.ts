@@ -36,7 +36,7 @@ export const END_POINTS: {
   createTimeline: { path: "/v1/{eventId}/timelines", method: "POST" },
 
   getEventDetailWithTimelines: { path: "/v1/events/detail", method: "GET" },
-
+  getEventRating: { path: "/v1/user-join-events/view-all", method: "GET" },
   // User
   patchMentorUser: { path: "/v1/users", method: "PATCH" },
   createUser: { path: "/v1/users", method: "POST" },
@@ -120,6 +120,19 @@ export const END_POINTS: {
     path: "/v1/jobapplications/jobpost",
     method: "GET",
   },
+  // User Count
+  getUserCount: {
+    path: "/v1/users/count",
+    method: "GET",
+  },
+  getJobPostCount: {
+    path: "/v1/jobposts/count",
+    method: "GET",
+  },
+  getEventCount: {
+    path: "/v1/events/count",
+    method: "GET",
+  },
 };
 
 export enum ACTIONS {
@@ -155,7 +168,7 @@ export enum ACTIONS {
   PUT_RATING = "putRating",
 
   GET_EVENT_DETAIL_WITH_TIMELINES = "getEventDetailWithTimelines",
-
+  GET_EVENT_RATING = "getEventRating",
   // User
   PATCH_MENTOR_USER = "patchMentorUser",
   CREATE_USER = "createUser",
@@ -187,9 +200,14 @@ export enum ACTIONS {
   UPDATE_JOB_APPLICATION = "updateJobApplication",
   CREATE_JOB_POST = "createJobPost",
   GET_JOB_APPLICATIONS_BY_JOBPOST_ID = "getJobApplicationsByJobPostId",
+
+  // User Count
+  GET_USER_COUNT = "getUserCount",
+  GET_JOB_POST_COUNT = "getJobPostCount",
+  GET_EVENT_COUNT = "getEventCount",
 }
 
-export const API_URL = "https://fptalumniii.site/api";
+export const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export const ROLES = {
   ADMIN: 1,

@@ -32,3 +32,15 @@ export function useJobs({
     },
   });
 }
+
+export function useGetJobPostCount() {
+  return useQuery<ApiResponse<number>>({
+    queryKey: ["job-post-count"],
+    queryFn: async () => {
+      const response = await APIClient.invoke<ApiResponse<number>>({
+        action: ACTIONS.GET_JOB_POST_COUNT,
+      });
+      return response;
+    },
+  });
+}
