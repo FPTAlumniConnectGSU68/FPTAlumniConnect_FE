@@ -107,7 +107,7 @@ const Footer = () => {
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
           <p>
-            &copy; 2024 FPT University Alumni Connection. All rights reserved.
+            &copy; 2025 FPT University Alumni Connection. All rights reserved.
           </p>
         </div>
       </div>

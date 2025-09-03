@@ -4,6 +4,7 @@ import { ApiResponse } from "@/lib/apiResponse";
 import {
   JobApplicationByJobPostId,
   JobApplicationCreate,
+  JobApplicationByCvid,
 } from "@/types/interfaces";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -28,6 +29,25 @@ export function useCreateJobApplication() {
       if (response.status === "success") {
         toast.success("CV applied successfully");
       }
+    },
+  });
+}
+
+export function useGetJobApplicationsByCvid(cvid: number) {
+  return useQuery<ApiResponse<JobApplicationByCvid>, Error>({
+    queryKey: ["job-applications", cvid],
+    enabled: Boolean(cvid),
+    queryFn: async () => {
+      const response = await APIClient.invoke<
+        ApiResponse<JobApplicationByCvid>
+      >({
+        action: ACTIONS.GET_JOB_APPLICATIONS_BY_CV_ID,
+        query: {
+          Cvid: cvid.toString(),
+        },
+      });
+      console.log("useGetJobApplicationsByCvid: ", response);
+      return response as ApiResponse<JobApplicationByCvid>;
     },
   });
 }

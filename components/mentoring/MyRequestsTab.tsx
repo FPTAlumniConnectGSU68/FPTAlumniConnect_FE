@@ -1,21 +1,26 @@
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { MentoringCard } from "./MentoringCard";
-import { useMentorShipAlumniRequest } from "@/hooks/use-mentoring-requests";
-import { isApiSuccess } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { MentoringRequest, Schedule } from "@/types/interfaces";
-import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Star } from "lucide-react";
-import { Textarea } from "../ui/textarea";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import {
+  useCreateMentorShipRequest,
+  useMentorShipAlumniRequest,
+} from "@/hooks/use-mentoring-requests";
 import { useRateMentor } from "@/hooks/use-schedules";
+import { isApiSuccess } from "@/lib/utils";
+import { MentoringRequest, Schedule } from "@/types/interfaces";
+import { Star } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { MentoringCard } from "./MentoringCard";
 
 interface MyRequestsTabProps {
   userId: number;
@@ -31,7 +36,11 @@ export function MyRequestsTab({ userId }: MyRequestsTabProps) {
     number | null
   >(null);
   const [scheduleObject, setScheduleObject] = useState<Schedule | null>(null);
-
+  const [isOpen, setIsOpen] = useState(false);
+  const [isCreate, setIsCreate] = useState(false);
+  const [requestMessage, setRequestMessage] = useState("");
+  const { mutate: createMentorshipRequest, isPending } =
+    useCreateMentorShipRequest();
   if (isLoading) {
     return (
       <div className="py-4 flex justify-center items-center h-[50vh]">
@@ -49,14 +58,23 @@ export function MyRequestsTab({ userId }: MyRequestsTabProps) {
     setIsRatingModalOpen(true);
   };
 
+  const handleCreateRequest = () => {
+    setIsOpen(true);
+    setIsCreate(true);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open && isCreate) {
+      setIsCreate(false);
+      setRequestMessage("");
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => router.push("/alumni/mentoring?isCreate=true")}
-        >
+        <Button variant="outline" size="sm" onClick={handleCreateRequest}>
           Tạo yêu cầu
         </Button>
       </div>
@@ -83,6 +101,51 @@ export function MyRequestsTab({ userId }: MyRequestsTabProps) {
         requestId={selectedRatingRequestId}
         scheduleObject={scheduleObject}
       />
+      <Dialog open={isOpen || isCreate} onOpenChange={handleOpenChange}>
+        <DialogContent className="max-w-2xl bg-white max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Tạo yêu cầu mentoring</DialogTitle>
+          </DialogHeader>
+          <DialogDescription className="space-y-4">
+            <Input
+              type="text"
+              placeholder="Nội dung yêu cầu"
+              className="w-full"
+              value={requestMessage}
+              onChange={(e) => setRequestMessage(e.target.value)}
+            />
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
+              disabled={isPending}
+              onClick={() =>
+                createMentorshipRequest(
+                  {
+                    aumniId: userId,
+                    requestMessage: requestMessage,
+                    type: null,
+                    status: "Pending",
+                  },
+                  {
+                    onSuccess: () => {
+                      setIsOpen(false);
+                      setIsCreate(false);
+                      setRequestMessage("");
+                    },
+                  }
+                )
+              }
+            >
+              {isPending ? "Đang tạo..." : "Tạo"}
+            </Button>
+          </DialogDescription>
+          <DialogFooter>
+            <DialogDescription className="text-sm text-gray-500 text-center">
+              Yêu cầu này sẽ được xem xét bởi các mentor.
+            </DialogDescription>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

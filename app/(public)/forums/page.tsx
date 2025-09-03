@@ -1,5 +1,6 @@
 "use client";
 
+import AutocompleteDropdown from "@/components/autocomplete/AutocompleteSelect";
 import CreateNewDiscussionModal from "@/components/forum/CreateNewDiscussionModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -15,21 +16,25 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/auth-context";
 import { useAuthGuard } from "@/hooks/use-auth-guard";
+import { useMajorCodes } from "@/hooks/use-major-codes";
 import { usePosts } from "@/hooks/use-post";
 import usePostService from "@/lib/services/post.service";
 import { formatDateToDMY, isApiSuccess } from "@/lib/utils";
-import { CommentType } from "@/types/interfaces";
+import { CommentType, TopUser, TopUserApi } from "@/types/interfaces";
 import { CirclePlus, MessageSquare, Search } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, use, useEffect, useState } from "react";
 
 function ForumsContent() {
   const { user } = useAuth();
+  const { GET_TOP_USERS } = usePostService();
   const searchParams = useSearchParams();
   const { requireAuth, AuthGuard } = useAuthGuard();
   const [openCreateNewDiscussion, setOpenCreateNewDiscussion] = useState(false);
   const [selected, setSelected] = useState<number | string>();
   const [search, setSearch] = useState("");
+  const [major, setMajor] = useState<string>("Tất cả chuyên ngành");
+  const [topUsers, setTopUsers] = useState<TopUser[]>([]);
 
   useEffect(() => {
     const openModal = searchParams.get("openModal") === "true";
@@ -62,9 +67,27 @@ function ForumsContent() {
     refetch,
   } = usePosts({
     size: 10,
-    query: { title: search },
+    query: {
+      title: search,
+      ...(major !== "Tất cả chuyên ngành" && { MajorId: major }),
+    },
   });
   const postItems = posts && isApiSuccess(posts) ? posts.data?.items ?? [] : [];
+
+  useEffect(() => {
+    (async () => {
+      const res = await GET_TOP_USERS();
+      if (isApiSuccess(res) && res.data) {
+        const formatted = res.data.map((user: TopUserApi) => ({
+          name: user.userName,
+          class: user.userCode, // directly map userCode to class
+          posts: user.postCount,
+          userAvatar: user.userAvatar,
+        }));
+        setTopUsers(formatted);
+      }
+    })();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,11 +95,12 @@ function ForumsContent() {
         {/* Hero Section */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Alumni Forums
+            Diễn đàn Alumni
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            Connect, share experiences, and engage in meaningful discussions
-            with fellow FPT alumni.
+            Kết nối, chia sẻ trải nghiệm và tham gia các cuộc thảo luận ý nghĩa
+            <br />
+            với các cựu sinh viên FPT.
           </p>
         </div>
 
@@ -86,9 +110,9 @@ function ForumsContent() {
             {/* Categories */}
             <Card>
               <CardHeader>
-                <CardTitle>Discussion</CardTitle>
+                <CardTitle>Thảo Luận</CardTitle>
                 <CardDescription>
-                  Explore topics and join conversations
+                  Khám phá các chủ đề và tham gia các cuộc trò chuyện
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -96,6 +120,8 @@ function ForumsContent() {
                   <CommandDesktop
                     search={search}
                     setSearch={setSearch}
+                    major={major}
+                    setMajor={setMajor}
                     onSubmit={refetch}
                   />
                 </Suspense>
@@ -113,9 +139,9 @@ function ForumsContent() {
                         {post.content}
                       </div>
                       <div className="flex items-center space-x-4 text-xs text-gray-500">
-                        <span>{post.views} views</span>
+                        <span>{post.views} Lượt xem</span>
                         <span>
-                          Last activity: {formatDateToDMY(post.updatedAt)}
+                          Hoạt động lần cuối: {formatDateToDMY(post.updatedAt)}
                         </span>
                       </div>
                     </div>
@@ -134,27 +160,25 @@ function ForumsContent() {
               onClick={handleStartNewDiscussion}
             >
               <CirclePlus className="h-4 w-4" />
-              Start a New Discussion
+              Bắt đầu thảo luận mới
             </Button>
             {/* Active Contributors */}
             <Card>
               <CardHeader>
-                <CardTitle>Top Contributors</CardTitle>
+                <CardTitle>Người cống hiến nhiều nhất</CardTitle>
                 <CardDescription>
-                  Most active forum members this month
+                  Người hoạt động nhiều nhất trong diễn đàn
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {[
-                  { name: "Nguyen Van An", class: "2018", posts: 45 },
-                  { name: "Tran Thi Binh", class: "2019", posts: 38 },
-                  { name: "Le Minh Duc", class: "2017", posts: 32 },
-                  { name: "Pham Thu Ha", class: "2020", posts: 28 },
-                ].map((contributor, index) => (
+                {topUsers.map((contributor, index) => (
                   <div key={index} className="flex items-center space-x-3">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
-                        src={`/placeholder.svg?height=32&width=32`}
+                        src={
+                          contributor.userAvatar ||
+                          `/placeholder.svg?height=32&width=32`
+                        }
                       />
                       <AvatarFallback>
                         {contributor.name
@@ -166,7 +190,7 @@ function ForumsContent() {
                     <div className="flex-1">
                       <p className="text-sm font-medium">{contributor.name}</p>
                       <p className="text-xs text-gray-500">
-                        Class of {contributor.class}
+                        Khóa {contributor.class}
                       </p>
                     </div>
                     <Badge variant="secondary" className="text-xs">
@@ -180,16 +204,22 @@ function ForumsContent() {
             {/* Forum Guidelines */}
             <Card>
               <CardHeader>
-                <CardTitle>Forum Guidelines</CardTitle>
+                <CardTitle>Hướng Dẫn Diễn Đàn</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-gray-600">
-                <p>• Be respectful and professional</p>
-                <p>• Stay on topic in discussions</p>
-                <p>• No spam or self-promotion</p>
-                <p>• Help maintain a positive community</p>
-                <Button variant="outline" size="sm" className="w-full mt-4">
+                <p>• Hãy tôn trọng mọi người</p>
+                <p>• Giữ thảo luận đúng chủ đề</p>
+                <p>• Không đăng spam hoặc quảng cáo cá nhân</p>
+                <p>• Góp phần xây dựng một cộng đồng tích cực</p>
+                <p>• Tránh tiết lộ thông tin cá nhân nhạy cảm</p>
+                <p>
+                  • Khuyến khích thảo luận mang tính xây dựng, đóng góp ý kiến
+                </p>
+                <p>• Chia sẻ thông tin chính xác, có nguồn gốc rõ ràng</p>
+
+                {/* <Button variant="outline" size="sm" className="w-full mt-4">
                   Read Full Guidelines
-                </Button>
+                </Button> */}
               </CardContent>
             </Card>
           </div>
@@ -228,27 +258,58 @@ export default function ForumsPage() {
   );
 }
 
-const CommandDesktop = ({ search, setSearch, onSubmit }: any) => {
+const CommandDesktop = ({
+  search,
+  setSearch,
+  major,
+  setMajor,
+  onSubmit,
+}: any) => {
   const handleSubmit = () => {
     onSubmit();
   };
+  const [majorSearch, setMajorSearch] = useState("");
+  const { data: majorsRes } = useMajorCodes({
+    searchString: majorSearch,
+    query: { Size: "200" },
+  });
+  const majors =
+    majorsRes?.status === "success" ? majorsRes.data?.items ?? [] : [];
+
   return (
-    <div className="flex items-center gap-2 mb-6">
+    <div className="flex items-center gap-3 mb-6">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
-          placeholder="Search forums..."
+          placeholder="Tìm kiếm..."
           className="pl-10 bg-white border-gray-200"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
+
+      <div className="w-48">
+        <AutocompleteDropdown
+          value={major}
+          onChange={(val) => setMajor(val)}
+          onSearch={setMajorSearch}
+          options={[
+            { value: "Tất cả chuyên ngành", label: "Tất cả chuyên ngành" },
+            ...majors.map((m) => ({
+              value: String(m.majorId),
+              label: m.majorName,
+            })),
+          ]}
+          placeholder="Select major..."
+        />
+      </div>
+
       <Button
         type="submit"
-        className="w-20 bg-gradient-to-r from-blue-600 to-purple-600"
+        className="w-24 bg-gradient-to-r from-blue-600 to-purple-600"
         onClick={handleSubmit}
       >
-        Search
+        Tìm kiếm
       </Button>
     </div>
   );
@@ -274,9 +335,8 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
       authorId: user?.userId,
       content: content,
       parentCommentId: parentCommentId ?? null,
-      type: parentCommentId ? "Reply" : "Comment",
+      type: parentCommentId ? "Trả lời" : "Comment",
     };
-    console.log(cmt);
 
     const res = await POST_COMMENT(cmt);
     if (isApiSuccess(res)) {
@@ -355,7 +415,7 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
                 className="text-xs text-blue-600 mt-1 hover:underline"
                 onClick={() => setShowReplyInput((prev) => !prev)}
               >
-                Reply
+                Trả lời
               </button>
             )}
 
@@ -364,7 +424,7 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
                 <Input
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Write a reply..."
+                  placeholder="Viết trả lời..."
                 />
                 <Button
                   size="sm"
@@ -375,7 +435,7 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
                   }}
                   disabled={!replyText.trim()}
                 >
-                  Reply
+                  Trả lời
                 </Button>
               </div>
             )}
@@ -424,7 +484,7 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
                 <div>
                   <h2 className="text-xl font-semibold">{data.title}</h2>
                   <p className="text-sm text-gray-500">
-                    Posted by {data.authorName} •{" "}
+                    Đăng bởi {data.authorName} •{" "}
                     {formatDateToDMY(data.createdAt)}
                   </p>
                 </div>
@@ -433,7 +493,7 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
               <div className="flex items-center gap-6 pt-2 border-t">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <MessageSquare className="h-4 w-4 mr-1" />
-                  Views ({data.views})
+                  Lượt xem: ({data.views})
                 </Button>
                 {/* <Button variant="ghost" size="sm" className="gap-2">
                   <Share2 className="h-4 w-4" />
@@ -444,7 +504,7 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
 
             <div className="space-y-4">
               <h3 className="font-semibold">
-                Comments ({data.comments.length})
+                Bình luận ({data.comments.length})
               </h3>
 
               <div className="flex gap-4">
@@ -467,7 +527,7 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
                     onClick={(e) => handleAddComment(e, newComment)}
                     disabled={!newComment.trim()}
                   >
-                    Comment
+                    Gửi
                   </Button>
                 </div>
               </div>

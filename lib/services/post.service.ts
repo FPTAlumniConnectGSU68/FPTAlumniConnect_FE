@@ -1,4 +1,4 @@
-import { Comment, Post } from "@/types/interfaces";
+import { Comment, Post, TopUserApi } from "@/types/interfaces";
 import { APIClient } from "../api-client";
 import { ApiResponse } from "../apiResponse";
 import { ACTIONS } from "../api-client/constants";
@@ -47,12 +47,20 @@ const usePostService = () => {
     return res;
   };
 
+  const GET_TOP_USERS = async () => {
+    const res = await APIClient.invoke<ApiResponse<TopUserApi[]>>({
+      action: ACTIONS.GET_TOP_USERS,
+    });
+    return res;
+  };
+
   return {
     GET_POST_DETAIL,
     GET_POST_COMMENTS,
     GET_CHILD_CMTS,
     POST_COMMENT,
     NEW_POST,
+    GET_TOP_USERS,
   };
 };
 

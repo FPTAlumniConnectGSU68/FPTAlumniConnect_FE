@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDateToDMY } from "@/lib/utils";
 import { CircleDollarSign, Clock, GraduationCap } from "lucide-react";
+import Image from "next/image";
 
 interface JobCardProps {
   job: JobPost;
@@ -29,6 +30,20 @@ export function JobCard({ job, isSelected, onClick }: JobCardProps) {
               {job.jobTitle}
             </h3>
             <p className="text-blue-600">{job.location}</p>
+            {job.recruiterInfoId && (
+              <div className="flex items-center gap-2">
+                <Image
+                  src={job.companyLogoUrl}
+                  alt={job.jobTitle}
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full"
+                />
+                <p className="text-ellipsis overflow-hidden w-full">
+                  {job.companyName}
+                </p>
+              </div>
+            )}
           </div>
           <Badge variant="secondary" className="bg-green-100 text-green-800">
             {job.status}

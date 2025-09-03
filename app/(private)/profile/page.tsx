@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/auth-context";
-import { useGetUser } from "@/hooks/use-user";
+import { useAvatarImageStore, useGetUser } from "@/hooks/use-user";
 import { APIClient } from "@/lib/api-client";
 import { ACTIONS } from "@/lib/api-client/constants";
+import { ApiResponse } from "@/lib/apiResponse";
 import { GraduationCap, School, Shield, User2 } from "lucide-react";
 import { downscaleImage } from "@/lib/image";
 import { uploadImageToCloudinary } from "@/lib/cloudinary";
@@ -26,17 +27,17 @@ export default function ProfilePage() {
     Admin: {
       color: "bg-red-50 text-red-800 border border-red-200",
       icon: Shield,
-      description: "System administrator with full access privileges",
+      description: "Quản trị viên hệ thống với đầy đủ quyền truy cập",
     },
     Alumni: {
       color: "bg-blue-50 text-blue-800 border border-blue-200",
       icon: GraduationCap,
-      description: "Graduate of FPT University",
+      description: "Cựu sinh viên Đại học FPT",
     },
     Student: {
       color: "bg-yellow-50 text-yellow-800 border border-yellow-200",
       icon: School,
-      description: "Current student at FPT University",
+      description: "Sinh viên đang theo học tại Đại học FPT",
     },
   };
 
@@ -160,8 +161,7 @@ export default function ProfilePage() {
         return;
       }
       setSaving(true);
-      console.log(form);
-      await APIClient.invoke({
+      const res = await APIClient.invoke<ApiResponse<any>>({
         action: ACTIONS.PATCH_MENTOR_USER,
         idQuery: String(userId),
         data: {
@@ -174,7 +174,10 @@ export default function ProfilePage() {
         },
       });
 
-      toast.success("Profile updated");
+      if (res.status === "success") {
+        useAvatarImageStore.setState({ avatarImage: form.profilePicture });
+        toast.success("Profile updated");
+      }
     } catch (err: any) {
       toast.error(err?.message || "Failed to update profile");
     } finally {
@@ -202,7 +205,7 @@ export default function ProfilePage() {
     return (
       <div className="container max-w-5xl mx-auto py-8 px-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-gray-500">
-          Loading profile...
+          Đang tải thông tin cá nhân...
         </div>
       </div>
     );
@@ -230,7 +233,7 @@ export default function ProfilePage() {
                     disabled={uploading}
                   />
                   <span className="inline-flex items-center px-3 py-1 text-xs rounded-md bg-blue-600 text-white cursor-pointer shadow">
-                    {uploading ? "Uploading..." : "Upload"}
+                    {uploading ? "Đang tải lên..." : "Tải lên"}
                   </span>
                 </label>
               )}
@@ -255,15 +258,15 @@ export default function ProfilePage() {
                 >
                   <TabsList>
                     <TabsTrigger value="cloudinary" disabled={uploading}>
-                      Local upload
+                      Tải lên từ máy
                     </TabsTrigger>
                     <TabsTrigger value="url" disabled={uploading}>
-                      Image URL
+                      Đường dẫn ảnh
                     </TabsTrigger>
                   </TabsList>
                   <TabsContent value="cloudinary">
                     <p className="text-xs text-gray-500 mt-2">
-                      Choose a local image to upload via Cloudinary.
+                      Chọn ảnh từ máy tính của bạn để tải lên Cloudinary.
                     </p>
                   </TabsContent>
                   <TabsContent value="url">
@@ -273,8 +276,12 @@ export default function ProfilePage() {
                         value={imageUrlInput}
                         onChange={(e) => setImageUrlInput(e.target.value)}
                       />
-                      <Button size="sm" onClick={handleApplyImageUrl}>
-                        Apply
+                      <Button
+                        size="sm"
+                        onClick={handleApplyImageUrl}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      >
+                        Áp dụng
                       </Button>
                     </div>
                   </TabsContent>
@@ -288,11 +295,11 @@ export default function ProfilePage() {
           <div className="space-y-6">
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-4">
-                Profile Details
+                Thông tin cá nhân
               </h3>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-2">
-                  <Label htmlFor="code">Student/Employee Code</Label>
+                  <Label htmlFor="code">Mã sinh viên/nhân viên</Label>
                   <Input
                     id="code"
                     name="code"
@@ -303,7 +310,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-2">
-                    <Label htmlFor="firstName">First name</Label>
+                    <Label htmlFor="firstName">Tên</Label>
                     <Input
                       id="firstName"
                       name="firstName"
@@ -312,7 +319,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="lastName">Last name</Label>
+                    <Label htmlFor="lastName">Họ</Label>
                     <Input
                       id="lastName"
                       name="lastName"
@@ -338,22 +345,26 @@ export default function ProfilePage() {
           <div className="lg:col-span-2 space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-1">
-                <span className="text-xs text-gray-500">Role</span>
+                <span className="text-xs text-gray-500">Vai trò</span>
                 <span className="font-medium">{userUnique.roleName}</span>
               </div>
               <div className="grid gap-1">
-                <span className="text-xs text-gray-500">Major</span>
+                <span className="text-xs text-gray-500">Chuyên ngành</span>
                 <span className="font-medium">{userUnique.majorName}</span>
               </div>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-3 p-2 justify-end">
-          <Button onClick={handleSave} disabled={saving || uploading}>
-            {saving ? "Saving..." : "Save changes"}
+          <Button
+            onClick={handleSave}
+            disabled={saving || uploading}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
+            {saving ? "Đang lưu..." : "Lưu thay đổi"}
           </Button>
           <Button variant="outline" onClick={handleReset} disabled={saving}>
-            Reset
+            Đặt lại
           </Button>
         </div>
       </div>

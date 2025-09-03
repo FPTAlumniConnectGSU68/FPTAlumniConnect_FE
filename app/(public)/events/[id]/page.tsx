@@ -1,4 +1,7 @@
 "use client";
+import DayBarChart from "@/components/chart/BarChart";
+import AlumniPieChart from "@/components/chart/PieChart";
+import CustomTooltip from "@/components/tooltip/CustomToolTip";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/contexts/auth-context";
@@ -6,17 +9,28 @@ import { useAuthGuard } from "@/hooks/use-auth-guard";
 import useEventService from "@/lib/services/event.service";
 import { formatDateToDMY, formatTime, isApiSuccess } from "@/lib/utils";
 import { Event, EventRating, EventTimeline } from "@/types/interfaces";
-import { Calendar, Clock, MapPin } from "lucide-react";
-import { useRouter, useParams } from "next/navigation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
+import { set } from "date-fns";
+import { Calendar, Clock, MapPin, Star } from "lucide-react";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function EventDetailPage() {
   const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
+  const isManage = searchParams.get("isManage") === "true";
   const { id } = params;
   const { user } = useAuth();
-  const { GET_EVENT_DETAIL_WITH_TIMELINES, JOIN_EVENT, GET_EVENT_RATING } =
-    useEventService();
+  const {
+    GET_EVENT_DETAIL_WITH_TIMELINES,
+    JOIN_EVENT,
+    GET_EVENT_RATING,
+    CHECK_USER_JOIN_EVENT,
+    PUT_RATING,
+    GET_EVENT_ROLE_STATISTICS,
+    GET_EVENT_PATICIPANT_STATISTICS,
+  } = useEventService();
   const router = useRouter();
   const { requireAuth, AuthGuard } = useAuthGuard();
   const [event, setEvent] = useState<Event>();
@@ -24,6 +38,14 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
+  const [userRating, setUserRating] = useState<EventRating | null>(null);
+
+  const [ratings, setRatings] = useState<Record<number, number>>({});
+  const [ratingContents, setRatingContents] = useState<Record<number, string>>(
+    {}
+  );
+  const [roleStats, setRoleStats] = useState<any>(null);
+  const [participentStats, setParticipentStats] = useState<any>(null);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -60,9 +82,67 @@ export default function EventDetailPage() {
         setLoading(false);
       }
     };
+
+    const fetchStatsitics = async () => {
+      if (!id) return;
+      try {
+        const roleRes = await GET_EVENT_ROLE_STATISTICS(id);
+        const participentRes = await GET_EVENT_PATICIPANT_STATISTICS(id);
+        if (isApiSuccess(roleRes) && roleRes.data) {
+          setRoleStats(
+            Object.entries(roleRes.data).map(([key, value]) => ({
+              name: key,
+              value,
+            }))
+          );
+        }
+        if (isApiSuccess(participentRes) && participentRes.data) {
+          setParticipentStats(
+            Object.entries(participentRes.data).map(([date, value]) => ({
+              date,
+              value,
+            }))
+          );
+        }
+      } catch (error) {}
+    };
+    if (isManage) {
+      fetchStatsitics();
+    }
     fetchRating();
     fetchEvent();
-  }, [id]);
+  }, [id, isManage]);
+
+  useEffect(() => {
+    const checkUserJoinEvent = async () => {
+      if (!id || !user?.userId) return;
+      try {
+        const res = await CHECK_USER_JOIN_EVENT(id, user.userId);
+        if (isApiSuccess(res) && res.data) {
+          setUserRating(res.data);
+        }
+      } catch (error) {}
+    };
+    checkUserJoinEvent();
+  }, [id, user]);
+
+  useEffect(() => {
+    if (userRating && eventRating) {
+      const found = eventRating.some((rating) => rating.id === userRating.id);
+      if (found) {
+        if (userRating.rating || userRating.content !== "") {
+          setRatings((prev) => ({
+            ...prev,
+            [userRating.eventId]: userRating.rating || 0,
+          }));
+          setRatingContents((prev) => ({
+            ...prev,
+            [userRating.eventId]: userRating.content || "",
+          }));
+        }
+      }
+    }
+  }, [userRating, eventRating]);
 
   const handleJoin = async () => {
     setJoining(true);
@@ -88,6 +168,35 @@ export default function EventDetailPage() {
     }
   };
 
+  const handleCommitRating = async (
+    eventId: number,
+    userJoinEventId: number | null | undefined
+  ) => {
+    const rating = ratings[eventId];
+    const content = ratingContents[eventId];
+    if (!rating) return;
+    if (!userJoinEventId) return;
+
+    try {
+      const ratingObj = {
+        eventId,
+        rating,
+        content,
+        userId: user?.userId,
+      };
+      const res = await PUT_RATING(userJoinEventId, ratingObj);
+      if (isApiSuccess(res)) {
+        toast.success("Rating success");
+      }
+    } catch (err) {
+      toast.error("Failed to submit rating. Please try again.");
+    }
+  };
+
+  const handleStarSelect = (eventId: number, rating: number) => {
+    setRatings((prev) => ({ ...prev, [eventId]: rating }));
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -111,14 +220,16 @@ export default function EventDetailPage() {
   }
 
   if (!event) {
-    return <p className="p-6 text-center text-gray-500">Event not found</p>;
+    return (
+      <p className="p-6 text-center text-gray-500">Không tìm thấy sự kiện.</p>
+    );
   }
 
   return (
     <div className="p-6">
       {/* Back button */}
       <button className="text-blue-600 mb-4" onClick={() => router.back()}>
-        &larr; Back
+        &larr; Quay lại
       </button>
 
       {/* Grid Layout */}
@@ -126,7 +237,7 @@ export default function EventDetailPage() {
         {/* LEFT COLUMN */}
         <div className="flex flex-col gap-4">
           {/* Image */}
-          <div className="w-full h-60 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+          <div className="w-full h-auto bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
             {event.img ? (
               <img
                 src={event.img}
@@ -134,50 +245,162 @@ export default function EventDetailPage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <span className="text-gray-500">No image</span>
+              <div className="w-full h-80 flex items-center justify-center bg-gray-100">
+                <span className="text-gray-500">No image</span>
+              </div>
             )}
           </div>
 
           {/* Title / Location / Start Date */}
           <div className="flex flex-col gap-3">
             <h2 className="text-xl font-semibold">{event.eventName}</h2>
-            <div className="flex justify-between items-center text-sm text-gray-600">
+            <div className="flex flex-col justify-between items-start gap-2 text-sm text-gray-600">
               <div className="flex items-center">
                 <MapPin className="h-4 w-4 mr-2" />
                 {event.location}
               </div>
-              <div className="flex gap-2">
-                <p>Start Time:</p>
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  {formatDateToDMY(event.startDate)}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full text-sm text-gray-700 mt-1 ">
+                {/* Start time */}
+                <div className="flex flex-col">
+                  <span className="text-gray-500 font-medium mb-1">
+                    Thời gian bắt đầu
+                  </span>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-1 text-gray-500" />
+                      {formatDateToDMY(event.startDate)}
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-1 text-gray-500" />
+                      {formatTime(event.startDate)}
+                    </div>
+                  </div>
                 </div>
+
+                {/* End time */}
+                <div className="flex flex-col">
+                  <span className="text-gray-500 font-medium mb-1">
+                    Thời gian kết thúc
+                  </span>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-1 text-gray-500" />
+                      {formatDateToDMY(event.endDate)}
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-1 text-gray-500" />
+                      {formatTime(event.endDate)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center mt-1 gap-4 text-sm text-gray-600">
+                {/* Participants */}
                 <div className="flex items-center">
-                  <Clock className="h-4 w-4 mr-2" />
-                  {formatTime(event.startDate)}
+                  <span className="font-medium">Số lượng tham gia:</span>
+                  <span className="ml-1">{event.total}</span>
+                </div>
+
+                {/* Rating */}
+                <div className="flex items-center">
+                  <span className="font-medium">Đánh giá trung bình:</span>
+                  <span className="ml-1">{event.averageRating}</span>
+                  <span className="text-yellow-500 ml-1">⭐</span>
                 </div>
               </div>
             </div>
             <div>
-              <Button
-                onClick={() => {
-                  if (
-                    !requireAuth({
-                      title: "View joined events.",
-                      description: "Sign in to view event you joined",
-                      actionText: "events",
-                    })
-                  ) {
-                    return;
-                  } else {
-                    handleJoin();
+              {!userRating ? (
+                <Button
+                  onClick={() => {
+                    if (new Date(event.startDate) < new Date()) {
+                      return; // prevent joining if already started
+                    }
+                    if (
+                      !requireAuth({
+                        title: "View joined events.",
+                        description: "Sign in to view event you joined",
+                        actionText: "events",
+                      })
+                    ) {
+                      return;
+                    } else {
+                      handleJoin();
+                    }
+                  }}
+                  disabled={joining || new Date(event.startDate) < new Date()}
+                  className={
+                    new Date(event.startDate) < new Date()
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
                   }
-                }}
-                disabled={joining}
-                className=" bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
-              >
-                {joining ? "Joining..." : "Join Event"}
-              </Button>
+                >
+                  {/* {joining ? "Joining..." : "Tham gia sự kiện"} */}
+                  {new Date(event.startDate) < new Date()
+                    ? "Đã diễn ra"
+                    : joining
+                    ? "Joining..."
+                    : "Tham gia sự kiện"}
+                </Button>
+              ) : (
+                <div className="p-4 border rounded-lg bg-gray-50 space-y-4">
+                  <h3 className="font-semibold">Đánh giá sự kiện</h3>
+
+                  {/* Stars */}
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-7 h-7 cursor-pointer transition-colors ${
+                          (ratings[event.eventId] ?? 0) >= star
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-gray-300 hover:text-yellow-300"
+                        }`}
+                        onClick={() => handleStarSelect(event.eventId, star)}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Comment Box */}
+                  <textarea
+                    rows={3}
+                    placeholder="Chia sẻ cảm nhận của bạn..."
+                    value={ratingContents[event.eventId] || ""}
+                    onChange={(e) =>
+                      setRatingContents((prev) => ({
+                        ...prev,
+                        [event.eventId]: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                  />
+
+                  {/* Submit Button */}
+                  <div className="flex justify-end">
+                    <CustomTooltip
+                      message={
+                        new Date() < new Date(event.startDate)
+                          ? "Sự kiện chưa diễn ra, không thể đánh giá"
+                          : ""
+                      }
+                    >
+                      <Button
+                        size="sm"
+                        disabled={
+                          !ratings[event.eventId] ||
+                          new Date() < new Date(event.startDate)
+                        }
+                        onClick={() =>
+                          handleCommitRating(event.eventId, userRating?.id)
+                        }
+                      >
+                        Gửi đánh giá
+                      </Button>
+                    </CustomTooltip>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -223,15 +446,51 @@ export default function EventDetailPage() {
 
         {/* RIGHT COLUMN */}
         <div className="flex flex-col gap-4">
+          {/* Management*/}
+          {isManage && (
+            <div className="flex-1 p-4 border rounded-lg bg-gray-50 min-h-60">
+              <Tabs defaultValue="pie" className="w-full">
+                {/* Tab buttons */}
+                <TabsList className="flex justify-start space-x-2 mb-4">
+                  <TabsTrigger
+                    value="pie"
+                    className="px-4 py-2 text-sm font-medium border rounded-lg transition
+      data-[state=active]:bg-orange-600 data-[state=active]:text-white
+      data-[state=active]:border-orange-600 data-[state=active]:shadow"
+                  >
+                    Thành phần tham gia
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="bar"
+                    className="px-4 py-2 text-sm font-medium border rounded-lg transition
+      data-[state=active]:bg-orange-600 data-[state=active]:text-white
+      data-[state=active]:border-orange-600 data-[state=active]:shadow"
+                  >
+                    Số lượng tham gia
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Pie Chart */}
+                <TabsContent value="pie">
+                  <AlumniPieChart data={roleStats || []} />
+                </TabsContent>
+
+                {/* Bar Chart */}
+                <TabsContent value="bar">
+                  <DayBarChart data={participentStats || []} />
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
           {/* Descriptions */}
           <div className="flex-1 p-4 border rounded-lg bg-gray-50 min-h-60">
-            <h3 className="font-semibold mb-2">Description</h3>
+            <h3 className="font-semibold mb-2">Mô tả</h3>
             <p className="text-sm text-gray-700">{event.description}</p>
           </div>
 
           {/* Timeline */}
           <div className="p-4 border rounded-lg bg-gray-50">
-            <h3 className="font-semibold mb-2">Timeline</h3>
+            <h3 className="font-semibold mb-2">Lịch hoạt động</h3>
             {event.eventTimeLines && event.eventTimeLines.length > 0 ? (
               <ul className="space-y-2 text-sm">
                 {event.eventTimeLines.map((t: EventTimeline) => (
@@ -248,7 +507,7 @@ export default function EventDetailPage() {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-gray-500">No timeline available</p>
+              <p className="text-sm text-gray-500">Không có lịch hoạt động</p>
             )}
           </div>
         </div>

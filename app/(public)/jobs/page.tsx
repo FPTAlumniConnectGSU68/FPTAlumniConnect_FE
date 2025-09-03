@@ -10,15 +10,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import { useJobs } from "@/hooks/use-jobs";
-import { useRouteHistory } from "@/hooks/use-route-history";
 import { isApiSuccess } from "@/lib/utils";
 import { JobPost, User } from "@/types/interfaces";
-import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 
-export default function JobsPage() {
+function JobsPageContent() {
   // State management
   const [search, setSearch] = useState("");
-  const [major, setMajor] = useState("all");
+  const [major, setMajor] = useState<string>("Tất cả chuyên ngành");
   const [location, setLocation] = useState("all");
   const [data, setData] = useState<JobPost[]>([]);
   const [selectedJob, setSelectedJob] = useState<JobPost | null>(null);
@@ -34,20 +34,44 @@ export default function JobsPage() {
     size: 5,
     query: {
       status: "Open",
-      majorId: major === "all" ? "" : major,
+      majorId: major === "Tất cả chuyên ngành" ? "" : major,
       location: location === "all" ? "" : location,
     },
   });
 
+  console.log("jobs: ", jobs);
+
+  const router = useRouter();
+
   const clearAllRef = useRef<HTMLButtonElement>(null);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const jobId = searchParams.get("id");
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(name, value);
+
+      return params.toString();
+    },
+    [searchParams]
+  );
 
   // Initialize/append data and selected job
   useEffect(() => {
     if (jobs && isApiSuccess(jobs) && jobs.data?.items) {
       if (page === 1) {
         setData(jobs.data.items);
-        if (jobs.data.items.length > 0) {
-          setSelectedJob((prev) => prev ?? jobs.data!.items[0]);
+        const idNum = jobId ? Number(jobId) : NaN;
+        if (jobId && Number.isFinite(idNum)) {
+          const match = jobs.data.items.find(
+            (item) => item.jobPostId === idNum
+          );
+          setSelectedJob(match ?? null);
+        } else {
+          setSelectedJob(
+            jobs.data.items.length > 0 ? jobs.data.items[0] : null
+          );
         }
       } else {
         setData((prev) => {
@@ -59,13 +83,26 @@ export default function JobsPage() {
         });
       }
     }
-  }, [jobs, page]);
+  }, [jobs, page, jobId]);
+
+  // Select job based on URL id when data updates
+  useEffect(() => {
+    const idNum = jobId ? Number(jobId) : NaN;
+    if (!jobId || !Number.isFinite(idNum)) return;
+    const found = data.find((j) => j.jobPostId === idNum) || null;
+    if (found && selectedJob?.jobPostId !== idNum) {
+      setSelectedJob(found);
+    }
+  }, [jobId, data, selectedJob]);
 
   // Reset pagination when filters change
   useEffect(() => {
     setPage(1);
-    setSelectedJob(null);
-  }, [major, location, search]);
+    // Keep selected job if URL has an id
+    if (!jobId) {
+      setSelectedJob(null);
+    }
+  }, [major, location, search, jobId]);
 
   // click clear all button once the page is loaded
   useEffect(() => {
@@ -74,12 +111,16 @@ export default function JobsPage() {
 
   // Event handlers
   const handleJobClick = (job: JobPost) => {
+    router.push(
+      pathname + "?" + createQueryString("id", job.jobPostId.toString()),
+      { scroll: false }
+    );
     setSelectedJob(job);
   };
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Jobs Directory</h1>
+      <h1 className="text-3xl font-bold mb-6">Tìm việc làm</h1>
 
       {/* Search and Filters */}
       <JobSearchFilters
@@ -109,7 +150,10 @@ export default function JobsPage() {
                 <JobCard
                   key={job.jobPostId}
                   job={job}
-                  isSelected={selectedJob?.jobPostId === job.jobPostId}
+                  isSelected={
+                    selectedJob?.jobPostId === job.jobPostId ||
+                    jobId === job.jobPostId.toString()
+                  }
                   onClick={handleJobClick}
                 />
               ))}
@@ -123,14 +167,14 @@ export default function JobsPage() {
                       onClick={() => setPage((p) => p + 1)}
                       disabled={isFetching}
                     >
-                      {isFetching ? "Loading..." : "Load more"}
+                      {isFetching ? "Đang tải..." : "Tải thêm việc làm"}
                     </Button>
                   </div>
                 )}
             </>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              No jobs found matching your criteria
+              Không tìm thấy việc làm phù hợp
             </div>
           )}
         </div>
@@ -147,5 +191,13 @@ export default function JobsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={<div className="p-8">Đang tải...</div>}>
+      <JobsPageContent />
+    </Suspense>
   );
 }

@@ -73,36 +73,36 @@ const UserCreateDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create User</DialogTitle>
+          <DialogTitle>Tạo người dùng</DialogTitle>
           <DialogDescription>
-            Create a new user with the following details.
+            Tạo người dùng với các thông tin sau.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="code">Code</Label>
+            <Label htmlFor="code">Mã</Label>
             <Input
               id="code"
-              placeholder="Enter code"
+              placeholder="Nhập mã"
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="firstName">First Name</Label>
+            <Label htmlFor="firstName">Tên</Label>
             <Input
               id="firstName"
-              placeholder="Enter first name"
+              placeholder="Nhập tên"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="lastName">Last Name</Label>
+            <Label htmlFor="lastName">Họ</Label>
             <Input
               id="lastName"
-              placeholder="Enter last name"
+              placeholder="Nhập họ"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
             />
@@ -111,26 +111,26 @@ const UserCreateDialog = ({
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
-              placeholder="Enter email"
+              placeholder="Nhập email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Mật khẩu</Label>
             <Input
               id="password"
               type="password"
-              placeholder="Enter password"
+              placeholder="Nhập mật khẩu"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="roleId">Role</Label>
+            <Label htmlFor="roleId">Vai trò</Label>
             <Select value={roleId} onValueChange={(value) => setRoleId(value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Select role" />
+                <SelectValue placeholder="Chọn vai trò" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="4">Recruiter</SelectItem>
@@ -139,13 +139,13 @@ const UserCreateDialog = ({
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="majorId">Major</Label>
+            <Label htmlFor="majorId">Chuyên ngành</Label>
             <Select
               value={majorId}
               onValueChange={(value) => setMajorId(value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select major" />
+                <SelectValue placeholder="Chọn chuyên ngành" />
               </SelectTrigger>
               <SelectContent>
                 {majorOptions.map((major) => (
@@ -162,11 +162,13 @@ const UserCreateDialog = ({
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
+            disabled={isLoading}
           >
-            Cancel
+            Hủy
           </Button>
           <Button
             type="submit"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             onClick={() =>
               onSubmit({
                 code: code,
@@ -180,7 +182,7 @@ const UserCreateDialog = ({
             }
             disabled={isLoading}
           >
-            Create
+            {isLoading ? "Đang tạo..." : "Tạo"}
           </Button>
         </DialogFooter>
       </DialogContent>

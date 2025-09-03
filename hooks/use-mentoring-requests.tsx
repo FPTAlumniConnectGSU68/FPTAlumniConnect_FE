@@ -74,7 +74,7 @@ export function useCreateMentorShipRequest() {
     },
     onSuccess: (response) => {
       if (response.status === "success") {
-        toast.success("Mentorship request created successfully");
+        toast.success("Tạo yêu cầu mentoring thành công");
         queryClient.invalidateQueries({
           queryKey: ["mentorship-alumni-request"],
         });

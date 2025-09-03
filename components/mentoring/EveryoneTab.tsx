@@ -16,6 +16,7 @@ import {
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { MentoringCard } from "./MentoringCard";
+import { MentoringCardSkeleton } from "./MentoringCardSkeleton";
 import { useCreateSchedule } from "@/hooks/use-schedules";
 
 interface EveryoneTabProps {
@@ -115,8 +116,10 @@ export function EveryoneTab({ currentPage, user }: EveryoneTabProps) {
 
   if (isLoading) {
     return (
-      <div className="py-4 flex justify-center items-center h-[50vh]">
-        <LoadingSpinner size="md" text="Loading mentoring requests..." />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4">
+        {Array.from({ length: 6 }).map((_, idx) => (
+          <MentoringCardSkeleton key={idx} />
+        ))}
       </div>
     );
   }
@@ -127,7 +130,9 @@ export function EveryoneTab({ currentPage, user }: EveryoneTabProps) {
     !mentoringRequests.data ||
     mentoringRequests.data.items.length === 0
   ) {
-    return <div className="text-center py-4">No mentoring requests found</div>;
+    return (
+      <div className="text-center py-4">Không có yêu cầu mentoring nào</div>
+    );
   }
 
   return (
@@ -139,7 +144,7 @@ export function EveryoneTab({ currentPage, user }: EveryoneTabProps) {
           actionButton={
             user && request.aumniId !== user?.userId && user.isMentor
               ? {
-                  label: "Accept the request",
+                  label: "Chấp nhận yêu cầu",
                   onClick: () => {
                     setIsAcceptRequestModalOpen(true);
                     setTempId(request.id);
@@ -155,16 +160,16 @@ export function EveryoneTab({ currentPage, user }: EveryoneTabProps) {
       >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Accept Request #{tempId}</DialogTitle>
+            <DialogTitle>Chấp nhận yêu cầu #{tempId}</DialogTitle>
             <DialogDescription>
-              Please provide the details for the mentoring session.
+              Vui lòng cung cấp chi tiết cho buổi học mentor.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Content</Label>
+              <Label>Nội dung</Label>
               <Textarea
-                placeholder="Enter session content..."
+                placeholder="Nhập nội dung buổi học..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
               />
@@ -173,14 +178,14 @@ export function EveryoneTab({ currentPage, user }: EveryoneTabProps) {
               )}
             </div>
             <div className="space-y-2">
-              <Label>Start Time</Label>
+              <Label>Thời gian bắt đầu</Label>
               <DateTimePicker date={startDate} setDate={setStartDate} />
               {errors.startDate && (
                 <p className="text-sm text-red-500">{errors.startDate}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label>End Time</Label>
+              <Label>Thời gian kết thúc</Label>
               <DateTimePicker date={endDate} setDate={setEndDate} />
               {errors.endDate && (
                 <p className="text-sm text-red-500">{errors.endDate}</p>
@@ -188,19 +193,23 @@ export function EveryoneTab({ currentPage, user }: EveryoneTabProps) {
             </div>
             {isError && (
               <p className="text-sm text-red-500">
-                {error?.message || "Failed to accept request"}
+                {error?.message || "Lỗi khi chấp nhận yêu cầu"}
               </p>
             )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={handleCancel}>
-              Cancel
+              Hủy
             </Button>
-            <Button onClick={handleAcceptRequest} disabled={isPending}>
+            <Button
+              onClick={handleAcceptRequest}
+              disabled={isPending}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
               {isPending ? (
-                <LoadingSpinner size="sm" text="Accepting..." />
+                <LoadingSpinner size="sm" text="Đang chấp nhận..." />
               ) : (
-                "Accept"
+                "Chấp nhận"
               )}
             </Button>
           </DialogFooter>

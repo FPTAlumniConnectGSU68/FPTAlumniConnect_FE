@@ -49,21 +49,26 @@ export interface JobPost {
   jobDescription: string;
   jobTitle: string;
   location: string;
+  city: string;
   minSalary: number;
   maxSalary: number;
   isDeal: boolean;
   requirements: string;
   benefits: string;
   time: string;
-  status: "Open" | "Closed" | "Deleted" | string;
+  status: string;
   email: string;
   userId: number;
   majorId: number;
   majorName: string;
   createdAt: string;
   updatedAt: string;
-  createdBy: string | number | null;
-  updatedBy: string | number | null;
+  createdBy: string;
+  updatedBy: string;
+  skills: Skill[];
+  recruiterInfoId: number;
+  companyName: string;
+  companyLogoUrl: string;
 }
 
 export interface JobPostCreate {
@@ -102,6 +107,7 @@ export interface Event {
   averageRating: number | null;
   userJoinEventId: number | null;
   eventTimeLines?: EventTimeline[];
+  total: number;
 }
 
 export interface EventTimeline {
@@ -299,6 +305,17 @@ export interface JobApplicationByJobPostId {
   updatedBy: string;
 }
 
+export interface JobApplicationByCvid {
+  applicationId: number;
+  jobPostId: number;
+  cvid: number;
+  letterCover: string;
+  status: "Approved" | "Pending" | "Rejected";
+  type: string | null;
+  createdAt: string;
+  updatedAt: string;
+  updatedBy: string;
+}
 export interface EventRating {
   id: number;
   userId: number;
@@ -313,4 +330,30 @@ export interface EventRating {
   updatedAt: string | null;
   createdBy: string;
   updatedBy: string | null;
+}
+
+export interface TopUser {
+  name: string;
+  userAvatar?: string;
+  class: string;
+  posts: number;
+}
+
+export interface TopUserApi {
+  postCount: number;
+  userAvatar: string;
+  userCode: string;
+  userId: number;
+  userName: string;
+}
+
+export interface RecruiterInfo {
+  recruiterInfoId: number;
+  userId: number;
+  companyName: string;
+  companyEmail: string;
+  companyPhone: string;
+  companyLogoUrl: string;
+  companyCertificateUrl: string;
+  status: boolean | string; // depends on whether "True" is boolean or string
 }

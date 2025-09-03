@@ -16,6 +16,7 @@ import SkillMultiSelect from "@/components/ui/skill-multi-select";
 import { CitySelect } from "@/components/ui/city-select";
 import { useState, useCallback, useMemo, memo, useEffect } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 interface CVFormProps {
   initialData?: CV | null;
@@ -204,44 +205,54 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
   }, [initialData]);
 
   return (
-    <form id="cv-form" onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+    <form id="cv-form" onSubmit={handleSubmit} className=" max-w-4xl space-y-6">
+      <div className="text-base md:text-lg font-semibold text-primary">
+        1. Thông tin cá nhân
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="fullName">Full Name</Label>
+          <Label htmlFor="fullName">Họ và tên</Label>
           <Input
             id="fullName"
             name="fullName"
             value={formData.fullName}
             onChange={handleInputChange}
-            className={errors.fullName ? "border-red-500" : ""}
+            placeholder="VD: Nguyễn Văn A"
+            aria-invalid={!!errors.fullName}
+            className={
+              errors.fullName
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
           />
           {errors.fullName && (
-            <span className="text-sm text-red-500">{errors.fullName}</span>
+            <span className="text-sm text-destructive">{errors.fullName}</span>
           )}
         </div>
 
         <div>
-          <Label htmlFor="gender">Gender</Label>
+          <Label htmlFor="gender">Giới tính</Label>
           <Select
             value={formData.gender}
             onValueChange={(value) => handleSelectChange("gender", value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select gender" />
+              <SelectValue placeholder="Chọn giới tính" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="male">Male</SelectItem>
-              <SelectItem value="female">Female</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
+              <SelectItem value="male">Nam</SelectItem>
+              <SelectItem value="female">Nữ</SelectItem>
+              <SelectItem value="other">Khác</SelectItem>
             </SelectContent>
           </Select>
           {errors.gender && (
-            <span className="text-sm text-red-500">{errors.gender}</span>
+            <span className="text-sm text-destructive">{errors.gender}</span>
           )}
         </div>
 
         <div>
-          <Label htmlFor="birthday">Birthday</Label>
+          <Label htmlFor="birthday">Ngày sinh</Label>
           <Input
             id="birthday"
             name="birthday"
@@ -252,10 +263,15 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
                 : ""
             }
             onChange={handleInputChange}
-            className={errors.birthday ? "border-red-500" : ""}
+            aria-invalid={!!errors.birthday}
+            className={
+              errors.birthday
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
           />
           {errors.birthday && (
-            <span className="text-sm text-red-500">{errors.birthday}</span>
+            <span className="text-sm text-destructive">{errors.birthday}</span>
           )}
         </div>
 
@@ -267,111 +283,145 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
             type="email"
             value={formData.email}
             onChange={handleInputChange}
-            className={errors.email ? "border-red-500" : ""}
+            placeholder="name@example.com"
+            aria-invalid={!!errors.email}
+            className={
+              errors.email
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
           />
           {errors.email && (
-            <span className="text-sm text-red-500">{errors.email}</span>
+            <span className="text-sm text-destructive">{errors.email}</span>
           )}
         </div>
 
         <div>
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="phone">Số điện thoại</Label>
           <Input
             id="phone"
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
-            className={errors.phone ? "border-red-500" : ""}
+            placeholder="VD: 0912 345 678"
+            aria-invalid={!!errors.phone}
+            className={
+              errors.phone
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
           />
           {errors.phone && (
-            <span className="text-sm text-red-500">{errors.phone}</span>
+            <span className="text-sm text-destructive">{errors.phone}</span>
           )}
         </div>
 
         <div>
-          <Label htmlFor="status">Status</Label>
-          <Select
-            value={formData.status}
-            onValueChange={(value) => handleSelectChange("status", value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Public">Public</SelectItem>
-              <SelectItem value="Private">Private</SelectItem>
-              <SelectItem value="Deleted">Deleted</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.status && (
-            <span className="text-sm text-red-500">{errors.status}</span>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="address">Address</Label>
-        <Input
-          id="address"
-          name="address"
-          value={formData.address}
-          onChange={handleInputChange}
-          className={errors.address ? "border-red-500" : ""}
-        />
-        {errors.address && (
-          <span className="text-sm text-red-500">{errors.address}</span>
-        )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="city">City</Label>
+          <Label htmlFor="city">Thành phố</Label>
           <CitySelect
             value={formData.city}
             onValueChange={(value) => handleSelectChange("city", value)}
           />
           {errors.city && (
-            <span className="text-sm text-red-500">{errors.city}</span>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="company">Company</Label>
-          <Input
-            id="company"
-            name="company"
-            value={formData.company}
-            onChange={handleInputChange}
-            className={errors.company ? "border-red-500" : ""}
-          />
-          {errors.company && (
-            <span className="text-sm text-red-500">{errors.company}</span>
+            <span className="text-sm text-destructive">{errors.city}</span>
           )}
         </div>
       </div>
 
       <div>
-        <Label htmlFor="desiredJob">Desired Job</Label>
+        <Label htmlFor="address">Địa chỉ</Label>
+        <Input
+          id="address"
+          name="address"
+          value={formData.address}
+          onChange={handleInputChange}
+          placeholder="Số nhà, đường, phường/xã, quận/huyện"
+          aria-invalid={!!errors.address}
+          className={
+            errors.address
+              ? "border-destructive focus-visible:ring-destructive"
+              : ""
+          }
+        />
+        {errors.address && (
+          <span className="text-sm text-destructive">{errors.address}</span>
+        )}
+      </div>
+      <div className="text-base md:text-lg font-semibold text-primary">
+        2. Vị trí ứng tuyển
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="position">Chức vụ</Label>
+          <Input
+            id="position"
+            name="position"
+            value={formData.position}
+            onChange={handleInputChange}
+            placeholder="VD: Frontend Developer"
+            aria-invalid={!!errors.position}
+            className={
+              errors.position
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
+          />
+          {errors.position && (
+            <span className="text-sm text-destructive">{errors.position}</span>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="jobLevel">Cấp bậc</Label>
+          <Input
+            id="jobLevel"
+            name="jobLevel"
+            value={formData.jobLevel}
+            onChange={handleInputChange}
+            placeholder="VD: Junior / Mid / Senior"
+            aria-invalid={!!errors.jobLevel}
+            className={
+              errors.jobLevel
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
+          />
+          {errors.jobLevel && (
+            <span className="text-sm text-destructive">{errors.jobLevel}</span>
+          )}
+        </div>
+      </div>
+      <div>
+        <Label htmlFor="desiredJob">Vị trí mong muốn</Label>
         <Input
           id="desiredJob"
           name="desiredJob"
           value={formData.desiredJob}
           onChange={handleInputChange}
-          className={errors.desiredJob ? "border-red-500" : ""}
+          placeholder="VD: React Native, Backend .NET, QA..."
+          aria-invalid={!!errors.desiredJob}
+          className={
+            errors.desiredJob
+              ? "border-destructive focus-visible:ring-destructive"
+              : ""
+          }
         />
         {errors.desiredJob && (
-          <span className="text-sm text-red-500">{errors.desiredJob}</span>
+          <span className="text-sm text-destructive">{errors.desiredJob}</span>
         )}
       </div>
+      <div className="text-base md:text-lg font-semibold text-primary">
+        3. Học vấn và Kỹ năng
+      </div>
       <div>
-        <Label htmlFor="majorId">Major</Label>
+        <Label htmlFor="majorId">Chuyên ngành</Label>
         <Select
           value={formData.majorId}
           onValueChange={(value) => handleSelectChange("majorId", value)}
           defaultValue={formData.majorId}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select major" />
+            <SelectValue placeholder="Chọn chuyên ngành" />
           </SelectTrigger>
           <SelectContent>
             {majorItems.map((major) => (
@@ -382,43 +432,92 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
           </SelectContent>
         </Select>
         {errors.majorId && (
-          <span className="text-sm text-red-500">{errors.majorId}</span>
+          <span className="text-sm text-destructive">{errors.majorId}</span>
+        )}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="language">Ngôn ngữ</Label>
+          <Input
+            id="language"
+            name="language"
+            value={formData.language}
+            onChange={handleInputChange}
+            placeholder="VD: English / Japanese / ..."
+            aria-invalid={!!errors.language}
+            className={
+              errors.language
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
+          />
+          {errors.language && (
+            <span className="text-sm text-destructive">{errors.language}</span>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="languageLevel">Cấp bậc ngôn ngữ</Label>
+          <Input
+            id="languageLevel"
+            name="languageLevel"
+            value={formData.languageLevel}
+            onChange={handleInputChange}
+            placeholder="VD: IELTS 7.0, JLPT N2..."
+            aria-invalid={!!errors.languageLevel}
+            className={
+              errors.languageLevel
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
+          />
+          {errors.languageLevel && (
+            <span className="text-sm text-destructive">
+              {errors.languageLevel}
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label>Kỹ năng</Label>
+        <SkillMultiSelect
+          value={selectedSkills}
+          onChange={handleSkillsChange}
+        />
+        {errors.skills && (
+          <span className="text-sm text-destructive">{errors.skills}</span>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="position">Position</Label>
-          <Input
-            id="position"
-            name="position"
-            value={formData.position}
-            onChange={handleInputChange}
-            className={errors.position ? "border-red-500" : ""}
-          />
-          {errors.position && (
-            <span className="text-sm text-red-500">{errors.position}</span>
-          )}
-        </div>
+      <div className="text-base md:text-lg font-semibold text-primary">
+        4. Kinh nghiệm làm việc
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="jobLevel">Job Level</Label>
+          <Label htmlFor="company">Công ty</Label>
           <Input
-            id="jobLevel"
-            name="jobLevel"
-            value={formData.jobLevel}
+            id="company"
+            name="company"
+            value={formData.company}
             onChange={handleInputChange}
-            className={errors.jobLevel ? "border-red-500" : ""}
+            placeholder="VD: FPT Software"
+            aria-invalid={!!errors.company}
+            className={
+              errors.company
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
           />
-          {errors.jobLevel && (
-            <span className="text-sm text-red-500">{errors.jobLevel}</span>
+          {errors.company && (
+            <span className="text-sm text-destructive">{errors.company}</span>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="startAt">Start Date</Label>
+          <Label htmlFor="startAt">Ngày bắt đầu</Label>
           <Input
             id="startAt"
             name="startAt"
@@ -429,15 +528,20 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
                 : ""
             }
             onChange={handleInputChange}
-            className={errors.startAt ? "border-red-500" : ""}
+            aria-invalid={!!errors.startAt}
+            className={
+              errors.startAt
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
           />
           {errors.startAt && (
-            <span className="text-sm text-red-500">{errors.startAt}</span>
+            <span className="text-sm text-destructive">{errors.startAt}</span>
           )}
         </div>
 
         <div>
-          <Label htmlFor="endAt">End Date</Label>
+          <Label htmlFor="endAt">Ngày kết thúc</Label>
           <Input
             id="endAt"
             name="endAt"
@@ -448,82 +552,82 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
                 : ""
             }
             onChange={handleInputChange}
-            className={errors.endAt ? "border-red-500" : ""}
+            aria-invalid={!!errors.endAt}
+            className={
+              errors.endAt
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
           />
           {errors.endAt && (
-            <span className="text-sm text-red-500">{errors.endAt}</span>
+            <span className="text-sm text-destructive">{errors.endAt}</span>
           )}
         </div>
       </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="language">Language</Label>
-          <Input
-            id="language"
-            name="language"
-            value={formData.language}
-            onChange={handleInputChange}
-            className={errors.language ? "border-red-500" : ""}
-          />
-          {errors.language && (
-            <span className="text-sm text-red-500">{errors.language}</span>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="languageLevel">Language Level</Label>
-          <Input
-            id="languageLevel"
-            name="languageLevel"
-            value={formData.languageLevel}
-            onChange={handleInputChange}
-            className={errors.languageLevel ? "border-red-500" : ""}
-          />
-          {errors.languageLevel && (
-            <span className="text-sm text-red-500">{errors.languageLevel}</span>
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Skills</Label>
-        <SkillMultiSelect
-          value={selectedSkills}
-          onChange={handleSkillsChange}
+      <div>
+        <Label htmlFor="primaryDuties">Nhiệm vụ chính</Label>
+        <Textarea
+          id="primaryDuties"
+          name="primaryDuties"
+          value={formData.primaryDuties}
+          onChange={handleInputChange}
+          placeholder="Mô tả ngắn gọn trách nhiệm và thành tựu"
+          aria-invalid={!!errors.primaryDuties}
+          className={
+            errors.primaryDuties
+              ? "border-destructive focus-visible:ring-destructive"
+              : ""
+          }
         />
-        {errors.skills && (
-          <span className="text-sm text-red-500">{errors.skills}</span>
+        {errors.primaryDuties && (
+          <span className="text-sm text-destructive">
+            {errors.primaryDuties}
+          </span>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="text-base md:text-lg font-semibold text-primary">
+        5. Mức lương mong muốn
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="minSalary">Min Salary</Label>
+          <Label htmlFor="minSalary">Mức lương tối thiểu</Label>
           <Input
             id="minSalary"
             name="minSalary"
             type="number"
             value={formData.minSalary}
             onChange={handleInputChange}
-            className={errors.minSalary ? "border-red-500" : ""}
+            placeholder="VD: 15000000"
+            aria-invalid={!!errors.minSalary}
+            className={
+              errors.minSalary
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
           />
           {errors.minSalary && (
-            <span className="text-sm text-red-500">{errors.minSalary}</span>
+            <span className="text-sm text-destructive">{errors.minSalary}</span>
           )}
         </div>
         <div>
-          <Label htmlFor="maxSalary">Max Salary</Label>
+          <Label htmlFor="maxSalary">Mức lương tối đa</Label>
           <Input
             id="maxSalary"
             name="maxSalary"
             type="number"
             value={formData.maxSalary}
             onChange={handleInputChange}
-            className={errors.maxSalary ? "border-red-500" : ""}
+            placeholder="VD: 30000000"
+            aria-invalid={!!errors.maxSalary}
+            className={
+              errors.maxSalary
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
           />
           {errors.maxSalary && (
-            <span className="text-sm text-red-500">{errors.maxSalary}</span>
+            <span className="text-sm text-destructive">{errors.maxSalary}</span>
           )}
         </div>
       </div>
@@ -537,34 +641,50 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
           onChange={handleInputChange}
           className="h-4 w-4"
         />
-        <Label htmlFor="isDeal">Negotiable salary</Label>
+        <Label htmlFor="isDeal">Thỏa thuận lương</Label>
+      </div>
+
+      <div className="text-base md:text-lg font-semibold text-primary">
+        6. Thông tin bổ sung
       </div>
 
       <div>
-        <Label htmlFor="primaryDuties">Primary Duties</Label>
-        <Textarea
-          id="primaryDuties"
-          name="primaryDuties"
-          value={formData.primaryDuties}
-          onChange={handleInputChange}
-          className={errors.primaryDuties ? "border-red-500" : ""}
-        />
-        {errors.primaryDuties && (
-          <span className="text-sm text-red-500">{errors.primaryDuties}</span>
+        <Label htmlFor="status">Trạng thái</Label>
+        <Select
+          value={formData.status}
+          onValueChange={(value) => handleSelectChange("status", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Chọn trạng thái" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Public">Public</SelectItem>
+            <SelectItem value="Private">Private</SelectItem>
+            <SelectItem value="Deleted">Deleted</SelectItem>
+          </SelectContent>
+        </Select>
+        {errors.status && (
+          <span className="text-sm text-destructive">{errors.status}</span>
         )}
       </div>
 
       <div>
-        <Label htmlFor="additionalContent">Additional Information</Label>
+        <Label htmlFor="additionalContent">Thông tin bổ sung</Label>
         <Textarea
           id="additionalContent"
           name="additionalContent"
           value={formData.additionalContent}
           onChange={handleInputChange}
-          className={`h-24 ${errors.additionalContent ? "border-red-500" : ""}`}
+          placeholder="Bằng cấp, chứng chỉ, link portfolio..."
+          aria-invalid={!!errors.additionalContent}
+          className={`h-24 ${
+            errors.additionalContent
+              ? "border-destructive focus-visible:ring-destructive"
+              : ""
+          }`}
         />
         {errors.additionalContent && (
-          <span className="text-sm text-red-500">
+          <span className="text-sm text-destructive">
             {errors.additionalContent}
           </span>
         )}

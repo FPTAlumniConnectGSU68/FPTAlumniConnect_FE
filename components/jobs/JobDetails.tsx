@@ -66,10 +66,12 @@ export function JobDetails({ job, user }: JobDetailsProps) {
                 {job.jobTitle}
               </h2>
               <div className="space-y-2">
-                <div className="flex items-center text-gray-600">
-                  <Building2 className="h-4 w-4 mr-2" />
-                  Company Email: {job.email}
-                </div>
+                {job.companyName && (
+                  <div className="flex items-center text-gray-600">
+                    <Building2 className="h-4 w-4 mr-2" />
+                    {job.companyName}
+                  </div>
+                )}
                 <div className="flex items-center text-gray-600">
                   <MapPin className="h-4 w-4 mr-2" />
                   {job.location}
@@ -81,6 +83,10 @@ export function JobDetails({ job, user }: JobDetailsProps) {
                 <div className="flex items-center text-gray-600">
                   <CircleDollarSign className="h-4 w-4 mr-2" />
                   {`${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()} VNĐ `}
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  Email: {job.email}
                 </div>
               </div>
             </div>
@@ -112,15 +118,15 @@ export function JobDetails({ job, user }: JobDetailsProps) {
             </section>
 
             <Button
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
               onClick={handleApplyClick}
             >
               {isPending ? (
                 <Loader2 className="animate-spin" />
               ) : user ? (
-                "Apply Now"
+                "Ứng tuyển ngay"
               ) : (
-                "Login to apply"
+                "Đăng nhập để ứng tuyển"
               )}
             </Button>
           </div>
@@ -141,7 +147,7 @@ export function JobDetailsEmpty() {
   return (
     <Card>
       <CardContent className="p-6 text-center text-gray-500">
-        Select a job to view details
+        Chọn một công việc để xem chi tiết
       </CardContent>
     </Card>
   );

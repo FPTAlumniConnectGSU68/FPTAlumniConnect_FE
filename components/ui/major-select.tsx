@@ -22,13 +22,17 @@ export function MajorSelect({
     data: majorsResponse,
     isLoading: isMajorsLoading,
     isError: isMajorsError,
-  } = useMajorCodes({});
+  } = useMajorCodes({
+    query: {
+      Size: "200",
+    },
+  });
 
   const renderContent = () => {
     if (isMajorsLoading) {
       return (
         <SelectItem value="loading" disabled>
-          Loading majors...
+          Đang tải chuyên ngành...
         </SelectItem>
       );
     }
@@ -36,7 +40,7 @@ export function MajorSelect({
     if (isMajorsError) {
       return (
         <SelectItem value="error" disabled>
-          Error: Failed to load majors
+          Lỗi: Không thể tải chuyên ngành
         </SelectItem>
       );
     }
@@ -44,7 +48,7 @@ export function MajorSelect({
     if (majorsResponse?.status === "error") {
       return (
         <SelectItem value="api-error" disabled>
-          Error: {majorsResponse.message || "Failed to load majors"}
+          Lỗi: {majorsResponse.message || "Không thể tải chuyên ngành"}
         </SelectItem>
       );
     }
@@ -55,7 +59,7 @@ export function MajorSelect({
       if (majors.length === 0) {
         return (
           <SelectItem value="empty" disabled>
-            No majors available
+            Không có chuyên ngành nào
           </SelectItem>
         );
       }
@@ -73,7 +77,7 @@ export function MajorSelect({
   return (
     <Select value={value} onValueChange={onValueChange} disabled={disabled}>
       <SelectTrigger>
-        <SelectValue placeholder="Select your major" />
+        <SelectValue placeholder="Chọn chuyên ngành của bạn" />
       </SelectTrigger>
       <SelectContent>{renderContent()}</SelectContent>
     </Select>

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { useCreateSchedule } from "@/hooks/use-schedules";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
-import { cn, isApiSuccess } from "@/lib/utils";
+import { cn, formatTime, isApiSuccess } from "@/lib/utils";
 import { MentoringRequest } from "@/types/interfaces";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { useState } from "react";
@@ -95,7 +95,9 @@ export default function MentorshipRequestsTable({
     !mentoringRequests.data ||
     mentoringRequests.data.items.length === 0
   ) {
-    return <div className="text-center py-4">No mentoring requests found</div>;
+    return (
+      <div className="text-center py-4">Không tìm thấy yêu cầu mentor</div>
+    );
   }
 
   const {
@@ -112,9 +114,10 @@ export default function MentorshipRequestsTable({
             <TableRow>
               <TableHead>ID</TableHead>
               <TableHead>Alumni</TableHead>
-              <TableHead>Message</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Tin nhắn</TableHead>
+              <TableHead>Ngày tạo</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Hành động</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -123,18 +126,21 @@ export default function MentorshipRequestsTable({
                 <TableCell>{request.id}</TableCell>
                 <TableCell>{request.alumniName}</TableCell>
                 <TableCell>{request.requestMessage}</TableCell>
+                <TableCell>{formatTime(request.createdAt)}</TableCell>
                 <TableCell>
                   <StatusChip
                     status={request.status as StatusChipProps["status"]}
                   />
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleReview(request.id)}
-                  >
-                    <SquareArrowOutUpRight className="w-4 h-4" />
-                  </Button>
+                  {request.status === "Pending" && (
+                    <Button
+                      variant="outline"
+                      onClick={() => handleReview(request.id)}
+                    >
+                      <SquareArrowOutUpRight className="w-4 h-4" />
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

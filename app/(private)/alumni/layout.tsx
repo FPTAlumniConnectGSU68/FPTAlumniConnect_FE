@@ -16,7 +16,7 @@ export default function AlumniLayout({
 
   useEffect(() => {
     if (!isLoading && (!user || user.roleName !== "Alumni")) {
-      router.push("/alumni/mentoring");
+      router.push("/alumni/events-management");
     }
   }, [user, isLoading, router]);
 

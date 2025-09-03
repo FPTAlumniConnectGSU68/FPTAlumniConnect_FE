@@ -1,5 +1,6 @@
 import Cookies from "js-cookie";
 import type { UserInfo } from "@/types/auth";
+import { useAvatarImageStore } from "@/hooks/use-user";
 
 const AUTH_TOKEN_KEY = "auth-token";
 const USER_INFO_KEY = "user_info";
@@ -32,6 +33,7 @@ export const AuthService = {
   clearAuth() {
     Cookies.remove(AUTH_TOKEN_KEY, { path: "/" });
     Cookies.remove(USER_INFO_KEY, { path: "/" });
+    useAvatarImageStore.setState({ avatarImage: "" });
   },
 
   isAuthenticated() {

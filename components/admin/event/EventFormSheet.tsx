@@ -27,6 +27,13 @@ import { toast } from "sonner";
 import { ApiResponse } from "@/lib/apiResponse";
 import { toHHmm } from "@/utils/format-date-time";
 
+const statusOptions = [
+  { value: "Pending", label: "Sắp diễn ra" },
+  { value: "Active", label: "Đang diễn ra" },
+  { value: "Completed", label: "Đã kết thúc" },
+  { value: "Delete", label: "Đã hủy" },
+];
+
 interface TimelineInput {
   eventTimeLineId?: number; // only in edit mode
   title: string;
@@ -50,19 +57,24 @@ export default function EventFormSheet({
 }: EventFormSheetProps) {
   const { user } = useAuth();
   const { GET_EVENT_DETAIL_WITH_TIMELINES } = useEventService();
-  const { data: majorsRes } = useMajorCodes({});
+  const { data: majorsRes } = useMajorCodes({
+    query: {
+      Size: "200",
+    },
+  });
   const majors =
     majorsRes?.status === "success" ? majorsRes.data?.items ?? [] : [];
 
   const [loading, setLoading] = useState(false);
   const [isSuggestion, setIsSuggestion] = useState(false);
-  const [eventData, setEventData] = useState({
+  const [eventData, setEventData] = useState<any>({
     eventName: "",
     description: "",
     location: "",
     startDate: "",
     endDate: "",
     img: "",
+    status: null,
     organizerId: user?.userId,
     majorId: 0,
     majorName: "",
@@ -80,6 +92,7 @@ export default function EventFormSheet({
       startDate: "",
       endDate: "",
       img: "",
+      status: null,
       organizerId: user?.userId,
       majorId: 0,
       majorName: "",
@@ -108,13 +121,10 @@ export default function EventFormSheet({
               eventName: ev.eventName || "",
               description: ev.description || "",
               location: ev.location || "",
-              startDate: ev.startDate
-                ? new Date(ev.startDate).toISOString().slice(0, 16)
-                : "",
-              endDate: ev.endDate
-                ? new Date(ev.endDate).toISOString().slice(0, 16)
-                : "",
+              startDate: ev.startDate ? ev.startDate : "",
+              endDate: ev.endDate ? ev.endDate : "",
               img: ev.img || "",
+              status: ev.status || null,
               organizerId: ev.organizerId || user?.userId,
               majorId: ev.majorId || 0,
               majorName: ev.majorName || "",
@@ -149,7 +159,7 @@ export default function EventFormSheet({
     const target = e.target as HTMLInputElement;
     const { name, value, type, files } = target;
 
-    setEventData((prev) => {
+    setEventData((prev: any) => {
       if (type === "file") {
         if (files?.[0]) {
           return { ...prev, img: URL.createObjectURL(files[0]) };
@@ -231,12 +241,12 @@ export default function EventFormSheet({
       eventName: eventData.eventName,
       img: eventData.img,
       description: eventData.description,
-      startDate: new Date(eventData.startDate).toISOString(),
-      endDate: new Date(eventData.endDate).toISOString(),
+      startDate: eventData.startDate,
+      endDate: eventData.endDate,
       organizerId: eventData.organizerId,
       majorId: eventData.majorId,
       location: eventData.location,
-      status: "Pending",
+      status: eventData.status,
       timeLines: timelines.map((t) => ({
         title: t.title,
         description: t.description,
@@ -267,12 +277,12 @@ export default function EventFormSheet({
       eventName: eventData.eventName,
       img: eventData.img,
       description: eventData.description,
-      startDate: new Date(eventData.startDate).toISOString(),
-      endDate: new Date(eventData.endDate).toISOString(),
+      startDate: eventData.startDate,
+      endDate: eventData.endDate,
       organizerId: eventData.organizerId,
       majorId: eventData.majorId,
       location: eventData.location,
-      status: "Pending",
+      status: eventData.status,
       timeLines: [], // no timelines on create
     };
 
@@ -312,29 +322,57 @@ export default function EventFormSheet({
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-[600px] overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{eventId ? "Edit Event" : "Create Event"}</SheetTitle>
+          <SheetTitle>
+            {eventId ? "Chỉnh sửa sự kiện" : "Tạo sự kiện"}
+          </SheetTitle>
         </SheetHeader>
 
         {loading ? (
-          <div className="py-6 text-center text-gray-500">Loading...</div>
+          <div className="py-6 text-center text-gray-500">Đang tải...</div>
         ) : (
           <div className="flex flex-col gap-4 py-4">
             {/* Event fields */}
-            <Label>Event Name</Label>
-            <Input
-              name="eventName"
-              value={eventData.eventName}
-              onChange={handleEventChange}
-            />
-
-            <Label>Description</Label>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <Label>Tên sự kiện</Label>
+                <Input
+                  name="eventName"
+                  value={eventData.eventName}
+                  onChange={handleEventChange}
+                />
+              </div>
+              <div className="w-1/4">
+                <Label>Trạng thái</Label>
+                <Select
+                  value={eventData.status || ""}
+                  onValueChange={(val) =>
+                    setEventData((prev: any) => ({
+                      ...prev,
+                      status: val,
+                    }))
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn trạng thái" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <Label>Mô tả</Label>
             <Textarea
               name="description"
               value={eventData.description}
               onChange={handleEventChange}
             />
 
-            <Label>Location</Label>
+            <Label>Địa điểm</Label>
             <Input
               name="location"
               value={eventData.location}
@@ -343,18 +381,18 @@ export default function EventFormSheet({
 
             {majors.length > 0 && (
               <div className="grid gap-2">
-                <Label htmlFor="major">Major</Label>
+                <Label htmlFor="major">Chuyên ngành</Label>
                 <Select
                   value={eventData.majorId ? String(eventData.majorId) : ""}
                   onValueChange={(val) =>
-                    setEventData((prev) => ({
+                    setEventData((prev: any) => ({
                       ...prev,
                       majorId: Number(val), // convert back to number
                     }))
                   }
                 >
                   <SelectTrigger id="major" className="w-full">
-                    <SelectValue placeholder="Select Major" />
+                    <SelectValue placeholder="Chọn chuyên ngành" />
                   </SelectTrigger>
                   <SelectContent>
                     {majors.map((m) => (
@@ -367,7 +405,7 @@ export default function EventFormSheet({
               </div>
             )}
 
-            <Label>Start Date</Label>
+            <Label>Ngày bắt đầu</Label>
             <Input
               type="datetime-local"
               name="startDate"
@@ -375,7 +413,7 @@ export default function EventFormSheet({
               onChange={handleEventChange}
             />
 
-            <Label>End Date</Label>
+            <Label>Ngày kết thúc</Label>
             <Input
               type="datetime-local"
               name="endDate"
@@ -383,14 +421,14 @@ export default function EventFormSheet({
               onChange={handleEventChange}
             />
 
-            <Label>Image URL</Label>
+            <Label>URL hình ảnh</Label>
             <Input
               name="img"
               value={eventData.img}
               onChange={handleEventChange}
             />
 
-            <Label>Upload Image</Label>
+            <Label>Tải lên hình ảnh</Label>
             <Input type="file" accept="image/*" onChange={handleEventChange} />
             {eventData.img && (
               <img
@@ -403,18 +441,18 @@ export default function EventFormSheet({
               <>
                 {/* Timeline section */}
                 <div className="flex items-center justify-between mt-6">
-                  <h3 className="text-lg font-semibold">Timelines</h3>
+                  <h3 className="text-lg font-semibold">Lịch trình</h3>
                   {isSuggestion && (
                     <span className="text-sm bg-green-50 border border-green-500 text-green-500 rounded-lg p-3">
-                      Below is the suggestions for timelines
+                      Dưới đây là gợi ý cho lịch trình
                     </span>
                   )}
                   <Button size="sm" onClick={addTimeline}>
-                    Add Timeline
+                    Thêm lịch trình
                   </Button>
                 </div>
                 {timelines.length === 0 && (
-                  <div className="text-gray-500">No timelines added</div>
+                  <div className="text-gray-500">Không có lịch trình</div>
                 )}
                 {timelines.map((t, idx) => (
                   <div
@@ -423,10 +461,10 @@ export default function EventFormSheet({
                   >
                     {/* Row 1: Title */}
                     <div className="flex flex-col">
-                      <label className="text-sm font-medium">Title</label>
+                      <label className="text-sm font-medium">Tiêu đề</label>
                       <Input
                         type="text"
-                        placeholder="Title"
+                        placeholder="Tiêu đề"
                         value={t.title}
                         onChange={(e) =>
                           handleTimelineChange(idx, "title", e.target.value)
@@ -436,10 +474,10 @@ export default function EventFormSheet({
 
                     {/* Row 2: Description */}
                     <div className="flex flex-col">
-                      <label className="text-sm font-medium">Description</label>
+                      <label className="text-sm font-medium">Mô tả</label>
                       <Input
                         type="text"
-                        placeholder="Description"
+                        placeholder="Mô tả"
                         value={t.description}
                         onChange={(e) =>
                           handleTimelineChange(
@@ -455,7 +493,7 @@ export default function EventFormSheet({
                     <div className="flex gap-4 items-end">
                       <div className="flex flex-col flex-1">
                         <label className="text-sm font-medium">
-                          Start Time
+                          Thời gian bắt đầu
                         </label>
                         <Input
                           type="time"
@@ -471,7 +509,9 @@ export default function EventFormSheet({
                       </div>
 
                       <div className="flex flex-col flex-1">
-                        <label className="text-sm font-medium">End Time</label>
+                        <label className="text-sm font-medium">
+                          Thời gian kết thúc
+                        </label>
                         <Input
                           type="time"
                           value={t.endTime}
@@ -487,7 +527,7 @@ export default function EventFormSheet({
                         className="mt-5"
                         onClick={() => removeTimeline(idx)}
                       >
-                        Remove
+                        Xóa
                       </Button>
                     </div>
                   </div>
@@ -512,13 +552,14 @@ export default function EventFormSheet({
 
         <SheetFooter className="mt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            Hủy
           </Button>
           <Button
             onClick={eventId ? handleUpdate : handleCreate}
             disabled={loading}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
-            Save Event
+            Lưu sự kiện
           </Button>
         </SheetFooter>
       </SheetContent>

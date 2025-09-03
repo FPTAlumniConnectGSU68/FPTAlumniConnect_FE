@@ -17,6 +17,8 @@ export const END_POINTS: {
   getEvents: { path: "/v1/events", method: "GET" },
   updateEvent: { path: "/v1/events", method: "PUT", secure: true },
   getJobs: { path: "/v1/jobposts", method: "GET" },
+  getRecuiters: { path: "/recruiter-info", method: "GET" },
+  updateRecuiter: { path: "/recruiter-info/status", method: "PATCH" },
   getPosts: { path: "/v1/posts", method: "GET" },
   getUsers: { path: "/v1/users", method: "GET" },
   getMentors: { path: "/v1/mentors", method: "GET" },
@@ -26,7 +28,7 @@ export const END_POINTS: {
   getChildCmts: { path: "", method: "GET" },
   postCmt: { path: "/v1/comments", method: "POST" },
   createPost: { path: "/v1/posts", method: "POST" },
-
+  getTopUsers: { path: "/v1/posts/top-users", method: "GET" },
   //event
   getEventDetail: { path: "/v1/events", method: "GET" },
   joinEvent: { path: "/v1/user-join-events", method: "POST" },
@@ -37,6 +39,18 @@ export const END_POINTS: {
 
   getEventDetailWithTimelines: { path: "/v1/events/detail", method: "GET" },
   getEventRating: { path: "/v1/user-join-events/view-all", method: "GET" },
+  checkUserJoinEvent: {
+    path: "/v1/user-join-events/event/check-user",
+    method: "GET",
+  },
+  getEventRoleStatistics: {
+    path: "/v1/user-join-events/event/participants/by-role",
+    method: "GET",
+  },
+  getEventPaticipantStatistics: {
+    path: "/v1/user-join-events/event/participants/by-day",
+    method: "GET",
+  },
   // User
   patchMentorUser: { path: "/v1/users", method: "PATCH" },
   createUser: { path: "/v1/users", method: "POST" },
@@ -120,6 +134,15 @@ export const END_POINTS: {
     path: "/v1/jobapplications/jobpost",
     method: "GET",
   },
+  getJobApplicationsByCvid: {
+    path: "/v1/jobapplications",
+    method: "GET",
+  },
+  // Recommendations
+  recommendJobsByCv: {
+    path: "/v1/phobert/recommend-jobs",
+    method: "GET",
+  },
   // User Count
   getUserCount: {
     path: "/v1/users/count",
@@ -131,6 +154,55 @@ export const END_POINTS: {
   },
   getEventCount: {
     path: "/v1/events/count",
+    method: "GET",
+  },
+  // Analytics / counts (monthly & status)
+  getEventCountByMonth: {
+    path: "/v1/events/count/month",
+    method: "GET",
+  },
+  getEventCountByStatus: {
+    path: "/v1/events/count/status",
+    method: "GET",
+  },
+  getUserCountByMonth: {
+    path: "/v1/users/count/month",
+    method: "GET",
+  },
+  getJobApplicationCount: {
+    path: "/v1/jobapplications/count",
+    method: "GET",
+  },
+  getJobPostCountByMonth: {
+    path: "/v1/jobposts/count/month",
+    method: "GET",
+  },
+  getMajorCount: {
+    path: "/v1/majorcodes/counts",
+    method: "GET",
+  },
+  getMentorshipCount: {
+    path: "/v1/mentorships/count",
+    method: "GET",
+  },
+  getMentorshipCountByMonth: {
+    path: "/v1/mentorships/count/month",
+    method: "GET",
+  },
+  getPostCount: {
+    path: "/v1/posts/count",
+    method: "GET",
+  },
+  getPostCountByMonth: {
+    path: "/v1/posts/count/month",
+    method: "GET",
+  },
+  getScheduleCount: {
+    path: "/schedules/count",
+    method: "GET",
+  },
+  getScheduleCountByMonth: {
+    path: "/schedules/count/month",
     method: "GET",
   },
 };
@@ -146,6 +218,8 @@ export enum ACTIONS {
 
   //Home
   GET_JOBS = "getJobs",
+  GET_RECUITERS = "getRecuiters",
+  UPDATE_RECRUITER = "updateRecuiter",
   GET_UPCOMMING_EVENTS = "getEvents",
   UPDATE_EVENT = "updateEvent",
   GET_FORUMS = "getPosts",
@@ -159,6 +233,7 @@ export enum ACTIONS {
   GET_CHILD_CMTS = "getChildCmts",
   POST_CMT = "postCmt",
   CREATE_POST = "createPost",
+  GET_TOP_USERS = "getTopUsers",
 
   GET_EVENT_DETAIL = "getEventDetail",
   JOIN_EVENT = "joinEvent",
@@ -169,6 +244,10 @@ export enum ACTIONS {
 
   GET_EVENT_DETAIL_WITH_TIMELINES = "getEventDetailWithTimelines",
   GET_EVENT_RATING = "getEventRating",
+
+  CHECK_USER_JOIN_EVENT = "checkUserJoinEvent",
+  GET_EVENT_ROLE_STATISTICS = "getEventRoleStatistics",
+  GET_EVENT_PATICIPANT_STATISTICS = "getEventPaticipantStatistics",
   // User
   PATCH_MENTOR_USER = "patchMentorUser",
   CREATE_USER = "createUser",
@@ -200,11 +279,27 @@ export enum ACTIONS {
   UPDATE_JOB_APPLICATION = "updateJobApplication",
   CREATE_JOB_POST = "createJobPost",
   GET_JOB_APPLICATIONS_BY_JOBPOST_ID = "getJobApplicationsByJobPostId",
+  GET_JOB_APPLICATIONS_BY_CV_ID = "getJobApplicationsByCvid",
 
   // User Count
   GET_USER_COUNT = "getUserCount",
   GET_JOB_POST_COUNT = "getJobPostCount",
   GET_EVENT_COUNT = "getEventCount",
+  // Analytics / counts (monthly & status)
+  GET_EVENT_COUNT_BY_MONTH = "getEventCountByMonth",
+  GET_EVENT_COUNT_BY_STATUS = "getEventCountByStatus",
+  GET_USER_COUNT_BY_MONTH = "getUserCountByMonth",
+  GET_JOB_APPLICATION_COUNT = "getJobApplicationCount",
+  GET_JOB_POST_COUNT_BY_MONTH = "getJobPostCountByMonth",
+  GET_MAJOR_COUNT = "getMajorCount",
+  GET_MENTORSHIP_COUNT = "getMentorshipCount",
+  GET_MENTORSHIP_COUNT_BY_MONTH = "getMentorshipCountByMonth",
+  GET_POST_COUNT = "getPostCount",
+  GET_POST_COUNT_BY_MONTH = "getPostCountByMonth",
+  GET_SCHEDULE_COUNT = "getScheduleCount",
+  GET_SCHEDULE_COUNT_BY_MONTH = "getScheduleCountByMonth",
+  // Recommendations
+  RECOMMEND_JOBS_BY_CV = "recommendJobsByCv",
 }
 
 export const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;

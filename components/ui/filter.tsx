@@ -30,6 +30,7 @@ interface FilterProps {
   selects?: SelectConfig[];
   className?: string;
   clearAllRef?: React.RefObject<HTMLButtonElement>;
+  children?: React.ReactNode;
 }
 
 export function Filter({
@@ -40,6 +41,7 @@ export function Filter({
   selects = [],
   className = "",
   clearAllRef,
+  children,
 }: FilterProps) {
   return (
     <div className={`flex gap-4 items-center ${className}`}>
@@ -70,6 +72,8 @@ export function Filter({
           </SelectContent>
         </Select>
       ))}
+      {/* extra */}
+      {children}
       {/* button to clear all filters */}
       <Button
         ref={clearAllRef}
@@ -80,7 +84,7 @@ export function Filter({
           });
         }}
       >
-        Clear All
+        Xóa tất cả
       </Button>
     </div>
   );

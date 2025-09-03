@@ -101,7 +101,7 @@ const Pagination = ({
           disabled={currentPage === 1}
         >
           <ChevronLeft className="h-4 w-4 mr-1" />
-          Previous
+          Trước
         </Button>
         <div className="flex items-center gap-2">{renderPageNumbers()}</div>
         <Button
@@ -110,12 +110,12 @@ const Pagination = ({
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
-          Next
+          Tiếp theo
           <ChevronRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
       <div className="text-sm text-gray-500">
-        Page {currentPage} of {totalPages}
+        Trang {currentPage} / {totalPages}
       </div>
     </div>
   );

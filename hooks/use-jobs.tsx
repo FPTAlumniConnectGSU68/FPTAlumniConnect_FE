@@ -44,3 +44,23 @@ export function useGetJobPostCount() {
     },
   });
 }
+
+export function useRecommendedJobsByCv(cvId?: number, page = 1, size = 6) {
+  return useQuery<ApiResponse<PaginatedData<JobPost>>>({
+    queryKey: ["recommended-jobs", cvId, page, size],
+    enabled: Boolean(cvId),
+    queryFn: async () => {
+      const response = await APIClient.invoke<
+        ApiResponse<PaginatedData<JobPost>>
+      >({
+        action: ACTIONS.RECOMMEND_JOBS_BY_CV,
+        idQuery: String(cvId),
+        query: {
+          Page: String(page),
+          Size: String(size),
+        },
+      });
+      return response;
+    },
+  });
+}

@@ -40,7 +40,7 @@ const CVPreview = forwardRef<HTMLDivElement, CVPreviewProps>(({ cv }, ref) => {
           {/* Professional Summary */}
           <section>
             <h2 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-800 pb-2 mb-3">
-              Professional Summary
+              Tóm tắt nghề nghiệp
             </h2>
             <div className="flex items-center gap-2 text-gray-700 mb-2">
               <Building2 className="w-4 h-4 text-blue-600" />
@@ -55,7 +55,7 @@ const CVPreview = forwardRef<HTMLDivElement, CVPreviewProps>(({ cv }, ref) => {
           {/* Language Skills */}
           <section>
             <h2 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-800 pb-2 mb-3">
-              Language Skills
+              Kỹ năng ngoại ngữ
             </h2>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
@@ -68,7 +68,7 @@ const CVPreview = forwardRef<HTMLDivElement, CVPreviewProps>(({ cv }, ref) => {
           {/* Salary Expectations */}
           <section>
             <h2 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-800 pb-2 mb-3">
-              Salary Expectations
+              Kỳ vọng lương
             </h2>
             <div className="bg-blue-50 p-3 rounded-lg">
               <p className="text-blue-800 font-medium">
@@ -84,11 +84,11 @@ const CVPreview = forwardRef<HTMLDivElement, CVPreviewProps>(({ cv }, ref) => {
           {/* Career Objective */}
           <section>
             <h2 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-800 pb-2 mb-3">
-              Career Objective
+              Mục tiêu nghề nghiệp
             </h2>
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="font-medium text-blue-800 mb-2">
-                Desired Position
+                Vị trí mong muốn
               </h3>
               <p className="text-lg font-medium mb-1">{cv.desiredJob}</p>
               <p className="text-gray-600">{cv.position}</p>
@@ -98,12 +98,12 @@ const CVPreview = forwardRef<HTMLDivElement, CVPreviewProps>(({ cv }, ref) => {
           {/* Work Experience */}
           <section>
             <h2 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-800 pb-2 mb-3">
-              Work Experience
+              Kinh nghiệm làm việc
             </h2>
             <div className="space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-medium text-blue-800 mb-2">
-                  Primary Duties
+                  Nhiệm vụ chính
                 </h3>
                 <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
                   {cv.primaryDuties}
@@ -116,7 +116,7 @@ const CVPreview = forwardRef<HTMLDivElement, CVPreviewProps>(({ cv }, ref) => {
           {cv.additionalContent && (
             <section>
               <h2 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-800 pb-2 mb-3">
-                Additional Information
+                Thông tin bổ sung
               </h2>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
@@ -132,9 +132,9 @@ const CVPreview = forwardRef<HTMLDivElement, CVPreviewProps>(({ cv }, ref) => {
       <div className="border-t border-gray-200 p-4 text-sm text-gray-500 bg-gray-50">
         <div className="flex justify-between max-w-4xl mx-auto">
           <p>
-            Status: <span className="text-blue-600">{cv.status}</span>
+            Trạng thái: <span className="text-blue-600">{cv.status}</span>
           </p>
-          <p>Last Updated: {format(new Date(), "MMMM dd, yyyy")}</p>
+          <p>Lần cuối cập nhật: {format(new Date(), "MMMM dd, yyyy")}</p>
         </div>
       </div>
     </div>

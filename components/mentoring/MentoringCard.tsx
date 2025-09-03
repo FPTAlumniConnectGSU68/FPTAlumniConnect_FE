@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { MentoringRequest, Schedule } from "@/types/interfaces";
 import { Clock, Star, UserCheck } from "lucide-react";
 import { LoadingSpinner } from "../ui/loading-spinner";
-import { formatDateToDMY } from "@/lib/utils";
+import { formatDateToDMY, formatTime } from "@/lib/utils";
 
 interface MentoringCardProps {
   request: MentoringRequest;
@@ -35,7 +35,22 @@ export function MentoringCard({
     }
   };
 
-  console.log("request", request);
+  function renderDateTimeRange(start?: string, end?: string) {
+    if (!start || !end) return "—";
+
+    const startDate = formatDateToDMY(start);
+    const startTime = formatTime(start);
+    const endDate = formatDateToDMY(end);
+    const endTime = formatTime(end);
+
+    // If same day → compact format
+    if (startDate === endDate) {
+      return `${startDate} ${startTime} - ${endTime}`;
+    }
+
+    // Different day → show both
+    return `${startDate} ${startTime} - ${endDate} ${endTime}`;
+  }
 
   return (
     <div className="relative overflow-hidden bg-white rounded-xl shadow p-6 flex flex-col justify-between min-h-[220px]">
@@ -94,14 +109,26 @@ export function MentoringCard({
                   </span>
                 </div>
               </div>
-              <div className="text-sm mt-2 flex items-center gap-2 bg-gradient-to-r from-purple-50 to-purple-100 p-2.5 rounded-lg border border-purple-200">
-                <Clock className="w-5 h-5 text-purple-600" />
-                <div className="flex items-center gap-1.5">
-                  <span className="text-gray-600">Thời gian:</span>
-                  <span className="font-medium text-purple-700 bg-white px-2.5 py-1 rounded-md shadow-sm">
-                    {formatDateToDMY(request.schedules[0]?.startTime ?? "")} -{" "}
-                    {formatDateToDMY(request.schedules[0]?.endTime ?? "")}
-                  </span>
+              <div className="text-sm mt-2 bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-lg border border-green-200 shadow-sm">
+                <div className="flex gap-2 mb-2">
+                  <span className="text-gray-700 font-medium">Chủ đề</span>
+                </div>
+                <div className="font-normal text-blue-600 bg-white px-3 py-1.5 rounded-md shadow-sm text-xs md:text-sm">
+                  {request.schedules[0]?.content || "—"}
+                </div>
+              </div>
+
+              <div className="text-sm mt-2 bg-gradient-to-r from-purple-50 to-purple-100 p-3 rounded-lg border border-purple-200 shadow-sm">
+                <div className="flex gap-2 mb-2">
+                  <Clock className="w-5 h-5 text-purple-600" />
+                  <span className="text-gray-700 font-medium">Thời gian</span>
+                </div>
+
+                <div className="font-normal text-purple-700 bg-white px-2 py-1.5 rounded-md shadow-sm text-xs md:text-sm">
+                  {renderDateTimeRange(
+                    request.schedules[0]?.startTime,
+                    request.schedules[0]?.endTime
+                  )}
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 "use client";
 import { useEvents } from "@/hooks/use-event";
 import { formatDateToDMY, formatTime, isApiSuccess } from "@/lib/utils";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
@@ -14,6 +14,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import useEventService from "@/lib/services/event.service";
 import { useToast } from "@/components/ui/toast";
 import { useAuthGuard } from "@/hooks/use-auth-guard";
+import { EventCardSkeleton } from "@/components/event/EventCardSkeleton";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import AutocompleteDropdown from "@/components/autocomplete/AutocompleteSelect";
 
 const locations = ["All Locations", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng"];
@@ -43,6 +52,9 @@ function EventsContent() {
   const [ratings, setRatings] = useState<Record<number, number>>({});
   const [ratingContents, setRatingContents] = useState<Record<number, string>>(
     {}
+  );
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "rating">(
+    "newest"
   );
   const majors =
     majorsRes?.status === "success" ? majorsRes.data?.items ?? [] : [];
@@ -89,6 +101,24 @@ function EventsContent() {
   const eventItems = eventData?.items ?? [];
   const totalPages = eventData?.totalPages ?? 0;
 
+  const itemsToRender = useMemo(() => {
+    const items = [...eventItems];
+    if (sortBy === "newest") {
+      items.sort(
+        (a, b) =>
+          new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+      );
+    } else if (sortBy === "oldest") {
+      items.sort(
+        (a, b) =>
+          new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+      );
+    } else if (sortBy === "rating") {
+      items.sort((a, b) => (b.averageRating ?? 0) - (a.averageRating ?? 0));
+    }
+    return items;
+  }, [eventItems, sortBy]);
+
   const handleStarSelect = (eventId: number, rating: number) => {
     setRatings((prev) => ({ ...prev, [eventId]: rating }));
   };
@@ -118,9 +148,45 @@ function EventsContent() {
     }
   };
 
+  const hasActiveFilters =
+    Boolean(searchInput) ||
+    Boolean(locationInput) ||
+    (major && major !== "All Majors") ||
+    showJoinedEvents;
+  const clearFilters = () => {
+    setSearchInput("");
+    setLocationInput("");
+    setMajor("All Majors");
+    setShowJoinedEvents(false);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Events Directory</h1>
+      <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Danh sách sự kiện</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Khám phá các sự kiện, hội thảo, và hội họp của cộng đồng sinh viên
+            FPT University.
+          </p>
+        </div>
+        <div className="w-full md:w-56">
+          <label className="block text-sm text-gray-500 mb-1">
+            Sắp xếp theo
+          </label>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Sắp xếp" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Mới nhất</SelectItem>
+              <SelectItem value="oldest">Cũ nhất</SelectItem>
+              <SelectItem value="rating">Đánh giá cao nhất</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       {/* Search & filter */}
       <Suspense
@@ -130,12 +196,12 @@ function EventsContent() {
           </div>
         }
       >
-        <div className="bg-white rounded-xl shadow p-6 mb-8 flex flex-col md:flex-row gap-4 md:items-center">
+        <div className="bg-white rounded-xl shadow p-6 mb-4 flex flex-col md:flex-row gap-4 md:items-center">
           {/* Search */}
           <div className="relative flex-1">
             <input
               type="text"
-              placeholder="Search by event name..."
+              placeholder="Tìm kiếm theo tên sự kiện..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -158,7 +224,7 @@ function EventsContent() {
           <div className="relative flex-2">
             <input
               type="text"
-              placeholder="Search by event location..."
+              placeholder="Tìm kiếm theo địa điểm..."
               value={locationInput}
               onChange={(e) => setLocationInput(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -211,7 +277,7 @@ function EventsContent() {
               ))}
             </select>
           </div> */}
-          <div className="w-full md:w-48">
+          <div className="w-full md:w-64">
             <AutocompleteDropdown
               value={major}
               onChange={(val) => {
@@ -219,13 +285,13 @@ function EventsContent() {
               }}
               onSearch={setMajorSearch}
               options={[
-                { value: "All Majors", label: "All Majors" },
+                { value: "All Majors", label: "Tất cả chuyên ngành" },
                 ...majors.map((m) => ({
                   value: String(m.majorId),
                   label: m.majorName,
                 })),
               ]}
-              placeholder="Search majors..."
+              placeholder="Tìm kiếm theo chuyên ngành..."
               isLoading={isLoading}
             />
           </div>
@@ -235,9 +301,9 @@ function EventsContent() {
             onClick={() => {
               if (
                 !requireAuth({
-                  title: "View joined events.",
-                  description: "Sign in to view event you joined",
-                  actionText: "events",
+                  title: "Xem sự kiện đã tham gia.",
+                  description: "Đăng nhập để xem sự kiện đã tham gia",
+                  actionText: "sự kiện",
                 })
               ) {
                 return;
@@ -247,28 +313,68 @@ function EventsContent() {
             }}
             className="whitespace-nowrap"
           >
-            {showJoinedEvents ? "Show All Events" : "My Joined Events"}
+            {showJoinedEvents
+              ? "Hiển thị tất cả sự kiện"
+              : "Sự kiện đã tham gia"}
           </Button>
         </div>
+        {hasActiveFilters && (
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            {searchInput && (
+              <Badge variant="secondary">Tìm kiếm: {searchInput}</Badge>
+            )}
+            {locationInput && (
+              <Badge variant="secondary">Địa điểm: {locationInput}</Badge>
+            )}
+            {major && major !== "All Majors" && (
+              <Badge variant="secondary">
+                Chuyên ngành:{" "}
+                {majors.find((m) => String(m.majorId) === major)?.majorName ??
+                  major}
+              </Badge>
+            )}
+            {/* {showJoinedEvents && <Badge>Đã tham gia</Badge>} */}
+            <Button variant="ghost" size="sm" onClick={clearFilters}>
+              Xóa bộ lọc
+            </Button>
+          </div>
+        )}
       </Suspense>
 
       {/* Events grid */}
       {isLoading && (
-        <div className="text-center py-10 text-gray-500">Loading events...</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: pageSize }).map((_, idx) => (
+            <EventCardSkeleton key={idx} />
+          ))}
+        </div>
       )}
 
       {!isLoading && eventItems.length === 0 && (
-        <div className="text-center py-10 text-gray-500">No events found</div>
+        <div className="bg-white rounded-xl border text-center py-16 px-8">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+            <Calendar className="h-6 w-6 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-semibold">
+            Không có sự kiện nào phù hợp với bộ lọc của bạn
+          </h3>
+          <p className="text-sm text-gray-500 mt-1 mb-4">
+            Hãy điều chỉnh tìm kiếm hoặc xóa tất cả bộ lọc để xem thêm kết quả.
+          </p>
+          <Button onClick={clearFilters} variant="outline">
+            Xóa bộ lọc
+          </Button>
+        </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {eventItems.map((item) => (
+        {itemsToRender.map((item) => (
           <Card
             key={item.eventId}
             className="border bg-white flex flex-col overflow-hidden"
           >
             {/* Image header */}
-            <div className="w-full h-40">
+            <div className="relative w-full h-40">
               <Image
                 src={item.img || "/default-event.png"}
                 alt={item.eventName}
@@ -276,6 +382,21 @@ function EventsContent() {
                 height={160}
                 className="w-full h-full object-cover"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+              <div className="absolute top-2 left-2 flex gap-2">
+                <Badge variant="secondary">
+                  {new Date(item.startDate) > new Date()
+                    ? "Sắp diễn ra"
+                    : "Đã diễn ra"}
+                </Badge>
+              </div>
+              {typeof item.averageRating !== "undefined" &&
+                item.averageRating !== null && (
+                  <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-gray-800">
+                    <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400" />
+                    {item.averageRating}
+                  </div>
+                )}
             </div>
             {/* Content */}
             <div className="p-6 flex flex-col flex-1">
@@ -285,7 +406,7 @@ function EventsContent() {
               </p>
               {showJoinedEvents && (
                 <div className="flex items-center text-sm gap-2">
-                  <span className="text-gray-600">Average Rating:</span>
+                  <span className="text-gray-600">Đánh giá trung bình:</span>
                   <div className="flex items-center">
                     <span className="font-medium mr-1 text-gray-900">
                       {item.averageRating}
@@ -308,7 +429,7 @@ function EventsContent() {
                 </div>
               </div>
 
-              {showJoinedEvents ? (
+              {/* {showJoinedEvents ? (
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -338,7 +459,7 @@ function EventsContent() {
                   <CustomTooltip
                     message={
                       new Date() < new Date(item.startDate)
-                        ? "Event hasn't started, cannot rate"
+                        ? "Sự kiện chưa diễn ra, không thể đánh giá"
                         : ""
                     }
                   >
@@ -352,7 +473,7 @@ function EventsContent() {
                         handleCommitRating(item.eventId, item.userJoinEventId)
                       }
                     >
-                      Rate
+                      Đánh giá
                     </Button>
                   </CustomTooltip>
                 </div>
@@ -363,9 +484,17 @@ function EventsContent() {
                   }}
                   className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
                 >
-                  Register Now
+                  Đăng ký ngay
                 </Button>
-              )}
+              )} */}
+              <Button
+                onClick={() => {
+                  setSelectedEventId(item.eventId);
+                }}
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
+              >
+                Xem chi tiết
+              </Button>
             </div>
           </Card>
         ))}

@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       router.push("/middlecheck");
     }
     toast.success(
-      `${action === "login" ? "Sign in" : "Registration"} successful`
+      `${action === "login" ? "Đăng nhập" : "Đăng ký"} thành công!`
     );
     return { success: true };
   };
@@ -101,11 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return handleAuthError(response as ApiError);
       }
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error("Đăng nhập thất bại:", error);
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred during sign in";
+        error instanceof Error ? error.message : "Đăng nhập thất bại";
       toast.error(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -125,11 +123,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return handleAuthError(response as ApiRegistrationError);
       }
     } catch (error) {
-      console.error("Registration failed:", error);
+      console.error("Đăng ký thất bại:", error);
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred during registration";
+        error instanceof Error ? error.message : "Đăng ký thất bại";
       toast.error(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -142,11 +138,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       AuthService.clearAuth();
       setUser(null);
-      toast.success("Logged out successfully");
+      toast.success("Đăng xuất thành công");
       router.push("/login");
     } catch (error) {
-      console.error("Logout failed:", error);
-      toast.error("Failed to log out properly");
+      console.error("Đăng xuất thất bại:", error);
+      toast.error("Đăng xuất thất bại");
     } finally {
       setIsLoading(false);
     }

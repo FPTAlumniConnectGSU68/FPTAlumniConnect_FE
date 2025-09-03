@@ -44,15 +44,15 @@ const UserHeader = ({
 
   return (
     <div className="flex justify-between items-center">
-      <h1 className="text-2xl font-bold">User Management</h1>
+      <h1 className="text-2xl font-bold">Quản lý người dùng</h1>
       <div className="flex gap-4 items-center">
         <Filter
-          searchPlaceholder="Search users..."
+          searchPlaceholder="Tìm kiếm người dùng..."
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
           selects={[
             {
-              placeholder: "Filter by role",
+              placeholder: "Lọc theo vai trò",
               value: role,
               onChange: (value) => {
                 setRole(value);
@@ -61,7 +61,7 @@ const UserHeader = ({
               options: roleOptions,
             },
             {
-              placeholder: "Filter by major code",
+              placeholder: "Lọc theo chuyên ngành",
               value: majorCode,
               onChange: (value) => {
                 setMajorCode(value);
@@ -73,10 +73,10 @@ const UserHeader = ({
         />
         <Button
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
         >
           <PlusIcon className="w-4 h-4" />
-          Create User
+          Tạo người dùng
         </Button>
       </div>
     </div>

@@ -10,8 +10,13 @@ const EventHeader = ({
     <div className="flex flex-col gap-4">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Event Management</h1>
-        <Button onClick={openCreateEvent}>Add Event</Button>
+        <h1 className="text-2xl font-bold">Quản lý sự kiện</h1>
+        <Button
+          onClick={openCreateEvent}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+        >
+          Thêm sự kiện
+        </Button>
       </div>
     </div>
   );

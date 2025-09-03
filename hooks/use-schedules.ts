@@ -79,14 +79,14 @@ export function useCreateSchedule() {
     },
     onSuccess: (response) => {
       if (response.status === "success") {
-        toast.success("Accepted request successfully");
+        toast.success("Chấp nhận yêu cầu thành công");
         invalidateArr.forEach((key) => {
           queryClient.invalidateQueries({ queryKey: [key] });
         });
       }
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to accept request");
+      toast.error(error.message || "Lỗi khi chấp nhận yêu cầu");
     },
   });
 }
@@ -104,14 +104,14 @@ export function useCompleteSchedule() {
     },
     onSuccess: (response) => {
       if (response.status === "success") {
-        toast.success("Completed schedule successfully");
+        toast.success("Hoàn thành buổi học thành công");
         invalidateArr.forEach((key) => {
           queryClient.invalidateQueries({ queryKey: [key] });
         });
       }
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to complete schedule");
+      toast.error(error.message || "Lỗi khi hoàn thành buổi học");
     },
   });
 }
@@ -141,14 +141,14 @@ export function useRateMentor() {
     },
     onSuccess: (response) => {
       if (response.status === "success") {
-        toast.success("Updated schedule rating successfully");
+        toast.success("Cập nhật đánh giá buổi học thành công");
         invalidateArr.forEach((key) => {
           queryClient.invalidateQueries({ queryKey: [key] });
         });
       }
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to update schedule rating");
+      toast.error(error.message || "Lỗi khi cập nhật đánh giá buổi học");
     },
   });
 }

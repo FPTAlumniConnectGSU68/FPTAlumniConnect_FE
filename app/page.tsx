@@ -223,10 +223,10 @@ export default function HomePage() {
       <Header />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         {/* Hero Section */}
-        <HeroSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        <HeroSection />
 
         {/* Main Content */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        {/* <section className="max-w-7xl mx-auto px-4 pt-6 sm:px-6 lg:px-8 pb-20">
           <Tabs defaultValue="alumni" className="space-y-8">
             <TabsList className="grid w-full grid-cols-5 h-12 bg-white border border-gray-200">
               {tabItems.map((item, index) => (
@@ -249,9 +249,8 @@ export default function HomePage() {
               </TabsContent>
             ))}
           </Tabs>
-        </section>
+        </section> */}
         <Footer />
-
         {/* Auth Modals */}
         <LoginModal
           isOpen={isLoginOpen}
@@ -269,7 +268,6 @@ export default function HomePage() {
             setIsLoginOpen(true);
           }}
         />
-
         {/* Add AuthGuard at the end */}
         <AuthGuard />
       </div>

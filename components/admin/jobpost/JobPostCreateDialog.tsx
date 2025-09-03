@@ -71,7 +71,11 @@ export function JobPostCreateDialog({
 }) {
   const queryClient = useQueryClient();
   const { data: skillsData } = useSkills({ page: 1, size: 100 });
-  const { data: majorsData } = useMajorCodes({});
+  const { data: majorsData } = useMajorCodes({
+    query: {
+      Size: "200",
+    },
+  });
 
   const statusItems = {
     Open: "Open",
@@ -351,7 +355,11 @@ export function JobPostCreateDialog({
             >
               Hủy
             </Button>
-            <Button type="submit" disabled={submitting || isSubmitting}>
+            <Button
+              type="submit"
+              disabled={submitting || isSubmitting}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
               {submitting || isSubmitting ? "Đang tạo..." : "Tạo"}
             </Button>
           </div>

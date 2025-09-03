@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/auth-context";
 import { useNotificationSetup } from "@/hooks/use-notification-socket";
-import { useGetUser } from "@/hooks/use-user";
+import { useAvatarImageStore, useGetUser } from "@/hooks/use-user";
 import { useNotificationStore } from "@/store/notification";
 import type { UserInfo } from "@/types/auth";
 import Cookies from "js-cookie";
@@ -30,6 +30,7 @@ import {
   UserCheck,
   Users,
   FileText,
+  Inbox,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -42,55 +43,63 @@ interface MainLayoutProps {
 }
 
 const navigation = [
-  { name: "Profile", href: "/profile", icon: User },
-  { name: "Chat", href: "/chat", icon: MessageSquare },
+  { name: "Hồ sơ", href: "/profile", icon: User },
+  // { name: "Trò chuyện", href: "/chat", icon: MessageSquare },
 ];
 
 const adminNavigation = [
-  { name: "Dashboard", href: "/admin/dashboard", icon: Home },
-  { name: "User Management", href: "/admin/users-management", icon: Users },
+  { name: "Trang chủ", href: "/admin/dashboard", icon: Home },
+  { name: "Quản lý người dùng", href: "/admin/users-management", icon: Users },
   {
-    name: "Post Management",
+    name: "Quản lý bài viết",
     href: "/admin/posts-management",
     icon: MessageSquare,
   },
+  // {
+  //   name: "Quản lý sự kiện",
+  //   href: "/admin/events-management",
+  //   icon: Calendar,
+  // },
+
   {
-    name: "Event Management",
-    href: "/admin/events-management",
-    icon: Calendar,
+    name: "Yêu cầu mentor",
+    href: "/admin/mentorship-requests",
+    icon: UserCheck,
   },
   {
-    name: "Job Post Management",
+    name: "Quản lý tin tuyển dụng",
     href: "/admin/jobposts-management",
     icon: Briefcase,
   },
   {
-    name: "Mentorship Requests",
-    href: "/admin/mentorship-requests",
-    icon: UserCheck,
+    name: "Quản lý nhà tuyển dụng",
+    href: "/admin/recruiters-management",
+    icon: Inbox,
   },
 ];
 
 const alumniNavigation = [
-  { name: "Mentoring", href: "/alumni/mentoring", icon: UserCheck },
+  // { name: "Cố vấn", href: "/alumni/mentoring", icon: UserCheck },
   {
-    name: "Event Management",
+    name: "Quản lý sự kiện",
     href: "/alumni/events-management",
     icon: Calendar,
   },
-  { name: "CV", href: "/alumni/CV", icon: FileText },
+  { name: "Sơ yếu lý lịch", href: "/alumni/CV", icon: FileText },
   {
-    name: "Job Post Management",
+    name: "Quản lý tin tuyển dụng",
     href: "/alumni/jobpost-management",
     icon: Briefcase,
   },
 ];
 
-const studentNavigation = [{ name: "CV", href: "/student/CV", icon: FileText }];
+const studentNavigation = [
+  { name: "Sơ yếu lý lịch", href: "/student/CV", icon: FileText },
+];
 
 const recruiterNavigation = [
   {
-    name: "Job Post Management",
+    name: "Quản lý tin tuyển dụng",
     href: "/recruiter/jobpost-management",
     icon: Briefcase,
   },
@@ -156,8 +165,8 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-red-50">
-      <header className="bg-white shadow-sm border-b">
+    <div className=" bg-red-50 overflow-y-auto">
+      <header className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-4">
             <Button
@@ -200,12 +209,12 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                   <Avatar className="h-8 w-8">
                     <AvatarImage
                       src={
+                        useAvatarImageStore.getState().avatarImage ||
                         fetchedUser?.profilePicture ||
                         "https://cdn.dribbble.com/users/13929796/avatars/normal/6d7cf73c0502578c420474f6adc6cc0d.png?1707433135"
                       }
                       alt={
                         (displayUser?.firstName || "") +
-                        " " +
                         (displayUser?.lastName || "")
                       }
                     />
@@ -230,21 +239,21 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                 <DropdownMenuItem asChild>
                   <Link href="/profile" className="flex items-center">
                     <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
+                    <span>Hồ sơ</span>
                   </Link>
                 </DropdownMenuItem>
                 {displayUser?.roleName === "Admin" && (
                   <DropdownMenuItem asChild>
                     <Link href="/admin/dashboard" className="flex items-center">
                       <Settings className="mr-2 h-4 w-4" />
-                      <span>Dashboard</span>
+                      <span>Trang chủ</span>
                     </Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
+                  <span>Đăng xuất</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -252,7 +261,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-65px)]">
+      <div className="flex h-[calc(100vh-65px)] overflow-y-auto">
         <aside
           className={`${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -276,7 +285,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                 <>
                   <div className="pt-4">
                     <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      Administration
+                      Quản trị viên
                     </h3>
                   </div>
                   {adminNavigation.map((item) => (
@@ -297,7 +306,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                 <>
                   <div className="pt-4">
                     <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      Alumni
+                      Cựu sinh viên
                     </h3>
                   </div>
                   {alumniNavigation.map((item) => (
@@ -318,7 +327,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                 <>
                   <div className="pt-4">
                     <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      Student
+                      Sinh viên
                     </h3>
                   </div>
                   {studentNavigation.map((item) => (
@@ -339,7 +348,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                 <>
                   <div className="pt-4">
                     <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                      Recruiter
+                      Nhà tuyển dụng
                     </h3>
                   </div>
                   {recruiterNavigation.map((item) => (
@@ -360,7 +369,7 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
           </div>
         </aside>
 
-        <main className="flex-1 lg:ml-0">
+        <main className="flex-1 lg:ml-0 overflow-y-auto">
           <div className="p-6">{children}</div>
         </main>
       </div>

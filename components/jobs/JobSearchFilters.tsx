@@ -3,6 +3,8 @@
 import { useMajorCodes } from "@/hooks/use-major-codes";
 import { isApiSuccess } from "@/lib/utils";
 import { Filter } from "../ui/filter";
+import { useEffect, useState } from "react";
+import AutocompleteDropdown from "../autocomplete/AutocompleteSelect";
 
 interface JobSearchFiltersProps {
   search: string;
@@ -32,39 +34,69 @@ export function JobSearchFilters({
   onLocationChange,
   clearAllRef,
 }: JobSearchFiltersProps) {
-  const { data: majorCodes } = useMajorCodes({});
-  const majorItems =
-    majorCodes && isApiSuccess(majorCodes) ? majorCodes.data?.items ?? [] : [];
-  const majorOptions = majorItems.map((major) => ({
-    value: major.majorId.toString(),
-    label: major.majorName,
-  }));
+  const [majorSearch, setMajorSearch] = useState("");
+  const { data: majorsRes } = useMajorCodes({
+    searchString: majorSearch,
+    query: {
+      Size: "200",
+    },
+  });
+  const majors =
+    majorsRes?.status === "success" ? majorsRes.data?.items ?? [] : [];
+
   const locationOptions = locations.map((location) => ({
     value: location,
     label: location,
   }));
+
+  useEffect(() => {
+    if (!clearAllRef?.current) return;
+
+    const handler = () => {
+      // reset major to default
+      onMajorChange("Tất cả chuyên ngành");
+    };
+
+    const btn = clearAllRef.current;
+    btn.addEventListener("click", handler);
+
+    return () => {
+      btn.removeEventListener("click", handler);
+    };
+  }, [clearAllRef, onMajorChange]);
+
   return (
-    <div className="bg-white rounded-xl shadow p-6 mb-8 flex flex-wrap gap-4">
+    <div className="bg-white rounded-xl shadow p-6 mb-8 flex gap-4 w-full">
       <Filter
-        searchPlaceholder="Search jobs..."
+        searchPlaceholder="Tìm kiếm việc làm..."
         searchValue={search}
         onSearchChange={onSearchChange}
         clearAllRef={clearAllRef}
         selects={[
           {
-            placeholder: "Select major",
-            value: major,
-            onChange: (value) => onMajorChange(value),
-            options: majorOptions,
-          },
-          {
-            placeholder: "Select location",
+            placeholder: "Chọn địa điểm",
             value: location,
             onChange: (value) => onLocationChange(value),
             options: locationOptions,
           },
         ]}
-      />
+      >
+        <div className="w-48">
+          <AutocompleteDropdown
+            value={major}
+            onChange={(val) => onMajorChange(val || "")}
+            onSearch={setMajorSearch}
+            options={[
+              { value: "Tất cả chuyên ngành", label: "Tất cả chuyên ngành" },
+              ...majors.map((m) => ({
+                value: String(m.majorId),
+                label: m.majorName,
+              })),
+            ]}
+            placeholder="Select major..."
+          />
+        </div>
+      </Filter>
     </div>
   );
 }

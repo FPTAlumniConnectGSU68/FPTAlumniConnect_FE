@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { User } from "@/types/interfaces";
 import { toast } from "sonner";
+import { create } from "zustand";
 
 export const USER_QUERY_KEYS = {
   all: ["users"] as const,
@@ -156,3 +157,13 @@ export function useGetUserCount() {
     },
   });
 }
+
+const useAvatarImage = create<{
+  avatarImage: string;
+  setAvatarImage: (avatarImage: string) => void;
+}>((set) => ({
+  avatarImage: "",
+  setAvatarImage: (avatarImage) => set({ avatarImage }),
+}));
+
+export const useAvatarImageStore = useAvatarImage;

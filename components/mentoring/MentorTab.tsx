@@ -22,7 +22,7 @@ export function MentorTab({ currentPage, userId }: MentorTabProps) {
   if (isLoading) {
     return (
       <div className="py-4 flex justify-center items-center h-[50vh]">
-        <LoadingSpinner size="md" text="Loading schedules..." />
+        <LoadingSpinner size="md" text="Đang tải lịch học..." />
       </div>
     );
   }
@@ -33,7 +33,9 @@ export function MentorTab({ currentPage, userId }: MentorTabProps) {
     !schedules.data ||
     schedules.data.items.length === 0
   ) {
-    return <div className="text-center py-4">No schedules found</div>;
+    return (
+      <div className="text-center py-4">Không có lịch học mentoring nào</div>
+    );
   }
 
   const handleComplete = (scheduleId: number) => {

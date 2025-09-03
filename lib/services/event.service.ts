@@ -73,6 +73,38 @@ const useEventService = () => {
     return res;
   };
 
+  const CHECK_USER_JOIN_EVENT = async (
+    eventId: string | number,
+    userId: string | number
+  ): Promise<ApiResponse<any>> => {
+    const res = await APIClient.invoke<ApiResponse<any>>({
+      action: ACTIONS.CHECK_USER_JOIN_EVENT,
+      idQuery: `${eventId}/${userId}`,
+    });
+
+    return res;
+  };
+
+  const GET_EVENT_ROLE_STATISTICS = async (
+    eventId: number | string
+  ): Promise<ApiResponse<any>> => {
+    const res = await APIClient.invoke<ApiResponse<any>>({
+      action: ACTIONS.GET_EVENT_ROLE_STATISTICS,
+      idQuery: eventId.toString(),
+    });
+    return res;
+  };
+
+  const GET_EVENT_PATICIPANT_STATISTICS = async (
+    eventId: number | string
+  ): Promise<ApiResponse<any>> => {
+    const res = await APIClient.invoke<ApiResponse<any>>({
+      action: ACTIONS.GET_EVENT_PATICIPANT_STATISTICS,
+      idQuery: eventId.toString(),
+    });
+    return res;
+  };
+
   // Other event-related functions if needed (CREATE_EVENT, UPDATE_EVENT, etc.)
 
   return {
@@ -82,6 +114,9 @@ const useEventService = () => {
     PUT_RATING,
     GET_EVENT_DETAIL_WITH_TIMELINES,
     GET_EVENT_RATING,
+    CHECK_USER_JOIN_EVENT,
+    GET_EVENT_ROLE_STATISTICS,
+    GET_EVENT_PATICIPANT_STATISTICS,
   };
 };
 

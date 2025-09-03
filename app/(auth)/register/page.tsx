@@ -73,12 +73,12 @@ export default function RegisterPage() {
           <div className="flex justify-start absolute top-4 left-4">
             <Link href="/" className="flex flex-row items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
-              <p className="text-sm text-gray-600">Back</p>
+              <p className="text-sm text-gray-600">Quay lại</p>
             </Link>
           </div>
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-            <p className="text-gray-600">Join the FPT Alumni Connection</p>
+            <h1 className="text-2xl font-bold text-gray-900">Tạo Tài Khoản</h1>
+            <p className="text-gray-600">Tham gia cộng đồng FPT Alumni</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -87,14 +87,14 @@ export default function RegisterPage() {
                 htmlFor="code"
                 className="text-sm font-medium text-gray-700"
               >
-                Code
+                Mã
               </Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   id="code"
                   type="text"
-                  placeholder="Enter your code"
+                  placeholder="Nhập mã của bạn"
                   value={formData.code}
                   onChange={(e) => handleChange("code", e.target.value)}
                   className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -107,14 +107,14 @@ export default function RegisterPage() {
                 htmlFor="firstName"
                 className="text-sm font-medium text-gray-700"
               >
-                First Name
+                Tên
               </Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   id="firstName"
                   type="text"
-                  placeholder="Enter your full name"
+                  placeholder="Nhập tên của bạn"
                   value={formData.firstName}
                   onChange={(e) => handleChange("firstName", e.target.value)}
                   className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -128,14 +128,14 @@ export default function RegisterPage() {
                 htmlFor="lastName"
                 className="text-sm font-medium text-gray-700"
               >
-                Last Name
+                Họ
               </Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   id="lastName"
                   type="text"
-                  placeholder="Enter your full name"
+                  placeholder="Nhập họ của bạn"
                   value={formData.lastName}
                   onChange={(e) => handleChange("lastName", e.target.value)}
                   className="pl-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -149,7 +149,7 @@ export default function RegisterPage() {
                 htmlFor="email"
                 className="text-sm font-medium text-gray-700"
               >
-                Email Address
+                Email
               </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />

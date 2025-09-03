@@ -52,12 +52,14 @@ export default function LoginPage() {
           <div className="flex justify-start absolute top-4 left-4">
             <Link href="/" className="flex flex-row items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
-              <p className="text-sm text-gray-600">Back</p>
+              <p className="text-sm text-gray-600">Quay lại</p>
             </Link>
           </div>
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>
-            <p className="text-gray-600">Sign in to your account</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Chào mừng bạn quay trở lại
+            </h1>
+            <p className="text-gray-600">Đăng nhập vào tài khoản của bạn</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -66,7 +68,7 @@ export default function LoginPage() {
                 htmlFor="email"
                 className="text-sm font-medium text-gray-700"
               >
-                Email Address
+                Email
               </Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -78,7 +80,7 @@ export default function LoginPage() {
                     errors.email ? "border-red-500" : ""
                   }`}
                   {...register("email", {
-                    required: "Email is required",
+                    required: "Email là bắt buộc",
                     // pattern: {
                     //   value: /@fpt\.edu\.vn$/,
                     //   message: "Email must be from fpt.edu.vn domain",
@@ -96,22 +98,22 @@ export default function LoginPage() {
                 htmlFor="password"
                 className="text-sm font-medium text-gray-700"
               >
-                Password
+                Mật khẩu
               </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
+                  placeholder="Nhập mật khẩu của bạn"
                   className={`pl-10 pr-10 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 ${
                     errors.password ? "border-red-500" : ""
                   }`}
                   {...register("password", {
-                    required: "Password is required",
+                    required: "Mật khẩu là bắt buộc",
                     minLength: {
                       value: 4,
-                      message: "Password must be at least 4 characters",
+                      message: "Mật khẩu phải có ít nhất 4 ký tự",
                     },
                   })}
                 />
@@ -141,16 +143,16 @@ export default function LoginPage() {
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
 
             <div className="text-center text-sm text-gray-600">
-              Don't have an account?{" "}
+              Không có tài khoản?{" "}
               <Link
                 href="/register"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
-                Sign up here
+                Đăng ký tại đây
               </Link>
             </div>
           </form>

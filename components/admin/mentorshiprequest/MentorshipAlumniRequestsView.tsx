@@ -56,7 +56,7 @@ const MentorshipAlumniRequestsView = () => {
               setIsOpen(true);
             }}
           >
-            Create Request
+            Tạo yêu cầu
           </Button>
           <Dialog
             open={isOpen || isCreate === "true"}
@@ -64,12 +64,12 @@ const MentorshipAlumniRequestsView = () => {
           >
             <DialogContent className="max-w-2xl bg-white max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Create New Mentorship Request</DialogTitle>
+                <DialogTitle>Tạo yêu cầu mentoring</DialogTitle>
               </DialogHeader>
               <DialogDescription className="space-y-4">
                 <Input
                   type="text"
-                  placeholder="Request Message"
+                  placeholder="Nội dung yêu cầu"
                   className="w-full"
                   value={requestMessage}
                   onChange={(e) => setRequestMessage(e.target.value)}
@@ -80,12 +80,12 @@ const MentorshipAlumniRequestsView = () => {
                   disabled={isPending}
                   onClick={handleCreateMentorshipRequest}
                 >
-                  {isPending ? "Creating..." : "Create"}
+                  {isPending ? "Đang tạo..." : "Tạo"}
                 </Button>
               </DialogDescription>
               <DialogFooter>
                 <DialogDescription className="text-sm text-gray-500 text-center">
-                  This new request will be under review by the mentors.
+                  Yêu cầu này sẽ được xem xét bởi các mentor.
                 </DialogDescription>
               </DialogFooter>
             </DialogContent>

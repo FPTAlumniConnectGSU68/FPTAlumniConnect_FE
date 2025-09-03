@@ -1,66 +1,66 @@
-import { Search } from "lucide-react";
 import React from "react";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
 
-interface HeroProps {
-  searchTerm: string;
-  setSearchTerm: (e: any) => any;
-}
-const HeroSection = ({ searchTerm, setSearchTerm }: HeroProps) => {
+const HeroSection = () => {
   return (
-    <section className="relative py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            Connect with{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              FPT Alumni
-            </span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Join thousands of FPT University alumni worldwide. Network, find
-            opportunities, share knowledge, and grow your career together.
-          </p>
-          {/* <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <Input
-                placeholder="Search alumni, companies, or skills..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-12 text-lg bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 h-12 px-8"
-            >
-              <Search className="h-5 w-5 mr-2" />
-              Explore Network
-            </Button>
-          </div> */}
+    <section className="relative w-full h-screen overflow-hidden">
+      {/* Background Campus */}
+      <div className="absolute inset-0">
+        <img
+          src="/images/campus.jpg"
+          alt="FPT University Campus"
+          className="w-full h-full object-cover"
+        />
+        {/* White gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/60 to-white" />
+      </div>
+
+      <div className="relative flex flex-col items-center w-full max-w-7xl mx-auto gap-5 mt-[40px]">
+        {/* First row */}
+        <div className="grid grid-cols-2 items-center gap-8">
+          <img
+            src="/images/campus2.jpg"
+            alt="FPT Campus"
+            className="h-[350px] w-[850px] object-cover rounded-2xl shadow-xl border-2 border-white"
+          />
+
+          <div className="flex items-center justify-center">
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900">
+              Connect with
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent text-5xl md:text-7xl font-extrabold">
+                FPT Alumni
+              </div>
+            </h1>
+          </div>
         </div>
 
-        {/* Stats */}
-        {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">2,847</div>
-            <div className="text-gray-600">Alumni Members</div>
+        {/* Second row */}
+        <div className="grid grid-cols-2 items-center gap-8">
+          {/* Left: Text */}
+          <div className="mt-6 p-6 max-w-3xl text-left">
+            <p className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold">
+                Together we are stronger
+              </span>{" "}
+              — join a vibrant community of FPT alumni shaping the future across
+              industries and borders.
+            </p>
+            <p className="mt-4 text-lg md:text-xl text-gray-700 leading-relaxed">
+              From{" "}
+              <span className="bg-gradient-to-r from-orange-500 to-pink-600 bg-clip-text text-transparent font-semibold">
+                classrooms to careers
+              </span>
+              , the FPT Alumni Network keeps us united, inspired, and moving
+              forward together.
+            </p>
           </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">156</div>
-            <div className="text-gray-600">Active Jobs</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-purple-600 mb-2">89</div>
-            <div className="text-gray-600">Mentors Available</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-orange-600 mb-2">12</div>
-            <div className="text-gray-600">Upcoming Events</div>
-          </div>
-        </div> */}
+
+          {/* Right: Students Image */}
+          <img
+            src="/images/students2.jpg"
+            alt="FPT Students"
+            className="h-[350px] w-[700px] object-cover rounded-2xl shadow-xl border-2 border-white"
+          />
+        </div>
       </div>
     </section>
   );
