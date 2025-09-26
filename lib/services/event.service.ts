@@ -1,7 +1,7 @@
 import { APIClient } from "@/lib/api-client";
 import { ACTIONS, API_URL } from "@/lib/api-client/constants";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
-import { Event, EventRating } from "@/types/interfaces";
+import { Event, EventRating, PopularEventItem } from "@/types/interfaces";
 
 const useEventService = () => {
   const GET_EVENT_DETAIL = async (
@@ -105,6 +105,27 @@ const useEventService = () => {
     return res;
   };
 
+  const GET_RELATED_EVENT = async (
+    eventId: number | string
+  ): Promise<ApiResponse<Event[]>> => {
+    const res = await APIClient.invoke<ApiResponse<Event[]>>({
+      action: ACTIONS.GET_RELATED_EVENT,
+      idQuery: eventId.toString(),
+    });
+    return res;
+  };
+  const GET_POPULAR_EVENT = async (): Promise<
+    ApiResponse<PopularEventItem[]>
+  > => {
+    const res = await APIClient.invoke<ApiResponse<PopularEventItem[]>>({
+      action: ACTIONS.GET_POPULAR_EVENT,
+      query: {
+        top: "9",
+      },
+    });
+    return res;
+  };
+
   // Other event-related functions if needed (CREATE_EVENT, UPDATE_EVENT, etc.)
 
   return {
@@ -117,6 +138,8 @@ const useEventService = () => {
     CHECK_USER_JOIN_EVENT,
     GET_EVENT_ROLE_STATISTICS,
     GET_EVENT_PATICIPANT_STATISTICS,
+    GET_RELATED_EVENT,
+    GET_POPULAR_EVENT,
   };
 };
 

@@ -25,7 +25,7 @@ const HeroSection = () => {
 
           <div className="flex items-center justify-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900">
-              Connect with
+              Kết nối với
               <div className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent text-5xl md:text-7xl font-extrabold">
                 FPT Alumni
               </div>
@@ -39,18 +39,16 @@ const HeroSection = () => {
           <div className="mt-6 p-6 max-w-3xl text-left">
             <p className="text-xl md:text-2xl font-semibold text-gray-800 leading-relaxed">
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold">
-                Together we are stronger
+                Cùng nhau chúng ta mạnh mẽ hơn
               </span>{" "}
-              — join a vibrant community of FPT alumni shaping the future across
-              industries and borders.
+              — hãy tham gia cộng đồng cựu sinh viên FPT năng động, định hình tương lai trên nhiều lĩnh vực và quốc gia.
             </p>
             <p className="mt-4 text-lg md:text-xl text-gray-700 leading-relaxed">
-              From{" "}
+              Từ{" "}
               <span className="bg-gradient-to-r from-orange-500 to-pink-600 bg-clip-text text-transparent font-semibold">
-                classrooms to careers
+                giảng đường đến sự nghiệp
               </span>
-              , the FPT Alumni Network keeps us united, inspired, and moving
-              forward together.
+              , Mạng lưới Cựu sinh viên FPT gắn kết chúng ta, truyền cảm hứng và cùng nhau tiến bước.
             </p>
           </div>
 

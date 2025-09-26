@@ -24,8 +24,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import AutocompleteDropdown from "@/components/autocomplete/AutocompleteSelect";
+import PopularEvent from "@/components/event/PoppularEvent";
 
 const locations = ["All Locations", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng"];
+const eventStatusList = [{ value: "", label: "Tất cả" }, { value: "Active", label: 'Đang mở' }, { value: 'Completed', label: "Đã hoàn thành" }]
 
 function EventsContent() {
   const { user } = useAuth();
@@ -38,6 +40,7 @@ function EventsContent() {
   const [locationInput, setLocationInput] = useState("");
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("All Locations");
+  const [eventStatus, setEventStatus] = useState(eventStatusList[0].value)
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
 
@@ -49,10 +52,7 @@ function EventsContent() {
     number | string | null
   >(null);
   const [showJoinedEvents, setShowJoinedEvents] = useState(false);
-  const [ratings, setRatings] = useState<Record<number, number>>({});
-  const [ratingContents, setRatingContents] = useState<Record<number, string>>(
-    {}
-  );
+
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "rating">(
     "newest"
   );
@@ -89,6 +89,9 @@ function EventsContent() {
   if (showJoinedEvents && user?.userId) {
     queryParams.UserId = user.userId.toString();
   }
+  if (eventStatus && eventStatus !== "") {
+    queryParams.Status = eventStatus
+  }
 
   const { data: eventsRes, isLoading } = useEvents({
     page: currentPage,
@@ -119,46 +122,20 @@ function EventsContent() {
     return items;
   }, [eventItems, sortBy]);
 
-  const handleStarSelect = (eventId: number, rating: number) => {
-    setRatings((prev) => ({ ...prev, [eventId]: rating }));
-  };
-
-  const handleCommitRating = async (
-    eventId: number,
-    userJoinEventId: number | null | undefined
-  ) => {
-    const rating = ratings[eventId];
-    const content = ratingContents[eventId];
-    if (!rating) return;
-    if (!userJoinEventId) return;
-
-    try {
-      const ratingObj = {
-        eventId,
-        rating,
-        content,
-        userId: user?.userId,
-      };
-      const res = await PUT_RATING(userJoinEventId, ratingObj);
-      if (isApiSuccess(res)) {
-        toast.success("Rating success");
-      }
-    } catch (err) {
-      toast.error("Failed to submit rating. Please try again.");
-    }
-  };
-
   const hasActiveFilters =
     Boolean(searchInput) ||
     Boolean(locationInput) ||
     (major && major !== "All Majors") ||
-    showJoinedEvents;
+    showJoinedEvents ||
+    (eventStatus !== eventStatusList[0].value)
+
   const clearFilters = () => {
     setSearchInput("");
     setLocationInput("");
     setMajor("All Majors");
     setShowJoinedEvents(false);
     setCurrentPage(1);
+    setEventStatus(eventStatusList[0].value)
   };
 
   return (
@@ -244,39 +221,6 @@ function EventsContent() {
             </span>
           </div>
 
-          {/* Location Filter */}
-          {/* <div className="w-full md:w-48">
-          <select
-            value={location}
-            onChange={(e) => {
-              setLocation(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="w-full border rounded-lg px-3 py-2"
-          >
-            {locations.map((l) => (
-              <option key={l}>{l}</option>
-            ))}
-          </select>
-        </div> */}
-          {/* Major Filter */}
-          {/* <div className="w-full md:w-48">
-            <select
-              value={major}
-              onChange={(e) => {
-                setMajor(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full border rounded-lg px-3 py-2"
-            >
-              <option value="All Majors">All Majors</option>
-              {majors.map((m) => (
-                <option key={m.majorId} value={String(m.majorId)}>
-                  {m.majorName}
-                </option>
-              ))}
-            </select>
-          </div> */}
           <div className="w-full md:w-64">
             <AutocompleteDropdown
               value={major}
@@ -294,6 +238,23 @@ function EventsContent() {
               placeholder="Tìm kiếm theo chuyên ngành..."
               isLoading={isLoading}
             />
+          </div>
+          {/* Status Dropdown */}
+          <div className="w-full md:w-48 flex items-center gap-2">
+            <label htmlFor="status" className="whitespace-nowrap">
+              Trạng thái:
+            </label>
+            <select
+              id="status"
+              value={eventStatus}
+              onChange={(e) => setEventStatus(e.target.value)}
+              className="w-full border rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              {eventStatusList.map((item) => (
+                <option value={item.value}>{item.label}</option>
+              ))}
+
+            </select>
           </div>
           {/* My Joined Events Button */}
           <Button
@@ -331,6 +292,13 @@ function EventsContent() {
                 Chuyên ngành:{" "}
                 {majors.find((m) => String(m.majorId) === major)?.majorName ??
                   major}
+              </Badge>
+            )}
+            {eventStatus && eventStatus !== eventStatusList[0].value && (
+              <Badge variant="secondary">
+                Trạng thái:{" "}
+                {eventStatusList.find((s) => String(s.value) === eventStatus)?.label ??
+                  eventStatus}
               </Badge>
             )}
             {/* {showJoinedEvents && <Badge>Đã tham gia</Badge>} */}
@@ -399,102 +367,47 @@ function EventsContent() {
                 )}
             </div>
             {/* Content */}
-            <div className="p-6 flex flex-col flex-1">
-              <h3 className="font-semibold text-lg mb-2">{item.eventName}</h3>
-              <p className="text-sm text-gray-500 mb-4 line-clamp-2 min-h-[40px]">
-                {item.description}
-              </p>
-              {showJoinedEvents && (
-                <div className="flex items-center text-sm gap-2">
-                  <span className="text-gray-600">Đánh giá trung bình:</span>
-                  <div className="flex items-center">
-                    <span className="font-medium mr-1 text-gray-900">
-                      {item.averageRating}
-                    </span>
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                  </div>
-                </div>
-              )}
-              <div className="text-sm text-gray-600 mb-4">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  {formatDateToDMY(item.startDate)}
-                  <span className="mx-2">•</span>
-                  <Clock className="h-4 w-4 mr-2" />
-                  {formatTime(item.startDate)}
-                </div>
-                <div className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  {item.location}
-                </div>
+            <div className="p-6 flex flex-col flex-1 justify-between">
+              <div>
+                <h3 className="font-semibold text-lg mb-2">{item.eventName}</h3>
+                <h4 className="font-normal mb-2">Diễn giả: {item.speaker}</h4>
+                <div className="mb-4 line-clamp-2 min-h-[40px] max-h-[90px] overflow-hidden" dangerouslySetInnerHTML={{ __html: item.description }} />
               </div>
-
-              {/* {showJoinedEvents ? (
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`w-6 h-6 cursor-pointer ${
-                          (ratings[item.eventId] ?? 0) >= star
-                            ? "text-yellow-400 fill-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                        onClick={() => handleStarSelect(item.eventId, star)}
-                      />
-                    ))}
+              <div>
+                {showJoinedEvents && (
+                  <div className="flex items-center text-sm gap-2">
+                    <span className="text-gray-600">Đánh giá trung bình:</span>
+                    <div className="flex items-center">
+                      <span className="font-medium mr-1 text-gray-900">
+                        {item.averageRating}
+                      </span>
+                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                    </div>
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Rating content"
-                    value={ratingContents[item.eventId] || ""}
-                    onChange={(e) =>
-                      setRatingContents((prev) => ({
-                        ...prev,
-                        [item.eventId]: e.target.value,
-                      }))
-                    }
-                    className="w-full pl-2 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-                  <CustomTooltip
-                    message={
-                      new Date() < new Date(item.startDate)
-                        ? "Sự kiện chưa diễn ra, không thể đánh giá"
-                        : ""
-                    }
-                  >
-                    <Button
-                      size="sm"
-                      disabled={
-                        !ratings[item.eventId] ||
-                        new Date() < new Date(item.startDate)
-                      }
-                      onClick={() =>
-                        handleCommitRating(item.eventId, item.userJoinEventId)
-                      }
-                    >
-                      Đánh giá
-                    </Button>
-                  </CustomTooltip>
+                )}
+                <div className="text-sm text-gray-600 mb-4">
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    {formatDateToDMY(item.startDate)}
+                    <span className="mx-2">•</span>
+                    <Clock className="h-4 w-4 mr-2" />
+                    {formatTime(item.startDate)}
+                  </div>
+                  <div className="flex items-center">
+                    <MapPin className="h-4 w-4 mr-2" />
+                    {item.location}
+                  </div>
                 </div>
-              ) : (
+
                 <Button
                   onClick={() => {
                     setSelectedEventId(item.eventId);
                   }}
                   className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
                 >
-                  Đăng ký ngay
+                  Xem chi tiết
                 </Button>
-              )} */}
-              <Button
-                onClick={() => {
-                  setSelectedEventId(item.eventId);
-                }}
-                className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
-              >
-                Xem chi tiết
-              </Button>
+              </div>
             </div>
           </Card>
         ))}
@@ -517,6 +430,7 @@ function EventsContent() {
         />
       )} */}
       <AuthGuard />
+      <PopularEvent />
     </div>
   );
 }

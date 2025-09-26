@@ -116,6 +116,36 @@ export function useCompleteSchedule() {
   });
 }
 
+export function useFailSchedule() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    ApiResponse<Schedule>,
+    Error,
+    { scheduleId: number; message: string }
+  >({
+    mutationFn: async ({ scheduleId, message }) => {
+      const response = await APIClient.invoke<ApiResponse<Schedule>>({
+        action: ACTIONS.FAIL_SCHEDULE,
+        idQuery: scheduleId.toString(),
+        data: { message },
+      });
+
+      return response;
+    },
+    onSuccess: (response) => {
+      if (response.status === "success") {
+        toast.success("Đã đánh dấu thất bại cho buổi học");
+        invalidateArr.forEach((key) => {
+          queryClient.invalidateQueries({ queryKey: [key] });
+        });
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || "Lỗi khi đánh dấu thất bại buổi học");
+    },
+  });
+}
+
 export function useRateMentor() {
   const queryClient = useQueryClient();
   return useMutation<

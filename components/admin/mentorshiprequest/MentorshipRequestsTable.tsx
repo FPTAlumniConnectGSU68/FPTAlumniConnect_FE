@@ -3,6 +3,12 @@ import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Pagination from "@/components/ui/pagination";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -11,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useCreateSchedule } from "@/hooks/use-schedules";
+import { useCancelMentorShipRequest } from "@/hooks/use-mentoring-requests";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { cn, formatTime, isApiSuccess } from "@/lib/utils";
 import { MentoringRequest } from "@/types/interfaces";
@@ -56,7 +63,19 @@ export default function MentorshipRequestsTable({
   const [selectedRequestId, setSelectedRequestId] = useState<number | null>(
     null
   );
+  const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
   const { mutate: createSchedule } = useCreateSchedule();
+  const { mutate: cancelMentorship, isPending: isCancelling } =
+    useCancelMentorShipRequest();
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [cancelMessage, setCancelMessage] = useState("");
+  const [cancelRequestId, setCancelRequestId] = useState<number | null>(null);
+  const truncate = (text: string | null | undefined, max: number = 50) => {
+    const value = text ?? "";
+    if (value.length <= max) return value;
+    return value.slice(0, max).trimEnd() + "...";
+  };
 
   const handleReview = (requestId: number) => {
     setSelectedRequestId(requestId);
@@ -125,21 +144,44 @@ export default function MentorshipRequestsTable({
               <TableRow key={request.id}>
                 <TableCell>{request.id}</TableCell>
                 <TableCell>{request.alumniName}</TableCell>
-                <TableCell>{request.requestMessage}</TableCell>
+                <TableCell>
+                  <button
+                    className="text-left w-full hover:underline"
+                    onClick={() => {
+                      setSelectedMessage(request.requestMessage ?? "");
+                      setIsMessageDialogOpen(true);
+                    }}
+                    title="Xem đầy đủ"
+                  >
+                    {truncate(request.requestMessage, 50)}
+                  </button>
+                </TableCell>
                 <TableCell>{formatTime(request.createdAt)}</TableCell>
                 <TableCell>
                   <StatusChip
                     status={request.status as StatusChipProps["status"]}
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell className="space-x-2">
                   {request.status === "Pending" && (
-                    <Button
-                      variant="outline"
-                      onClick={() => handleReview(request.id)}
-                    >
-                      <SquareArrowOutUpRight className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleReview(request.id)}
+                      >
+                        <SquareArrowOutUpRight className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          setCancelRequestId(request.id);
+                          setIsCancelDialogOpen(true);
+                        }}
+                        disabled={isCancelling}
+                      >
+                        {isCancelling ? "Đang từ chối..." : "Từ chối"}
+                      </Button>
+                    </div>
                   )}
                 </TableCell>
               </TableRow>
@@ -162,6 +204,66 @@ export default function MentorshipRequestsTable({
         onSelectMentor={handleSelectMentor}
         requestId={selectedRequestId}
       />
+
+      <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tin nhắn yêu cầu</DialogTitle>
+          </DialogHeader>
+          <div className="whitespace-pre-wrap text-sm text-gray-800">
+            {selectedMessage}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Lý do từ chối yêu cầu</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <textarea
+              className="w-full border rounded-md p-2 text-sm"
+              placeholder="Nhập lý do..."
+              value={cancelMessage}
+              onChange={(e) => setCancelMessage(e.target.value)}
+              rows={4}
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsCancelDialogOpen(false);
+                  setCancelMessage("");
+                  setCancelRequestId(null);
+                }}
+              >
+                Hủy
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={
+                  isCancelling ||
+                  !cancelMessage.trim() ||
+                  cancelRequestId === null
+                }
+                onClick={() => {
+                  if (cancelRequestId === null || !cancelMessage.trim()) return;
+                  cancelMentorship({
+                    id: cancelRequestId,
+                    message: cancelMessage.trim(),
+                  });
+                  setIsCancelDialogOpen(false);
+                  setCancelMessage("");
+                  setCancelRequestId(null);
+                }}
+              >
+                Xác nhận từ chối
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -26,18 +26,6 @@ export function RecuiterManagement({
         onPageChange={onPageChange}
         refetchRecruiters={refetchRecruiters}
       />
-      {/* <JobPostTable
-        jobPosts={jobPosts}
-        isLoading={isLoading}
-        onPageChange={onPageChange}
-        currentPage={currentPage}
-        onViewApplicants={setSelectedJobPostId}
-      /> */}
-      {/* <JobPostApplicantsDialog
-        jobPostId={selectedJobPostId}
-        open={!!selectedJobPostId}
-        onOpenChange={() => setSelectedJobPostId(null)}
-      /> */}
     </div>
   );
 }

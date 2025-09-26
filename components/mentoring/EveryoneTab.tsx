@@ -142,7 +142,9 @@ export function EveryoneTab({ currentPage, user }: EveryoneTabProps) {
           key={request.id}
           request={request}
           actionButton={
-            user && request.aumniId !== user?.userId && user.isMentor
+            user &&
+            request.aumniId !== user?.userId &&
+            user.mentorStatus === "Active"
               ? {
                   label: "Chấp nhận yêu cầu",
                   onClick: () => {
@@ -158,7 +160,7 @@ export function EveryoneTab({ currentPage, user }: EveryoneTabProps) {
         open={isAcceptRequestModalOpen}
         onOpenChange={setIsAcceptRequestModalOpen}
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Chấp nhận yêu cầu #{tempId}</DialogTitle>
             <DialogDescription>

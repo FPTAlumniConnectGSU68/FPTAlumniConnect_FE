@@ -16,6 +16,13 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
 
+const statusMap: Record<string, string> = {
+  Pending: "Sắp diễn ra",
+  Active: "Đang diễn ra",
+  Completed: "Đã diễn ra",
+  Deleted: "Đã hủy",
+};
+
 interface EventTableProps {
   events: ApiResponse<PaginatedData<Event>> | undefined;
   isLoading: boolean;
@@ -64,6 +71,7 @@ const EventTable = ({
               <TableHead>Tiêu đề</TableHead>
               <TableHead>Thời gian bắt đầu</TableHead>
               <TableHead>Thời gian kết thúc</TableHead>
+              <TableHead>Trạng thái</TableHead>
               <TableHead>Hành động</TableHead>
             </TableRow>
           </TableHeader>
@@ -91,6 +99,9 @@ const EventTable = ({
                   {formatDateToDMY(event.endDate) +
                     " " +
                     formatTime(event.endDate)}
+                </TableCell>
+                <TableCell>
+                  {event.status ? statusMap[event.status] ?? event.status : "Không xác định"}
                 </TableCell>
                 <TableCell>
                   <Button

@@ -1,7 +1,7 @@
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { cn, isApiSuccess } from "@/lib/utils";
-import { JobPost, RecruiterInfo } from "@/types/interfaces";
+import { JobPost, RecruiterInfo, User } from "@/types/interfaces";
 import { Button } from "@/components/ui/button";
 import Pagination from "@/components/ui/pagination";
 import {
@@ -19,6 +19,7 @@ import { SquareArrowOutUpRight } from "lucide-react";
 import { RecruiterDialog } from "./RecuiterInfoDialog";
 import useRecruiterService from "@/lib/services/recuiter.service";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/auth-context";
 interface StatusChipProps {
   status: "Active" | "Inactive" | "Pending";
 }
@@ -57,6 +58,7 @@ const RecruiterTable = ({
   if (isLoading) {
     return <LoadingSpinner text="Đang tải..." />;
   }
+  const { user } = useAuth();
 
   if (
     !recruiters ||
@@ -76,17 +78,16 @@ const RecruiterTable = ({
     setSelectedRecuiterId(recuiterId);
   };
 
-  const handleUpdate = async (
-    recruiterInfoId: string,
-    status: "Active" | "Inactive" | "Pending" | string
-  ) => {
+  const handleUpdate = async (data: {
+    recruiterInfoId: number;
+    status: string;
+  }): Promise<void> => {
     try {
-      const res = await UPDATE_RECRUITER(recruiterInfoId, status);
+      const res = await UPDATE_RECRUITER(data.recruiterInfoId, data.status);
       if (isApiSuccess(res)) {
         toast("Cập nhật thành công!");
         refetchRecruiters();
       }
-      return res;
     } catch (error) {
       toast("Cập nhật thất bại!");
       console.error("Failed to update recruiter:", error);
@@ -139,6 +140,7 @@ const RecruiterTable = ({
             (rec) => rec.recruiterInfoId === selectedRecuiterId
           )}
           onSave={handleUpdate}
+          user={user as User}
         />
       )}
 

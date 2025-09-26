@@ -74,7 +74,7 @@ export function useCreateMentorShipRequest() {
     },
     onSuccess: (response) => {
       if (response.status === "success") {
-        toast.success("Tạo yêu cầu mentoring thành công");
+        toast.success("Tạo yêu cầu cố vấn thành công");
         queryClient.invalidateQueries({
           queryKey: ["mentorship-alumni-request"],
         });
@@ -83,6 +83,37 @@ export function useCreateMentorShipRequest() {
     },
     onError: (error) => {
       toast.error(error.message);
+    },
+  });
+}
+
+export function useCancelMentorShipRequest() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    ApiResponse<MentoringRequest>,
+    Error,
+    { id: number; message: string }
+  >({
+    mutationFn: async ({ id, message }) => {
+      const response = await APIClient.invoke<ApiResponse<MentoringRequest>>({
+        action: ACTIONS.CANCEL_MENTORSHIP_REQUEST,
+        idQuery: id.toString(),
+        data: { message },
+      });
+      return response as ApiResponse<MentoringRequest>;
+    },
+    onSuccess: (response) => {
+      if (response.status === "success") {
+        toast.success("Đã từ chối yêu cầu cố vấn");
+        queryClient.invalidateQueries({ queryKey: ["mentor-ship-requests"] });
+        queryClient.invalidateQueries({
+          queryKey: ["mentorship-alumni-request"],
+        });
+        queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || "Lỗi khi từ chối yêu cầu");
     },
   });
 }

@@ -56,7 +56,7 @@ function ToastPortal({
     warning: "border-yellow-500 bg-yellow-50 text-yellow-800",
   };
 
-  if (!mounted) return null;
+  if (!mounted || typeof document === "undefined") return null;
 
   return createPortal(
     <div className="fixed top-16 right-4 z-50 flex flex-col gap-2">

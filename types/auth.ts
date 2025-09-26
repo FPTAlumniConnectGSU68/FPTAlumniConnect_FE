@@ -18,7 +18,7 @@ export interface UserInfo {
   email: string;
   roleId: number;
   roleName: string;
-  isMentor: boolean;
+  mentorStatus: "Active" | "Suspended" | "Pending" | string;
   googleId: string | null;
   firstName: string | null;
   lastName: string | null;

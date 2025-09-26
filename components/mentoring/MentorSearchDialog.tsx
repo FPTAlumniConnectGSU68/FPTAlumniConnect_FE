@@ -47,7 +47,7 @@ export function MentorSearchDialog({
   const { data: mentors, isLoading } = useMentors({
     page: 1,
     query: {
-      isMentor: "true",
+      mentorStatus: "Active",
     },
   });
 

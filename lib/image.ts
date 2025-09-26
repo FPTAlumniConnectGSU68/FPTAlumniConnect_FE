@@ -23,6 +23,9 @@ export async function downscaleImage(
   const width = Math.round(imageBitmap.width * ratio);
   const height = Math.round(imageBitmap.height * ratio);
 
+  if (typeof document === "undefined") {
+    throw new Error("Canvas operations require a browser environment");
+  }
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;

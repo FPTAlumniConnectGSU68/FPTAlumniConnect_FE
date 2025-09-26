@@ -13,11 +13,11 @@ export default function MentoringPage() {
   const { user } = useAuth();
 
   const isAlumni = user?.roleName.toLowerCase() === "alumni";
-  const isMentor = user?.isMentor;
+  const isMentor = user?.mentorStatus === "Active";
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Danh mục Mentoring</h1>
+      <h1 className="text-3xl font-bold mb-6">Danh mục cố vấn</h1>
 
       <Tabs defaultValue="everyone" className="w-full">
         <TabsList className="w-full">

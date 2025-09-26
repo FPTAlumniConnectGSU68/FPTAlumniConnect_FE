@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import TextEditor from "@/components/ui/text-editor";
 import { useAuth } from "@/contexts/auth-context";
 import { useAuthGuard } from "@/hooks/use-auth-guard";
 import { useMajorCodes } from "@/hooks/use-major-codes";
@@ -134,10 +135,11 @@ function ForumsContent() {
                     }}
                   >
                     <div className="flex-1">
-                      <p className="text-sm text-gray-600 mb-2">{post.title}</p>
-                      <div className="flex items-center space-x-4 text-xs text-gray-500 mb-2">
-                        {post.content}
-                      </div>
+                      <h2 className=" font-bold text-gray-600 mb-2">{post.title}</h2>
+                      <div
+                        className="max-h-[150px] mb-2 overflow-hidden [&_img]:max-w-full [&_img]:h-auto [&_img]:max-h-[100px] [&_img]:object-contain"
+                        dangerouslySetInnerHTML={{ __html: post.content }}
+                      />
                       <div className="flex items-center space-x-4 text-xs text-gray-500">
                         <span>{post.views} Lượt xem</span>
                         <span>
@@ -227,18 +229,22 @@ function ForumsContent() {
       </div>
 
       <AuthGuard />
-      {user && (
-        <CreateNewDiscussionModal
-          isOpen={openCreateNewDiscussion}
-          onClose={() => setOpenCreateNewDiscussion(false)}
-          user={user}
-          onCreated={refetch}
-        />
-      )}
-      {user && (
-        <CommentDialog id={selected} setSelected={setSelected} user={user} />
-      )}
-    </div>
+      {
+        user && (
+          <CreateNewDiscussionModal
+            isOpen={openCreateNewDiscussion}
+            onClose={() => setOpenCreateNewDiscussion(false)}
+            user={user}
+            onCreated={refetch}
+          />
+        )
+      }
+      {
+        user && (
+          <CommentDialog id={selected} setSelected={setSelected} user={user} />
+        )
+      }
+    </div >
   );
 }
 
@@ -368,7 +374,7 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
         const sortedComments = [...userComments, ...otherComments];
         setData({ ...res.data, comments: sortedComments });
       }
-    } catch (error) {}
+    } catch (error) { }
   };
   const fetchPostCmts = async (id: number | string) => {
     const cmt = await GET_POST_COMMENTS(id);
@@ -409,7 +415,11 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
                 {formatDateToDMY(comment.createdAt)}
               </span>
             </div>
-            <p className="text-gray-700 mt-1">{comment.content}</p>
+            {/* <p className="text-gray-700 mt-1">{comment.content}</p> */}
+            <div
+              className="max-h-[150px] mb-2 overflow-hidden [&_img]:max-w-full [&_img]:h-auto [&_img]:max-h-[100px] [&_img]:object-contain"
+              dangerouslySetInnerHTML={{ __html: comment.content }}
+            />
             {comment.parentCommentId === null && (
               <button
                 className="text-xs text-blue-600 mt-1 hover:underline"
@@ -448,9 +458,8 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
           return (
             <div key={child.commentId} className="relative flex gap-4 ml-6">
               <div
-                className={`absolute left-0 border-l border-gray-400 ${
-                  isLastChild ? "top-0 h-4" : "top-0 bottom-0"
-                }`}
+                className={`absolute left-0 border-l border-gray-400 ${isLastChild ? "top-0 h-4" : "top-0 bottom-0"
+                  }`}
               />
               <div className="absolute left-0 top-4 w-4 border-t border-gray-400" />
               <div className="flex-1 ml-6">
@@ -489,7 +498,10 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
                   </p>
                 </div>
               </div>
-              <p className="text-gray-700">{data.content}</p>
+              <div
+                className="prose text-gray-700"
+                dangerouslySetInnerHTML={{ __html: data.content }}
+              />
               <div className="flex items-center gap-6 pt-2 border-t">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <MessageSquare className="h-4 w-4 mr-1" />
@@ -518,11 +530,14 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-2">
-                  <Input
+                  {/* <Input
                     placeholder="Add a comment..."
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                  />
+                  /> */}
+                  <div>
+                    <TextEditor content={newComment} setContent={setNewComment} placeholder="Thêm bình luận" />
+                  </div>
                   <Button
                     onClick={(e) => handleAddComment(e, newComment)}
                     disabled={!newComment.trim()}

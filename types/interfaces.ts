@@ -11,7 +11,7 @@ export interface User {
   majorId: number;
   majorName: string;
   googleId: string | null;
-  isMentor: boolean;
+  mentorStatus: "Active" | "Suspended" | "Pending" | string;
 }
 
 export interface Mentor {
@@ -21,7 +21,7 @@ export interface Mentor {
   email: string;
   emailVerified: boolean;
   googleId: string | null;
-  isMentor: boolean;
+  mentorStatus: "Active" | "Suspended" | "Pending" | string;
   majorId: number;
   majorName: string;
   profilePicture: string;
@@ -108,6 +108,14 @@ export interface Event {
   userJoinEventId: number | null;
   eventTimeLines?: EventTimeline[];
   total: number;
+  speaker: string;
+}
+
+export interface PopularEventItem {
+  eventId: number;
+  eventName: string;
+  participantCount: number;
+  popularityScore: number;
 }
 
 export interface EventTimeline {
@@ -116,6 +124,8 @@ export interface EventTimeline {
   description: string;
   startTime: string; // "HH:mm:ss"
   endTime: string; // "HH:mm:ss"
+  day: string;
+  speaker: string;
 }
 
 export type TimelineSuggestion = {
@@ -126,6 +136,8 @@ export type TimelineSuggestion = {
   startTime: string; // ISO date string
   endTime: string; // ISO date string
   description?: string;
+  speaker: string;
+  day: string;
 };
 
 export interface Notification {

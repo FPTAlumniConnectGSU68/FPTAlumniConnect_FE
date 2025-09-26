@@ -2,13 +2,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/auth-context";
 import { useMajorCodes } from "@/hooks/use-major-codes";
@@ -26,6 +19,8 @@ import { useUpdateEvent } from "@/hooks/use-event";
 import { toast } from "sonner";
 import { ApiResponse } from "@/lib/apiResponse";
 import { toHHmm } from "@/utils/format-date-time";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import TextEditor from "@/components/ui/text-editor";
 
 const statusOptions = [
   { value: "Pending", label: "Sắp diễn ra" },
@@ -38,6 +33,8 @@ interface TimelineInput {
   eventTimeLineId?: number; // only in edit mode
   title: string;
   description: string;
+  speaker: string
+  day: string | null;
   startTime: string;
   endTime: string;
 }
@@ -74,7 +71,7 @@ export default function EventFormSheet({
     startDate: "",
     endDate: "",
     img: "",
-    status: null,
+    status: statusOptions[0].value,
     organizerId: user?.userId,
     majorId: 0,
     majorName: "",
@@ -119,6 +116,7 @@ export default function EventFormSheet({
           if (ev) {
             setEventData({
               eventName: ev.eventName || "",
+              speaker: ev.speaker || "",
               description: ev.description || "",
               location: ev.location || "",
               startDate: ev.startDate ? ev.startDate : "",
@@ -133,11 +131,13 @@ export default function EventFormSheet({
             if (ev.eventTimeLines && ev.eventTimeLines.length !== 0) {
               setTimelines(
                 ev.eventTimeLines.map((t: any) => ({
-                  eventTimeLineId: t.eventTimeLineId, // keep if API needs for update
+                  eventTimeLineId: t.eventTimeLineId,
                   title: t.title || "",
                   description: t.description || "",
-                  startTime: t.startTime?.slice(0, 5) || "", // HH:mm
-                  endTime: t.endTime?.slice(0, 5) || "", // HH:mm
+                  speaker: t.speaker || "",
+                  day: t.day ? String(t.day).split("T")[0] : null,
+                  startTime: t.startTime?.slice(0, 5) || "",
+                  endTime: t.endTime?.slice(0, 5) || "",
                 }))
               );
             }
@@ -183,7 +183,14 @@ export default function EventFormSheet({
   ) => {
     setTimelines((prev) => {
       const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
+      if (field === "day") {
+        updated[index].day = value || null;
+      } else {
+        updated[index] = {
+          ...updated[index],
+          [field]: value,
+        };
+      }
       return updated;
     });
   };
@@ -191,7 +198,7 @@ export default function EventFormSheet({
   const addTimeline = () => {
     setTimelines((prev) => [
       ...prev,
-      { title: "", description: "", startTime: "", endTime: "" },
+      { title: "", description: "", speaker: "", day: null, startTime: "", endTime: "" },
     ]);
   };
 
@@ -206,6 +213,7 @@ export default function EventFormSheet({
     const end = new Date(eventData.endDate);
 
     if (!eventData.eventName.trim()) newErrors.push("Event name is required.");
+    if (!eventData.speaker.trim()) newErrors.push("Event speaker is required.");
     if (!eventData.startDate) newErrors.push("Event start date is required.");
 
     if (!eventData.endDate) newErrors.push("Event end date is required.");
@@ -215,12 +223,13 @@ export default function EventFormSheet({
     timelines.forEach((t, idx) => {
       if (!t.title.trim())
         newErrors.push(`Timeline ${idx + 1}: title is required.`);
-      if (!t.startTime || !t.endTime)
-        newErrors.push(`Timeline ${idx + 1}: start/end time required.`);
+      if (!t.day)
+        newErrors.push(`Timeline ${idx + 1}: time required.`);
       if (
         t.startTime &&
         t.endTime &&
         new Date(t.startTime) >= new Date(t.endTime)
+
       ) {
         newErrors.push(`Timeline ${idx + 1}: start must be before end.`);
       }
@@ -240,6 +249,7 @@ export default function EventFormSheet({
     const payload = {
       eventName: eventData.eventName,
       img: eventData.img,
+      speaker: eventData.speaker,
       description: eventData.description,
       startDate: eventData.startDate,
       endDate: eventData.endDate,
@@ -250,8 +260,10 @@ export default function EventFormSheet({
       timeLines: timelines.map((t) => ({
         title: t.title,
         description: t.description,
-        startTime: t.startTime,
-        endTime: t.endTime,
+        speaker: t.speaker,
+        day: t.day,
+        startTime: t.startTime && t.startTime.trim() !== "" ? t.startTime : "00:00",
+        endTime: t.endTime && t.endTime.trim() !== "" ? t.endTime : "00:00",
       })),
     };
 
@@ -276,6 +288,7 @@ export default function EventFormSheet({
     const payload = {
       eventName: eventData.eventName,
       img: eventData.img,
+      speaker: eventData.speaker,
       description: eventData.description,
       startDate: eventData.startDate,
       endDate: eventData.endDate,
@@ -304,6 +317,8 @@ export default function EventFormSheet({
               (res.data.timelineSuggestions || []).map((t) => ({
                 title: t.title || "",
                 description: t.description || "",
+                speaker: t.speaker || "",
+                day: t.day ? String(t.day).split("T")[0] : null,
                 startTime: toHHmm(t.startTime),
                 endTime: toHHmm(t.endTime),
               }))
@@ -319,13 +334,13 @@ export default function EventFormSheet({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-[600px] overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[900px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
             {eventId ? "Chỉnh sửa sự kiện" : "Tạo sự kiện"}
-          </SheetTitle>
-        </SheetHeader>
+          </DialogTitle>
+        </DialogHeader>
 
         {loading ? (
           <div className="py-6 text-center text-gray-500">Đang tải...</div>
@@ -365,12 +380,26 @@ export default function EventFormSheet({
                 </Select>
               </div>
             </div>
-            <Label>Mô tả</Label>
-            <Textarea
-              name="description"
-              value={eventData.description}
+            <Label>Người diễn giả</Label>
+            <Input
+              name="speaker"
+              value={eventData.speaker}
               onChange={handleEventChange}
             />
+            <Label>Mô tả</Label>
+            <div className="mb-9">
+              <TextEditor
+                content={eventData.description}
+                setContent={(val) =>
+                  setEventData((prev: any) => ({
+                    ...prev,
+                    description: val, // Quill HTML string
+                  }))
+                }
+                height="100px"
+                extraItems={['link', 'image']}
+              />
+            </div>
 
             <Label>Địa điểm</Label>
             <Input
@@ -471,8 +500,24 @@ export default function EventFormSheet({
                         }
                       />
                     </div>
+                    {/* Row 2: Speaker */}
+                    <div className="flex flex-col">
+                      <label className="text-sm font-medium">Diễn giả</label>
+                      <Input
+                        type="text"
+                        placeholder="Diễn giả"
+                        value={t.speaker}
+                        onChange={(e) =>
+                          handleTimelineChange(
+                            idx,
+                            "speaker",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
 
-                    {/* Row 2: Description */}
+                    {/* Row 3: Description */}
                     <div className="flex flex-col">
                       <label className="text-sm font-medium">Mô tả</label>
                       <Input
@@ -489,8 +534,24 @@ export default function EventFormSheet({
                       />
                     </div>
 
-                    {/* Row 3: Start Time, End Time, Remove Button */}
+                    {/* Row 4: Start Time, End Time, Remove Button */}
                     <div className="flex gap-4 items-end">
+                      <div className="flex flex-col flex-1">
+                        <label className="text-sm font-medium">
+                          Ngày
+                        </label>
+                        <Input
+                          type="date"
+                          value={t.day ?? ""}
+                          onChange={(e) =>
+                            handleTimelineChange(
+                              idx,
+                              "day",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </div>
                       <div className="flex flex-col flex-1">
                         <label className="text-sm font-medium">
                           Thời gian bắt đầu
@@ -499,11 +560,7 @@ export default function EventFormSheet({
                           type="time"
                           value={t.startTime}
                           onChange={(e) =>
-                            handleTimelineChange(
-                              idx,
-                              "startTime",
-                              e.target.value
-                            )
+                            handleTimelineChange(idx, "startTime", e.target.value)
                           }
                         />
                       </div>
@@ -550,7 +607,7 @@ export default function EventFormSheet({
           </div>
         )}
 
-        <SheetFooter className="mt-4">
+        <DialogFooter className="mt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Hủy
           </Button>
@@ -561,8 +618,8 @@ export default function EventFormSheet({
           >
             Lưu sự kiện
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

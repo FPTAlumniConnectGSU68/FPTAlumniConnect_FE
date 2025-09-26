@@ -1,25 +1,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+// Removed confirm dialog; admin changes apply directly
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Pagination from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// Removed mentoring dropdown per request
 import {
   Sheet,
   SheetContent,
@@ -37,6 +24,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { usePatchMentorUser, UserData } from "@/hooks/use-user";
+import { useAuth } from "@/contexts/auth-context";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { isApiSuccess } from "@/lib/utils";
 import { User } from "@/types/interfaces";
@@ -67,7 +62,7 @@ const UserIdentity = ({ user }: { user: User }) => (
       <div className="font-medium">
         {user.firstName} {user.lastName}
       </div>
-      {user.isMentor && (
+      {user.mentorStatus === "Active" && (
         <Badge variant="secondary" className="text-xs">
           Mentor
         </Badge>
@@ -94,27 +89,7 @@ const UserEmail = ({
   </div>
 );
 
-// Separate component for role selector
-const RoleSelector = ({
-  user,
-  onRoleChange,
-}: {
-  user: User;
-  onRoleChange: (value: string, userId: number) => void;
-}) => (
-  <Select
-    defaultValue={user.isMentor ? "Mentor" : "None"}
-    onValueChange={(value) => onRoleChange(value, user.userId)}
-  >
-    <SelectTrigger>
-      <SelectValue placeholder="Select an option" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="Mentor">Mentor</SelectItem>
-      <SelectItem value="None">None</SelectItem>
-    </SelectContent>
-  </Select>
-);
+// Role selector removed
 
 const EditUserSheet = ({
   user,
@@ -129,16 +104,7 @@ const EditUserSheet = ({
   isOpen: boolean;
   onOpenChange: (value: boolean) => void;
 }) => {
-  const [role, setRole] = useState(user.isMentor ? "Mentor" : "None");
-
-  const handleRoleChange = (value: string) => {
-    setRole(value);
-  };
-
-  const handleSave = () => {
-    onRoleChange(role, user.userId);
-    setIsOpen(true);
-  };
+  // Removed mentoring dropdown from sheet
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -169,28 +135,17 @@ const EditUserSheet = ({
               <Label>Role</Label>
               <Input type="text" defaultValue={user.roleName} disabled />
             </div>
+            <div>mentorStatus: {user.mentorStatus}</div>
             <div className="flex flex-col gap-2">
               <Label>Major</Label>
               <Input type="text" defaultValue={user.majorName} disabled />
             </div>
-            <div className="flex flex-col gap-2">
-              <Label>Mentoring</Label>
-              <Select defaultValue={role} onValueChange={handleRoleChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an option" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Mentor">Mentor</SelectItem>
-                  <SelectItem value="None">None</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Mentoring dropdown removed */}
           </div>
           <SheetFooter className="mb-4">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              Close
             </Button>
-            <Button onClick={handleSave}>Update</Button>
           </SheetFooter>
         </div>
       </SheetContent>
@@ -205,50 +160,26 @@ const UserTable = ({
   currentPage,
 }: UserTableProps) => {
   const [openSheetId, setOpenSheetId] = useState<number | null>(null);
-  const [isOpenConfirm, setIsOpenConfirm] = useState(false);
-  const [termChoice, setTermChoice] = useState("");
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const { user: currentUser } = useAuth();
+  const isAdmin = (currentUser?.roleName || "").toLowerCase() === "admin";
 
   const { mutate: patchMentorUser, isPending } = usePatchMentorUser();
 
-  const handleRoleChange = useCallback(
-    (value: string, userId: number) => {
-      if (!users || !isApiSuccess(users) || !users.data) return;
-
-      const user = users.data.items.find((u) => u.userId === userId);
-      if (user) {
-        setSelectedUser(user);
-        setTermChoice(value);
-      }
+  const handleAdminMentorChange = useCallback(
+    (value: string, userRow: User) => {
+      const userData: UserData = {
+        firstName: userRow.firstName,
+        lastName: userRow.lastName,
+        email: userRow.email,
+        mentorStatus: value === "Mentor" ? "Active" : "Suspended",
+        profilePicture: userRow.profilePicture || "",
+      };
+      patchMentorUser({ userId: userRow.userId.toString(), userData });
     },
-    [users]
+    [patchMentorUser]
   );
 
-  const handleConfirm = useCallback(async () => {
-    if (!selectedUser) return;
-
-    const userData: UserData = {
-      firstName: selectedUser.firstName,
-      lastName: selectedUser.lastName,
-      email: selectedUser.email,
-      isMentor: termChoice === "Mentor",
-      profilePicture: selectedUser.profilePicture || "",
-    };
-
-    try {
-      await patchMentorUser({
-        userId: selectedUser.userId.toString(),
-        userData,
-      });
-
-      setIsOpenConfirm(false);
-      setOpenSheetId(null);
-      setSelectedUser(null);
-      setTermChoice("");
-    } catch (error) {
-      console.error("Failed to update user:", error);
-    }
-  }, [selectedUser, termChoice, patchMentorUser]);
+  // Accept flow removed; admin uses dropdown instead
 
   if (isLoading) {
     return <LoadingSpinner text="loading users..." />;
@@ -274,6 +205,7 @@ const UserTable = ({
               <TableHead>User</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Request Mentor</TableHead>
               <TableHead>Major</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Action</TableHead>
@@ -294,6 +226,19 @@ const UserTable = ({
                 <TableCell>
                   <Badge variant="outline">{user.roleName}</Badge>
                 </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      user.mentorStatus === "Active"
+                        ? "outline"
+                        : user.mentorStatus === "Pending"
+                        ? "default"
+                        : "destructive"
+                    }
+                  >
+                    {user.mentorStatus}
+                  </Badge>
+                </TableCell>
                 <TableCell>{user.majorName}</TableCell>
                 <TableCell>
                   <Badge
@@ -304,15 +249,29 @@ const UserTable = ({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <EditUserSheet
-                    user={user}
-                    onRoleChange={handleRoleChange}
-                    setIsOpen={setIsOpenConfirm}
-                    isOpen={openSheetId === user.userId}
-                    onOpenChange={(open) =>
-                      setOpenSheetId(open ? user.userId : null)
-                    }
-                  />
+                  {isAdmin ? (
+                    <Select
+                      defaultValue={
+                        user.mentorStatus === "Active" ? "Mentor" : "None"
+                      }
+                      onValueChange={(val) =>
+                        handleAdminMentorChange(val, user)
+                      }
+                      disabled={isPending}
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Set mentor status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Mentor">Mentor</SelectItem>
+                        <SelectItem value="None">None</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : user.mentorStatus === "Pending" ? (
+                    <Badge variant="default">Pending</Badge>
+                  ) : (
+                    <Badge variant="outline">No action</Badge>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -326,31 +285,7 @@ const UserTable = ({
         onPageChange={onPageChange}
       />
 
-      <Dialog open={isOpenConfirm} onOpenChange={setIsOpenConfirm}>
-        <DialogContent className="sm:max-w-[400px] bg-white">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
-              Confirmation
-            </DialogTitle>
-            <DialogDescription className="text-gray-600">
-              Are you sure you want to change the role of this user to{" "}
-              {termChoice}?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsOpenConfirm(false)}
-              disabled={isPending}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleConfirm} disabled={isPending}>
-              {isPending ? "Updating..." : "Confirm"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Accept dialog removed */}
     </div>
   );
 };

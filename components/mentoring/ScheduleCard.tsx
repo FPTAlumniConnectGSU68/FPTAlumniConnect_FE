@@ -2,18 +2,42 @@ import { Schedule } from "@/types/interfaces";
 import { Button } from "../ui/button";
 import { formatDateToDMY } from "@/lib/utils";
 import { CalendarDays, Clock, User, UserCheck } from "lucide-react";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { Textarea } from "../ui/textarea";
 
 interface ScheduleCardProps {
   schedule: Schedule;
   onComplete: (scheduleId: number) => void;
   isCompleting: boolean;
+  onFail?: (scheduleId: number, message: string) => void;
+  isFailing?: boolean;
 }
 
 export function ScheduleCard({
   schedule,
   onComplete,
   isCompleting,
+  onFail,
+  isFailing,
 }: ScheduleCardProps) {
+  const [isFailDialogOpen, setIsFailDialogOpen] = useState(false);
+  const [failMessage, setFailMessage] = useState("");
+  const getStatusLabel = (status: string) => {
+    const map: Record<string, string> = {
+      Active: "Đang diễn ra",
+      Failed: "Thất bại",
+      Completed: "Hoàn tất",
+      Unknown: "Không xác định",
+    };
+    return map[status] ?? map.Unknown;
+  };
   const getStatusConfig = (status: string) => {
     const configs = {
       Active: {
@@ -88,9 +112,9 @@ export function ScheduleCard({
       <div
         className={`mb-5 rounded-lg px-4 py-3 text-white bg-gradient-to-r ${statusConfig.gradientFrom} ${statusConfig.gradientTo} flex items-center justify-between`}
       >
-        <h3 className="text-base sm:text-lg font-semibold">Phiên mentoring</h3>
+        <h3 className="text-base sm:text-lg font-semibold">Phiên cố vấn</h3>
         <span className="px-2.5 py-1 rounded-full text-xs sm:text-sm font-medium bg-white/20 text-white border border-white/30">
-          {schedule.status}
+          {getStatusLabel(schedule.status)}
         </span>
       </div>
 
@@ -149,19 +173,73 @@ export function ScheduleCard({
         <p className="text-gray-600 line-clamp-2">{schedule.content}</p>
       </div>
 
-      {/* Action Button */}
-      {schedule.status !== "Completed" ? (
-        <div className="flex justify-end">
+      {/* Actions */}
+      {schedule.status === "Active" && (
+        <div className="flex justify-end gap-2">
           <Button
             variant="outline"
             onClick={() => onComplete(schedule.scheduleId)}
-            disabled={isCompleting}
+            disabled={isCompleting || isFailing}
             className={`w-full sm:w-auto bg-white ${statusConfig.hover} border ${statusConfig.border} ${statusConfig.text}`}
           >
-            {isCompleting ? "Đang hoàn tất..." : "Đánh dấu hoàn tất"}
+            {isCompleting ? "Đang xử lý..." : "Đánh dấu hoàn tất"}
           </Button>
+          <Button
+            variant="outline"
+            onClick={() => setIsFailDialogOpen(true)}
+            disabled={isCompleting || isFailing}
+            className={`w-full sm:w-auto bg-white ${statusConfig.hover} border ${statusConfig.border} ${statusConfig.text}`}
+          >
+            {isFailing ? "Đang xử lý..." : "Thất bại"}
+          </Button>
+
+          <Dialog open={isFailDialogOpen} onOpenChange={setIsFailDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Xác nhận đánh dấu thất bại</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600">
+                  Vui lòng nhập lý do thất bại cho buổi học này.
+                </p>
+                <Textarea
+                  placeholder="Nhập lý do..."
+                  value={failMessage}
+                  onChange={(e) => setFailMessage(e.target.value)}
+                  className="min-h-[100px]"
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsFailDialogOpen(false);
+                    setFailMessage("");
+                  }}
+                >
+                  Hủy
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!onFail) return;
+                    const message = failMessage.trim();
+                    if (!message) return;
+                    onFail(schedule.scheduleId, message);
+                    setIsFailDialogOpen(false);
+                    setFailMessage("");
+                  }}
+                  disabled={isFailing || failMessage.trim() === ""}
+                  className="bg-rose-600 hover:bg-rose-700 text-white"
+                >
+                  Xác nhận thất bại
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
-      ) : (
+      )}
+
+      {schedule.status === "Completed" && (
         <div className="mt-2 text-sm text-gray-600 flex items-center justify-end">
           <span
             className={`inline-flex items-center rounded-full px-3 py-1 ${statusConfig.chip} border`}
@@ -170,6 +248,8 @@ export function ScheduleCard({
           </span>
         </div>
       )}
+
+      {/* For Failed: show nothing */}
     </div>
   );
 }

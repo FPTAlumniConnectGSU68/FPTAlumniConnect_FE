@@ -17,30 +17,31 @@ import { getRoleBadgeColor } from "@/utils/get-role-badge-color";
 import { LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { NotificationBell } from "@/components/notification/notification-bell";
 
 type NavItem = { href: string; label: string };
 
 const navItems: NavItem[] = [
   {
-    href: "/network",
-    label: "Network",
+    href: "/",
+    label: "Trang chủ",
   },
   {
     href: "/mentoring",
-    label: "Mentoring",
+    label: "Cố vấn",
   },
   {
     href: "/jobs",
-    label: "Jobs",
+    label: "Tuyển dụng",
   },
   {
     href: "/events",
-    label: "Events",
+    label: "Sự kiện",
   },
 
   {
     href: "/forums",
-    label: "Forums",
+    label: "Bài viết",
   },
 ];
 
@@ -89,21 +90,21 @@ const UserMenu = ({ user, userUnique, logout }: UserMenuProps) => {
           <DropdownMenuItem asChild>
             <Link href="/profile" className="flex items-center">
               <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+              <span>Hồ sơ</span>
             </Link>
           </DropdownMenuItem>
           {isAdmin && (
             <DropdownMenuItem asChild>
               <Link href="/admin/dashboard" className="flex items-center">
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Dashboard</span>
+                <span>Trang tổng quan</span>
               </Link>
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={logout} className="text-red-600">
             <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
+            <span>Đăng xuất</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -147,7 +148,10 @@ const Header = () => {
           {/*----------------------- */}
           <div className="flex items-center gap-3">
             {user ? (
-              <UserMenu user={user} userUnique={userUnique} logout={logout} />
+              <>
+                <NotificationBell />
+                <UserMenu user={user} userUnique={userUnique} logout={logout} />
+              </>
             ) : (
               <>
                 <Button
@@ -155,14 +159,14 @@ const Header = () => {
                   size="sm"
                   onClick={() => router.push("/login")}
                 >
-                  Sign In
+                  Đăng nhập
                 </Button>
                 <Button
                   size="sm"
                   className="bg-gradient-to-r from-blue-600 to-purple-600"
                   onClick={() => router.push("/register")}
                 >
-                  Join Network
+                  Tham gia
                 </Button>
               </>
             )}

@@ -184,7 +184,7 @@ export default function ForumDetail() {
           open={!!selectedThread}
           onOpenChange={() => setSelectedThread(null)}
         >
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogTitle>{"Thread Detail"}</DialogTitle>
             {selectedThread && (
               <div className="space-y-6">

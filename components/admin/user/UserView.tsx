@@ -21,10 +21,12 @@ const UserView = () => {
   const [password, setPassword] = useState("");
   const [roleId, setRoleId] = useState<string>("");
   const [majorId, setMajorId] = useState<string>("");
+  const [mentorStatus, setMentorStatus] = useState<string>("");
   const { data: users, isLoading } = useUsers({
     page: currentPage,
     role: role,
     major: majorCode,
+    mentorStatus: mentorStatus,
   });
   const { mutateAsync: createUser, isPending: isCreateLoading } =
     useCreateUser();
@@ -62,6 +64,8 @@ const UserView = () => {
         setMajorCode={setMajorCode}
         setCurrentPage={setCurrentPage}
         setIsOpen={setIsOpen}
+        mentorStatus={mentorStatus}
+        setMentorStatus={setMentorStatus}
       />
       <UserTable
         users={users}

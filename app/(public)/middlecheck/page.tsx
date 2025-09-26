@@ -22,16 +22,16 @@ export default function MiddleCheckPage() {
         router.push("/admin/dashboard");
         break;
       case ROLES.ALUMNI:
-        router.push("/alumni/events-management");
+        router.push("/");
         break;
       case ROLES.STUDENT:
-        router.push("/student/CV");
+        router.push("/");
         break;
       case ROLES.LECTURER:
-        router.push("/lecturer");
+        router.push("/");
         break;
       case ROLES.RECRUITER:
-        router.push("/recruiter");
+        router.push("/recruiter/jobpost-management");
         break;
       default:
         router.push("/");

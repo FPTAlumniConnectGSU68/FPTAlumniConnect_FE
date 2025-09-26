@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     AuthService.setUserInfo(userInfo);
     setUser(userInfo);
     const lastRoute = getLastRoute();
-    if (lastRoute && lastRoute !== "/login") {
+    if (lastRoute === "/jobs") {
       navigateBack();
     } else {
       router.push("/middlecheck");

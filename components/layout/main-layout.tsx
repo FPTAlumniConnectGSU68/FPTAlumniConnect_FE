@@ -31,6 +31,7 @@ import {
   Users,
   FileText,
   Inbox,
+  GraduationCap,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -55,12 +56,11 @@ const adminNavigation = [
     href: "/admin/posts-management",
     icon: MessageSquare,
   },
-  // {
-  //   name: "Quản lý sự kiện",
-  //   href: "/admin/events-management",
-  //   icon: Calendar,
-  // },
-
+  {
+    name: "Quản lý sự kiện",
+    href: "/admin/events-management",
+    icon: Calendar,
+  },
   {
     name: "Yêu cầu mentor",
     href: "/admin/mentorship-requests",
@@ -75,6 +75,16 @@ const adminNavigation = [
     name: "Quản lý nhà tuyển dụng",
     href: "/admin/recruiters-management",
     icon: Inbox,
+  },
+  {
+    name: "Mã ngành",
+    href: "/admin/majorcodes",
+    icon: GraduationCap,
+  },
+  {
+    name: "Kỹ năng",
+    href: "/admin/skills",
+    icon: GraduationCap,
   },
 ];
 

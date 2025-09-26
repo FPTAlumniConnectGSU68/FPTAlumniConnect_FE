@@ -35,6 +35,7 @@ export default function CustomTooltip({
       {children}
       {visible &&
         message &&
+        typeof document !== "undefined" &&
         createPortal(
           <div
             className="absolute z-[9999] px-2 py-1 bg-gray-800 text-white text-xs rounded shadow-lg"

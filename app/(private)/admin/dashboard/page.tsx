@@ -38,19 +38,33 @@ import { MonthYearSelect } from "@/components/ui/month-year-select";
 import dynamic from "next/dynamic";
 
 // Constants and helpers (module scope for stability and performance)
+// const MONTH_NAMES = [
+//   "Jan",
+//   "Feb",
+//   "Mar",
+//   "Apr",
+//   "May",
+//   "Jun",
+//   "Jul",
+//   "Aug",
+//   "Sep",
+//   "Oct",
+//   "Nov",
+//   "Dec",
+// ];
 const MONTH_NAMES = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
 ];
 
 // Lazy-load chart components (client-only) with built-in loading fallbacks
@@ -239,9 +253,9 @@ const Dashboard = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
+          <h1 className="text-2xl font-semibold">Bảng điều khiển quản trị</h1>
           <p className="text-sm text-gray-500">
-            Welcome back{userUnique ? `, ${userUnique.firstName}` : ""}.
+            Chào mừng quay lại {userUnique ? `, ${userUnique.firstName}` : ""}.
           </p>
         </div>
         <Badge className="bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1">
@@ -252,51 +266,51 @@ const Dashboard = () => {
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={Users}
-          title="New Users"
+          title="Người dùng mới"
           value={userCountData?.toString() ?? "0"}
-          trend={"+12% from last week"}
+          trend={""}
         />
         <StatCard
           icon={Briefcase}
-          title="Job Posts"
+          title="Bài tuyển dụng"
           value={jobPostCountData?.toString() ?? "0"}
-          trend={"+3 this week"}
+          trend={""}
         />
         <StatCard
           icon={CalendarDays}
-          title="Upcoming Events"
+          title="Sự kiện sắp diễn ra"
           value={eventCountData?.toString() ?? "0"}
-          trend={"2 this month"}
+          trend={""}
         />
         <StatCard
           icon={Newspaper}
-          title="Forum Posts"
+          title="Bài thảo luận"
           value={postCountData?.toString() ?? "0"}
-          trend={"-5% from last week"}
+          trend={""}
         />
         <StatCard
           icon={Briefcase}
-          title="Job Applications"
+          title="Đơn xin việc"
           value={jobAppCountData?.toString() ?? "0"}
-          trend={"This week"}
+          trend={""}
         />
         <StatCard
           icon={Users}
-          title="Mentorship Requests"
+          title="Yêu cầu cố vấn"
           value={mentorshipCountData?.toString() ?? "0"}
-          trend={"This month"}
+          trend={""}
         />
         <StatCard
           icon={Users}
-          title="Schedules"
+          title="Lịch cố vấn"
           value={scheduleCountData?.toString() ?? "0"}
-          trend={"This month"}
+          trend={""}
         />
         <StatCard
           icon={Users}
-          title="Majors"
+          title="Chuyên ngành"
           value={majorCountData?.toString() ?? "0"}
-          trend={"Total"}
+          trend={""}
         />
       </div>
 
@@ -304,8 +318,8 @@ const Dashboard = () => {
         <Card className="shadow-sm hover:shadow-md transition-shadow rounded-xl border border-gray-100">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Events by Month</CardTitle>
-              <CardDescription>Monthly event count</CardDescription>
+              <CardTitle>Sự kiện theo tháng</CardTitle>
+              <CardDescription>Số lượng sự kiện theo từng tháng</CardDescription>
             </div>
             <MonthYearSelect value={eventsMY} onChange={setEventsMY} />
           </CardHeader>
@@ -321,8 +335,8 @@ const Dashboard = () => {
         <Card className="shadow-sm hover:shadow-md transition-shadow rounded-xl border border-gray-100">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Users by Month</CardTitle>
-              <CardDescription>Monthly user registrations</CardDescription>
+              <CardTitle>Người dùng theo tháng</CardTitle>
+              <CardDescription>Số lượng người dùng mới theo tháng</CardDescription>
             </div>
             <MonthYearSelect value={usersMY} onChange={setUsersMY} />
           </CardHeader>
@@ -338,8 +352,8 @@ const Dashboard = () => {
         <Card className="shadow-sm hover:shadow-md transition-shadow rounded-xl border border-gray-100">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Job Posts by Month</CardTitle>
-              <CardDescription>Monthly job posts</CardDescription>
+              <CardTitle>Bài đăng việc làm theo tháng</CardTitle>
+              <CardDescription>Bài đăng việc làm hàng tháng</CardDescription>
             </div>
             <MonthYearSelect value={jobPostsMY} onChange={setJobPostsMY} />
           </CardHeader>
@@ -355,8 +369,8 @@ const Dashboard = () => {
         <Card className="shadow-sm hover:shadow-md transition-shadow rounded-xl border border-gray-100">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Mentorships by Month</CardTitle>
-              <CardDescription>Monthly mentorship requests</CardDescription>
+              <CardTitle>Lượng cố vấn theo tháng</CardTitle>
+              <CardDescription>Yêu cầu cố vấn hàng tháng</CardDescription>
             </div>
             <MonthYearSelect value={mentorshipMY} onChange={setMentorshipMY} />
           </CardHeader>
@@ -372,8 +386,8 @@ const Dashboard = () => {
         <Card className="shadow-sm hover:shadow-md transition-shadow rounded-xl border border-gray-100">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Posts by Month</CardTitle>
-              <CardDescription>Monthly forum posts</CardDescription>
+              <CardTitle>Bài viết theo tháng</CardTitle>
+              <CardDescription>Bài đăng diễn đàn hàng tháng</CardDescription>
             </div>
             <MonthYearSelect value={postsMY} onChange={setPostsMY} />
           </CardHeader>
@@ -389,8 +403,8 @@ const Dashboard = () => {
         <Card className="shadow-sm hover:shadow-md transition-shadow rounded-xl border border-gray-100">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Schedules by Month</CardTitle>
-              <CardDescription>Monthly schedules</CardDescription>
+              <CardTitle>Lịch trình theo tháng</CardTitle>
+              <CardDescription>Lịch trình hàng tháng</CardDescription>
             </div>
             <MonthYearSelect value={schedulesMY} onChange={setSchedulesMY} />
           </CardHeader>

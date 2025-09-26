@@ -1,6 +1,10 @@
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ScheduleCard } from "./ScheduleCard";
-import { useCompleteSchedule, useSchedules } from "@/hooks/use-schedules";
+import {
+  useCompleteSchedule,
+  useFailSchedule,
+  useSchedules,
+} from "@/hooks/use-schedules";
 import { isApiSuccess } from "@/lib/utils";
 
 interface MentorTabProps {
@@ -18,6 +22,7 @@ export function MentorTab({ currentPage, userId }: MentorTabProps) {
 
   const { mutate: completeSchedule, isPending: isCompleting } =
     useCompleteSchedule();
+  const { mutate: failSchedule, isPending: isFailing } = useFailSchedule();
 
   if (isLoading) {
     return (
@@ -42,6 +47,16 @@ export function MentorTab({ currentPage, userId }: MentorTabProps) {
     completeSchedule(scheduleId);
   };
 
+  const handleFail = (scheduleId: number) => {
+    // handled by ScheduleCard dialog which passes message
+    // this function signature remains for compatibility if needed elsewhere
+  };
+
+  const handleFailWithMessage = (scheduleId: number, message: string) => {
+    console.log(scheduleId, message);
+    failSchedule({ scheduleId, message });
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {schedules.data.items.map((schedule) => (
@@ -50,6 +65,8 @@ export function MentorTab({ currentPage, userId }: MentorTabProps) {
           schedule={schedule}
           onComplete={handleComplete}
           isCompleting={isCompleting}
+          onFail={handleFailWithMessage}
+          isFailing={isFailing}
         />
       ))}
     </div>

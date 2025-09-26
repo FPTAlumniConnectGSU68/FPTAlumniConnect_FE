@@ -16,6 +16,8 @@ const UserHeader = ({
   setMajorCode,
   setCurrentPage,
   setIsOpen,
+  mentorStatus,
+  setMentorStatus,
 }: {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
@@ -26,6 +28,8 @@ const UserHeader = ({
   setMajorCode: (value: string) => void;
   setCurrentPage: (value: number) => void;
   setIsOpen: (value: boolean) => void;
+  mentorStatus: string;
+  setMentorStatus: (value: string) => void;
 }) => {
   if (!majors) return null;
 
@@ -41,6 +45,12 @@ const UserHeader = ({
     value: major.majorId.toString(),
     label: major.majorName,
   }));
+
+  const mentorStatusOptions = [
+    { value: "Active", label: "Active" },
+    { value: "Pending", label: "Pending" },
+    { value: "Suspended", label: "Suspended" },
+  ];
 
   return (
     <div className="flex justify-between items-center">
@@ -59,6 +69,15 @@ const UserHeader = ({
                 setCurrentPage(1);
               },
               options: roleOptions,
+            },
+            {
+              placeholder: "Lọc theo mentor status",
+              value: mentorStatus,
+              onChange: (value) => {
+                setMentorStatus(value);
+                setCurrentPage(1);
+              },
+              options: mentorStatusOptions,
             },
             {
               placeholder: "Lọc theo chuyên ngành",

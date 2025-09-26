@@ -1,6 +1,7 @@
 "use client";
 import DayBarChart from "@/components/chart/BarChart";
 import AlumniPieChart from "@/components/chart/PieChart";
+import RelatedEvent from "@/components/event/RelatedEvent";
 import CustomTooltip from "@/components/tooltip/CustomToolTip";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -104,7 +105,7 @@ export default function EventDetailPage() {
             }))
           );
         }
-      } catch (error) {}
+      } catch (error) { }
     };
     if (isManage) {
       fetchStatsitics();
@@ -121,7 +122,7 @@ export default function EventDetailPage() {
         if (isApiSuccess(res) && res.data) {
           setUserRating(res.data);
         }
-      } catch (error) {}
+      } catch (error) { }
     };
     checkUserJoinEvent();
   }, [id, user]);
@@ -254,6 +255,7 @@ export default function EventDetailPage() {
           {/* Title / Location / Start Date */}
           <div className="flex flex-col gap-3">
             <h2 className="text-xl font-semibold">{event.eventName}</h2>
+            <h4 className="font-normal mb-2">Diễn giả: {event.speaker}</h4>
             <div className="flex flex-col justify-between items-start gap-2 text-sm text-gray-600">
               <div className="flex items-center">
                 <MapPin className="h-4 w-4 mr-2" />
@@ -340,8 +342,8 @@ export default function EventDetailPage() {
                   {new Date(event.startDate) < new Date()
                     ? "Đã diễn ra"
                     : joining
-                    ? "Joining..."
-                    : "Tham gia sự kiện"}
+                      ? "Joining..."
+                      : "Tham gia sự kiện"}
                 </Button>
               ) : (
                 <div className="p-4 border rounded-lg bg-gray-50 space-y-4">
@@ -352,11 +354,10 @@ export default function EventDetailPage() {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`w-7 h-7 cursor-pointer transition-colors ${
-                          (ratings[event.eventId] ?? 0) >= star
-                            ? "text-yellow-400 fill-yellow-400"
-                            : "text-gray-300 hover:text-yellow-300"
-                        }`}
+                        className={`w-7 h-7 cursor-pointer transition-colors ${(ratings[event.eventId] ?? 0) >= star
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300 hover:text-yellow-300"
+                          }`}
                         onClick={() => handleStarSelect(event.eventId, star)}
                       />
                     ))}
@@ -406,7 +407,7 @@ export default function EventDetailPage() {
 
           {/* Ratings */}
           <div className="p-4 border rounded-lg bg-gray-50">
-            <h3 className="font-semibold mb-2">Ratings</h3>
+            <h3 className="font-semibold mb-2">Đánh giá</h3>
             {eventRating && eventRating.length > 0 ? (
               <ul className="space-y-4">
                 {eventRating.map((r) => (
@@ -426,7 +427,7 @@ export default function EventDetailPage() {
                           <span className="text-yellow-500">⭐ {r.rating}</span>
                         ) : (
                           <span className="text-gray-400 text-sm italic">
-                            No rating
+                            Không có đánh giá nào
                           </span>
                         )}
                       </div>
@@ -439,7 +440,7 @@ export default function EventDetailPage() {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-gray-500">No ratings yet</p>
+              <p className="text-sm text-gray-500">Không có đánh giá nào</p>
             )}
           </div>
         </div>
@@ -485,7 +486,7 @@ export default function EventDetailPage() {
           {/* Descriptions */}
           <div className="flex-1 p-4 border rounded-lg bg-gray-50 min-h-60">
             <h3 className="font-semibold mb-2">Mô tả</h3>
-            <p className="text-sm text-gray-700">{event.description}</p>
+            <div className="mb-4 line-clamp-2 min-h-[40px]" dangerouslySetInnerHTML={{ __html: event.description }} />
           </div>
 
           {/* Timeline */}
@@ -493,16 +494,20 @@ export default function EventDetailPage() {
             <h3 className="font-semibold mb-2">Lịch hoạt động</h3>
             {event.eventTimeLines && event.eventTimeLines.length > 0 ? (
               <ul className="space-y-2 text-sm">
-                {event.eventTimeLines.map((t: EventTimeline) => (
-                  <li key={t.eventTimeLineId}>
-                    <div className="flex gap-4">
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2" />
-                        {formatTime(t.startTime)} - {formatTime(t.endTime)}
-                      </div>
+                {event.eventTimeLines.map((t: EventTimeline, index) => (
+                  <li key={t.eventTimeLineId} className="flex flex-col gap-1">
+                    <div className="grid gap-4 grid-cols-2">
+                      <p className="font-semibold">{(index + 1) + ". " + t.title}</p>
 
-                      <p>{t.title}</p>
+                      <div className="flex items-center gap-3">
+                        <p>{formatDateToDMY(t.day)}</p>
+                        <div className="flex items-center"> <Clock className="h-4 w-4 mr-2" />
+                          {formatTime(t.startTime)} - {formatTime(t.endTime)}</div>
+
+                      </div>
                     </div>
+                    <p>Diễn giả: {t.speaker}</p>
+                    <p className="mb-2">Chi tiết: {t.description}</p>
                   </li>
                 ))}
               </ul>
@@ -511,8 +516,10 @@ export default function EventDetailPage() {
             )}
           </div>
         </div>
+
       </div>
       <AuthGuard />
+      <RelatedEvent eventId={id} />
     </div>
   );
 }

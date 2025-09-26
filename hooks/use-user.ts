@@ -18,6 +18,7 @@ interface UseUsersOptions {
   size?: number;
   role?: string;
   major?: string;
+  mentorStatus?: string;
   query?: Record<string, string>;
 }
 
@@ -25,7 +26,7 @@ export interface UserData {
   firstName: string;
   lastName: string;
   email: string;
-  isMentor: boolean;
+  mentorStatus: "Active" | "Suspended" | "Pending";
   profilePicture: string;
 }
 
@@ -40,10 +41,11 @@ export function useUsers({
   size = 5,
   role,
   major,
+  mentorStatus,
   query = {},
 }: UseUsersOptions = {}) {
   return useQuery<ApiResponse<PaginatedData<User>>>({
-    queryKey: USER_QUERY_KEYS.list({ page, size, role, major }),
+    queryKey: USER_QUERY_KEYS.list({ page, size, role, major, mentorStatus }),
     queryFn: async () => {
       const response = await APIClient.invoke<ApiResponse<PaginatedData<User>>>(
         {
@@ -53,6 +55,7 @@ export function useUsers({
             Size: size.toString(),
             RoleId: role?.toString() || "",
             MajorId: major?.toString() || "",
+            MentorStatus: mentorStatus?.toString() || "",
             ...query,
           },
         }
@@ -72,7 +75,7 @@ export function usePatchMentorUser() {
         firstName: userData.firstName,
         lastName: userData.lastName,
         email: userData.email,
-        isMentor: userData.isMentor,
+        mentorStatus: userData.mentorStatus,
         profilePicture: userData.profilePicture,
       };
 

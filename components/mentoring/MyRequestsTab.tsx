@@ -104,7 +104,7 @@ export function MyRequestsTab({ userId }: MyRequestsTabProps) {
       <Dialog open={isOpen || isCreate} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-2xl bg-white max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Tạo yêu cầu mentoring</DialogTitle>
+            <DialogTitle>Tạo yêu cầu cố vấn</DialogTitle>
           </DialogHeader>
           <DialogDescription className="space-y-4">
             <Input

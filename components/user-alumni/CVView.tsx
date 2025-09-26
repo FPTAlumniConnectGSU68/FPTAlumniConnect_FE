@@ -237,6 +237,7 @@ const CVView = () => {
   }, [recJobsByCv]);
 
   const triggerFormSubmit = useCallback(() => {
+    if (typeof document === "undefined") return;
     const form = document.getElementById("cv-form") as HTMLFormElement | null;
     if (form) {
       const submitEvent = new Event("submit", {

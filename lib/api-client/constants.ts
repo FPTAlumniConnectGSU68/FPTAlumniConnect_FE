@@ -19,6 +19,8 @@ export const END_POINTS: {
   getJobs: { path: "/v1/jobposts", method: "GET" },
   getRecuiters: { path: "/recruiter-info", method: "GET" },
   updateRecuiter: { path: "/recruiter-info/status", method: "PATCH" },
+  getRecuiterInfo: { path: "/recruiter-info", method: "GET" },
+  createNewRecuiter: { path: "/recruiter-info", method: "POST" },
   getPosts: { path: "/v1/posts", method: "GET" },
   getUsers: { path: "/v1/users", method: "GET" },
   getMentors: { path: "/v1/mentors", method: "GET" },
@@ -51,9 +53,13 @@ export const END_POINTS: {
     path: "/v1/user-join-events/event/participants/by-day",
     method: "GET",
   },
+
+  getRelatedEvent: { path: "/v1/events/similar", method: "GET" },
+  getPopularEvent: { path: "/v1/events/popularity", method: "GET" },
   // User
   patchMentorUser: { path: "/v1/users", method: "PATCH" },
   createUser: { path: "/v1/users", method: "POST" },
+  updateMentorStatus: { path: "/v1/users/mentor-status", method: "PATCH" },
   // Notifications
   getUserNotifications: {
     path: "/Notification/user",
@@ -77,6 +83,10 @@ export const END_POINTS: {
     path: "/v1/mentorships",
     method: "POST",
   },
+  cancelMentorshipRequest: {
+    path: "/v1/mentorships/cancel",
+    method: "PATCH",
+  },
 
   // Schedule
   getSchedules: {
@@ -89,6 +99,10 @@ export const END_POINTS: {
   },
   completeSchedule: {
     path: "/schedules/complete",
+    method: "PATCH",
+  },
+  failSchedule: {
+    path: "/schedules/fail",
     method: "PATCH",
   },
   rateMentorRequest: {
@@ -116,6 +130,31 @@ export const END_POINTS: {
   getSkills: {
     path: "/v1/skills",
     method: "GET",
+  },
+  createSkill: {
+    path: "/v1/skills",
+    method: "POST",
+  },
+  updateSkill: {
+    path: "/v1/skills",
+    method: "PUT",
+  },
+  deleteSkill: {
+    path: "/v1/skills",
+    method: "DELETE",
+  },
+  // Major Codes
+  createMajor: {
+    path: "/v1/majorcodes",
+    method: "POST",
+  },
+  updateMajor: {
+    path: "/v1/majorcodes",
+    method: "PUT",
+  },
+  deleteMajor: {
+    path: "/v1/majorcodes",
+    method: "DELETE",
   },
   // Job Applications
   createJobApplication: {
@@ -220,6 +259,8 @@ export enum ACTIONS {
   GET_JOBS = "getJobs",
   GET_RECUITERS = "getRecuiters",
   UPDATE_RECRUITER = "updateRecuiter",
+  GET_RECRUITER_INFO = "getRecuiterInfo",
+  CREATE_RECRUITER = "createNewRecuiter",
   GET_UPCOMMING_EVENTS = "getEvents",
   UPDATE_EVENT = "updateEvent",
   GET_FORUMS = "getPosts",
@@ -248,9 +289,12 @@ export enum ACTIONS {
   CHECK_USER_JOIN_EVENT = "checkUserJoinEvent",
   GET_EVENT_ROLE_STATISTICS = "getEventRoleStatistics",
   GET_EVENT_PATICIPANT_STATISTICS = "getEventPaticipantStatistics",
+  GET_RELATED_EVENT = "getRelatedEvent",
+  GET_POPULAR_EVENT = "getPopularEvent",
   // User
   PATCH_MENTOR_USER = "patchMentorUser",
   CREATE_USER = "createUser",
+  UPDATE_MENTOR_STATUS = "updateMentorStatus",
 
   // Notifications
   GET_USER_NOTIFICATIONS = "getUserNotifications",
@@ -260,11 +304,13 @@ export enum ACTIONS {
   GET_MENTORSHIP_REQUESTS = "getMentorshipRequests",
   GET_MENTORSHIP_ALUMNI_REQUEST_BY_ID = "getMentorshipAlumniRequestById",
   CREATE_MENTORSHIP_REQUEST = "createMentorshipRequest",
+  CANCEL_MENTORSHIP_REQUEST = "cancelMentorshipRequest",
 
   // Schedule
   GET_SCHEDULES = "getSchedules",
   ACCEPT_SCHEDULE = "acceptSchedule",
   COMPLETE_SCHEDULE = "completeSchedule",
+  FAIL_SCHEDULE = "failSchedule",
   RATE_MENTOR_REQUEST = "rateMentorRequest",
   // CV
   GET_CV = "getCV",
@@ -273,6 +319,13 @@ export enum ACTIONS {
   UPDATE_CV = "updateCV",
   // Skills
   GET_SKILLS = "getSkills",
+  CREATE_SKILL = "createSkill",
+  UPDATE_SKILL = "updateSkill",
+  DELETE_SKILL = "deleteSkill",
+  // Majors
+  CREATE_MAJOR = "createMajor",
+  UPDATE_MAJOR = "updateMajor",
+  DELETE_MAJOR = "deleteMajor",
 
   // Job Applications
   CREATE_JOB_APPLICATION = "createJobApplication",

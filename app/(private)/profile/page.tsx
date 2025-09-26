@@ -55,7 +55,7 @@ export default function ProfilePage() {
     firstName: "",
     lastName: "",
     email: "",
-    isMentor: false,
+    mentorStatus: "Suspended",
     profilePicture: "",
   });
 
@@ -66,6 +66,10 @@ export default function ProfilePage() {
     "cloudinary"
   );
   const [imageUrlInput, setImageUrlInput] = useState("");
+  const [mentorStatus, setMentorStatus] = useState<
+    "Active" | "Suspended" | "Pending" | "None"
+  >("None");
+  const [updatingMentorStatus, setUpdatingMentorStatus] = useState(false);
 
   useEffect(() => {
     if (!userUnique) return;
@@ -74,11 +78,41 @@ export default function ProfilePage() {
       firstName: userUnique.firstName || "",
       lastName: userUnique.lastName || "",
       email: userUnique.email || "",
-      isMentor: !!userUnique.isMentor,
+      mentorStatus: (userUnique as any).mentorStatus || "Suspended",
       profilePicture: userUnique.profilePicture || "",
     });
     setAvatarPreview(userUnique.profilePicture || "/placeholder.svg");
+    setMentorStatus(((userUnique as any).mentorStatus || "Suspended") as any);
   }, [userUnique]);
+
+  const isAlumniOrLecturer =
+    (user?.roleName || "").toLowerCase() === "alumni" ||
+    (user?.roleName || "").toLowerCase() === "lecturer";
+
+  const handleRegisterMentor = async () => {
+    try {
+      if (!userId) return;
+      setUpdatingMentorStatus(true);
+      const res = await APIClient.invoke<ApiResponse<any>>({
+        action: ACTIONS.UPDATE_MENTOR_STATUS,
+        idQuery: String(userId),
+        data: { mentorStatus: "Pending" },
+      });
+      if (res.status === "success") {
+        setMentorStatus("Pending");
+        setForm((prev) => ({ ...prev, mentorStatus: "Pending" }));
+        toast.success(
+          "Đã gửi yêu cầu trở thành Mentor. Vui lòng chờ quản trị viên duyệt"
+        );
+      } else {
+        toast.error("Cập nhật trạng thái Mentor thất bại");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Cập nhật trạng thái Mentor thất bại");
+    } finally {
+      setUpdatingMentorStatus(false);
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -138,7 +172,10 @@ export default function ProfilePage() {
   };
 
   const handleToggleMentor = (checked: boolean) => {
-    setForm((prev) => ({ ...prev, isMentor: checked }));
+    setForm((prev) => ({
+      ...prev,
+      mentorStatus: checked ? "Active" : "Suspended",
+    }));
   };
 
   const handleReset = () => {
@@ -148,7 +185,7 @@ export default function ProfilePage() {
       firstName: userUnique.firstName || "",
       lastName: userUnique.lastName || "",
       email: userUnique.email || "",
-      isMentor: !!userUnique.isMentor,
+      mentorStatus: (userUnique as any).mentorStatus || "Suspended",
       profilePicture: userUnique.profilePicture || "",
     });
     setAvatarPreview(userUnique.profilePicture || "/placeholder.svg");
@@ -169,7 +206,7 @@ export default function ProfilePage() {
           firstName: form.firstName,
           lastName: form.lastName,
           email: form.email,
-          isMentor: form.isMentor,
+          mentorStatus: form.mentorStatus,
           profilePicture: form.profilePicture,
         },
       });
@@ -353,6 +390,53 @@ export default function ProfilePage() {
                 <span className="font-medium">{userUnique.majorName}</span>
               </div>
             </div>
+
+            {isAlumniOrLecturer && (
+              <div className="mt-2 p-4 border border-gray-100 rounded-lg bg-gray-50">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div>
+                    <span className="text-xs text-gray-500">
+                      Trạng thái Mentor
+                    </span>
+                    <div className="mt-1">
+                      <Badge
+                        className={
+                          mentorStatus === "Active"
+                            ? "bg-green-50 text-green-700 border border-green-200"
+                            : mentorStatus === "Pending"
+                            ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                            : mentorStatus === "Suspended"
+                            ? "bg-gray-100 text-gray-700 border border-gray-200"
+                            : "bg-gray-50 text-gray-600 border border-gray-200"
+                        }
+                      >
+                        {mentorStatus}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {(mentorStatus === "Suspended" ||
+                      mentorStatus === "None") && (
+                      <Button
+                        size="sm"
+                        onClick={handleRegisterMentor}
+                        disabled={updatingMentorStatus}
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      >
+                        {updatingMentorStatus
+                          ? "Đang gửi..."
+                          : "Đăng ký Mentor"}
+                      </Button>
+                    )}
+                    {mentorStatus === "Pending" && (
+                      <Button size="sm" disabled variant="outline">
+                        Đang chờ duyệt
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-3 p-2 justify-end">

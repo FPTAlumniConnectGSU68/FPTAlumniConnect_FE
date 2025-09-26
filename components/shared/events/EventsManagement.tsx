@@ -34,7 +34,9 @@ export function EventsManagement() {
     size: 4,
     query: {
       EventName: search,
-      ...(user ? { OrganizerId: user.userId.toString() } : {}),
+      ...(user && user.roleId !== 1
+        ? { OrganizerId: user.userId.toString() }
+        : {}),
     },
   });
 

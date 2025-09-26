@@ -21,6 +21,7 @@ import { useMajorCodes } from "@/hooks/use-major-codes";
 import { isApiSuccess } from "@/lib/utils";
 import usePostService from "@/lib/services/post.service";
 import { useRouter } from "next/navigation";
+import TextEditor from "../ui/text-editor";
 
 interface CreateNewDiscussionModalProps {
   isOpen: boolean;
@@ -70,27 +71,30 @@ const CreateNewDiscussionModal = ({
   };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-white max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[800px] max-w-[95vw] max-h-[90vh] flex flex-col overflow-auto">
         <DialogHeader>
-          <DialogTitle>Create New Discussion</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">
+            Tạo thảo luận mới
+          </DialogTitle>
         </DialogHeader>
-        <DialogDescription className="space-y-4">
+
+        {/* Body */}
+        <div className="flex-1 flex flex-col overflow-y-auto space-y-4">
           <Input
             type="text"
-            placeholder="Title"
-            className="w-full"
+            placeholder="Tiêu đề"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          <Textarea
-            placeholder="Description"
-            className="w-full"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
+
+          {/* Rich text editor fills remaining height */}
+          <div>
+            <TextEditor content={content} setContent={setContent} extraItems={['link', 'image']} />
+          </div>
+
           <Select value={selectedMajor} onValueChange={setSelectedMajor}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a major" />
+              <SelectValue placeholder="Chọn chuyên ngành" />
             </SelectTrigger>
             <SelectContent>
               {majorOptions.map((item) => (
@@ -100,22 +104,22 @@ const CreateNewDiscussionModal = ({
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Footer with submit */}
+        <DialogFooter className="mt-4">
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
             onClick={handleSubmit}
           >
-            Create
+            Tạo
           </Button>
-        </DialogDescription>
-        <DialogFooter>
-          <DialogDescription className="text-sm text-gray-500 text-center">
-            This new discussion will be under review by the moderators.
-          </DialogDescription>
         </DialogFooter>
       </DialogContent>
+
     </Dialog>
-  );
+  )
 };
 
 export default CreateNewDiscussionModal;
