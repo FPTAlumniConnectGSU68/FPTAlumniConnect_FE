@@ -93,7 +93,9 @@ export function JobPostsManagement({
 
   return (
     <div className="space-y-4">
-      <JobPostHeader ableToAdd={recruiter.length > 0} />
+      <JobPostHeader
+        ableToAdd={recruiter.length > 0 && recruiter[0].status === "Active"}
+      />
       {recruiter.length <= 0 ? (
         <div className="flex items-center justify-center h-56">
           <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-gray-300 bg-white p-10 shadow-sm text-center max-w-md">

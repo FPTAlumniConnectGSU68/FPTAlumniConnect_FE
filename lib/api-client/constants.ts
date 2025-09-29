@@ -244,6 +244,27 @@ export const END_POINTS: {
     path: "/schedules/count/month",
     method: "GET",
   },
+  getSettings: { path: "/Settings", method: "GET" },
+  updateMentorshipCleanup: {
+    path: "/v1/api/MentorshipCleanup/interval",
+    method: "PUT",
+    secure: true,
+  },
+  updateJobPostCleanup: {
+    path: "/v1/api/JobPostCleanup/interval",
+    method: "PUT",
+    secure: true,
+  },
+  updateMentorshipSettings: {
+    path: "/MentorshipSettings/max-per-day",
+    method: "PUT",
+    secure: true,
+  },
+  updateScheduleSettings: {
+    path: "/ScheduleSettings/max-per-day",
+    method: "PUT",
+    secure: true,
+  },
 };
 
 export enum ACTIONS {
@@ -353,6 +374,12 @@ export enum ACTIONS {
   GET_SCHEDULE_COUNT_BY_MONTH = "getScheduleCountByMonth",
   // Recommendations
   RECOMMEND_JOBS_BY_CV = "recommendJobsByCv",
+
+  GET_SETTINGS = "getSettings",
+  UPDATE_MENTORSHIP_CLEANUP = "updateMentorshipCleanup",
+  UPDATE_JOBPOST_CLEANUP = "updateJobPostCleanup",
+  UPDATE_MENTORSHIP_SETTINGS = "updateMentorshipSettings",
+  UPDATE_SCHEDULE_SETTINGS = "updateScheduleSettings",
 }
 
 export const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;

@@ -24,7 +24,7 @@ export function MajorSelect({
     isError: isMajorsError,
   } = useMajorCodes({
     query: {
-      Size: "200",
+      Size: "300",
     },
   });
 

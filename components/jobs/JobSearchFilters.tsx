@@ -38,7 +38,7 @@ export function JobSearchFilters({
   const { data: majorsRes } = useMajorCodes({
     searchString: majorSearch,
     query: {
-      Size: "200",
+      Size: "300",
     },
   });
   const majors =

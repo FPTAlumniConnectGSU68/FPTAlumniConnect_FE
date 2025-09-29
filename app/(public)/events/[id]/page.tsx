@@ -16,6 +16,7 @@ import { Calendar, Clock, MapPin, Star } from "lucide-react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { decode } from "entities";
 
 export default function EventDetailPage() {
   const params = useParams<{ id: string }>();
@@ -486,7 +487,7 @@ export default function EventDetailPage() {
           {/* Descriptions */}
           <div className="flex-1 p-4 border rounded-lg bg-gray-50 min-h-60">
             <h3 className="font-semibold mb-2">Mô tả</h3>
-            <div className="mb-4 line-clamp-2 min-h-[40px]" dangerouslySetInnerHTML={{ __html: event.description }} />
+            <div className="mb-4 min-h-[40px]" dangerouslySetInnerHTML={{ __html: decode(event.description) }} />
           </div>
 
           {/* Timeline */}

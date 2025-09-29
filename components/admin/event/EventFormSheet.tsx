@@ -21,6 +21,9 @@ import { ApiResponse } from "@/lib/apiResponse";
 import { toHHmm } from "@/utils/format-date-time";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import TextEditor from "@/components/ui/text-editor";
+import { downscaleImage } from "@/lib/image";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
+
 
 const statusOptions = [
   { value: "Pending", label: "Sắp diễn ra" },
@@ -56,12 +59,13 @@ export default function EventFormSheet({
   const { GET_EVENT_DETAIL_WITH_TIMELINES } = useEventService();
   const { data: majorsRes } = useMajorCodes({
     query: {
-      Size: "200",
+      Size: "300",
     },
   });
   const majors =
     majorsRes?.status === "success" ? majorsRes.data?.items ?? [] : [];
-
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSuggestion, setIsSuggestion] = useState(false);
   const [eventData, setEventData] = useState<any>({
@@ -89,7 +93,7 @@ export default function EventFormSheet({
       startDate: "",
       endDate: "",
       img: "",
-      status: null,
+      status: statusOptions[0].value,
       organizerId: user?.userId,
       majorId: 0,
       majorName: "",
@@ -97,6 +101,7 @@ export default function EventFormSheet({
     setTimelines([]);
     setErrors([]);
     setIsSuggestion(false);
+    setImagePreview("");
   };
 
   // Fetch event detail if editing
@@ -142,6 +147,7 @@ export default function EventFormSheet({
               );
             }
           }
+          setImagePreview(ev.img || '');
         }
       } catch (err) {
         console.error("Failed to fetch event detail", err);
@@ -225,11 +231,13 @@ export default function EventFormSheet({
         newErrors.push(`Timeline ${idx + 1}: title is required.`);
       if (!t.day)
         newErrors.push(`Timeline ${idx + 1}: time required.`);
+      else if (new Date(t.day + " " + t.startTime) < start || new Date(t.day + " " + t.endTime) > end) {
+        newErrors.push(`Timeline ${idx + 1}: must be between ${start.toLocaleString()} and ${end.toLocaleString()}`);
+      }
       if (
         t.startTime &&
         t.endTime &&
         new Date(t.startTime) >= new Date(t.endTime)
-
       ) {
         newErrors.push(`Timeline ${idx + 1}: start must be before end.`);
       }
@@ -333,6 +341,36 @@ export default function EventFormSheet({
     }
   };
 
+
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      // Preview right away (local object URL)
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+
+      // Downscale/compress then upload to Cloudinary
+      setUploadingImg(true);
+      const compressedBlob = await downscaleImage(file, {
+        maxWidth: 800,
+        maxHeight: 800,
+        quality: 0.8,
+      });
+      const url = await uploadImageToCloudinary(compressedBlob, {
+        folder: "events",
+      });
+      setEventData((prev: any) => ({ ...prev, img: url }));
+      toast.success("Image uploaded");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error?.message || "Failed to upload image");
+    } finally {
+      setUploadingImg(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[900px] max-h-[90vh] overflow-y-auto">
@@ -359,7 +397,7 @@ export default function EventFormSheet({
               <div className="w-1/4">
                 <Label>Trạng thái</Label>
                 <Select
-                  value={eventData.status || ""}
+                  value={eventData.status || statusOptions[0].value}
                   onValueChange={(val) =>
                     setEventData((prev: any) => ({
                       ...prev,
@@ -450,7 +488,7 @@ export default function EventFormSheet({
               onChange={handleEventChange}
             />
 
-            <Label>URL hình ảnh</Label>
+            {/* <Label>URL hình ảnh</Label>
             <Input
               name="img"
               value={eventData.img}
@@ -465,7 +503,32 @@ export default function EventFormSheet({
                 alt="Preview"
                 className="w-full h-40 object-cover rounded-lg border"
               />
-            )}
+            )} */}
+            <Label>Hình ảnh sự kiện</Label>
+            <div className="flex flex-col gap-2">
+              {/* Allow paste URL if needed */}
+              <Input
+                placeholder="Hoặc nhập URL hình ảnh"
+                name="img"
+                value={eventData.img}
+                onChange={handleEventChange}
+              />
+
+              <div className="flex items-center gap-4">
+                <Input type="file" accept="image/*" onChange={handleFileChange} />
+                {uploadingImg && <span className="text-sm text-gray-500">Đang tải...</span>}
+              </div>
+
+              {(eventData.img || imagePreview) && (
+                <img
+                  src={eventData.img || imagePreview}
+                  alt="Event preview"
+                  className="w-full h-40 object-cover rounded-lg border"
+                />
+              )}
+            </div>
+
+
             {eventId && (
               <>
                 {/* Timeline section */}

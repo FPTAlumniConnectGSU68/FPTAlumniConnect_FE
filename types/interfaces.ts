@@ -217,11 +217,17 @@ export interface CV {
   email: string;
   phone: string;
   city: string;
-  company: string;
-  primaryDuties: string;
-  jobLevel: string;
-  startAt: string;
-  endAt: string;
+  employmentHistories: [
+    {
+      cvId: number;
+      companyName: string;
+      primaryDuties: string;
+      jobLevel: string;
+      startDate: string;
+      endDate: string;
+      isCurrentJob: boolean;
+    }
+  ];
   language: string;
   languageLevel: string;
   minSalary: number;
@@ -229,13 +235,88 @@ export interface CV {
   isDeal: boolean;
   desiredJob: string;
   position: string;
-  majorId: string;
+  majorId: number;
   majorName: string;
   additionalContent: string;
-  status: "Deleted" | "Public" | "Private";
+  schoolName: string;
+  degree: string;
+  fieldOfStudy: string;
+  graduationYear: number;
+  educationDescription: string;
+  status: string;
+  startAt: string;
+  endAt: string;
   skillIds: number[];
   skillNames: string[];
 }
+
+// {
+//   "id": 1,
+//   "userId": 1,
+//   "fullName": "Nguyễn Văn Minh",
+//   "address": "123 Lê Lợi, Q1",
+//   "birthday": "1998-04-10T00:00:00",
+//   "gender": "Male",
+//   "email": "minh.alumni@example.com",
+//   "phone": "0905123456",
+//   "city": "Hồ Chí Minh",
+//   "employmentHistories": [
+//     {
+//       "employmentHistoryId": 1,
+//       "cvId": 1,
+//       "companyName": "Công ty FPT Software",
+//       "primaryDuties": "Phát triển phần mềm quản lý doanh nghiệp",
+//       "jobLevel": "Nhân viên",
+//       "startDate": "2018-01-01T00:00:00",
+//       "endDate": "2020-06-30T00:00:00",
+//       "isCurrentJob": false
+//     },
+//     {
+//       "employmentHistoryId": 2,
+//       "cvId": 1,
+//       "companyName": "Công ty Viettel",
+//       "primaryDuties": "Quản trị hệ thống mạng nội bộ",
+//       "jobLevel": "Chuyên viên",
+//       "startDate": "2020-07-01T00:00:00",
+//       "endDate": "2022-12-31T00:00:00",
+//       "isCurrentJob": false
+//     },
+//     {
+//       "employmentHistoryId": 3,
+//       "cvId": 1,
+//       "companyName": "Công ty VNG",
+//       "primaryDuties": "Xây dựng và bảo trì hệ thống cloud",
+//       "jobLevel": "Trưởng nhóm",
+//       "startDate": "2023-01-01T00:00:00",
+//       "endDate": null,
+//       "isCurrentJob": true
+//     }
+//   ],
+//   "language": "Tiếng Anh",
+//   "languageLevel": "Trung cấp",
+//   "minSalary": 10000000,
+//   "maxSalary": 15000000,
+//   "isDeal": false,
+//   "desiredJob": "Lập trình viên",
+//   "position": "Developer",
+//   "majorId": 3,
+//   "majorName": "Kỹ thuật phần mềm",
+//   "additionalContent": "Ưu tiên môi trường trẻ",
+//   "schoolName": "Đại học FPT",
+//   "degree": "Bachelor",
+//   "fieldOfStudy": "Công nghệ thông tin",
+//   "graduationYear": 2020,
+//   "educationDescription": "Tốt nghiệp loại Giỏi, tham gia nhiều dự án phần mềm.",
+//   "status": "Public",
+//   "startAt": null,
+//   "endAt": null,
+//   "skillIds": [
+//     8
+//   ],
+//   "skillNames": [
+//     "Back-end Develop"
+//   ]
+// }
 
 export interface CVCreate {
   userId: number;
@@ -246,11 +327,17 @@ export interface CVCreate {
   email: string;
   phone: string;
   city: string;
-  company: string;
-  primaryDuties: string;
-  jobLevel: string;
-  startAt: string;
-  endAt: string;
+  employmentHistories: [
+    {
+      cvId: number;
+      companyName: string;
+      primaryDuties: string;
+      jobLevel: string;
+      startDate: string;
+      endDate: string;
+      isCurrentJob: boolean;
+    }
+  ];
   language: string;
   languageLevel: string;
   minSalary: number;
@@ -260,6 +347,11 @@ export interface CVCreate {
   position: string;
   majorId: number;
   additionalContent: string;
+  schoolName: string;
+  degree: string;
+  fieldOfStudy: string;
+  graduationYear: number;
+  educationDescription: string;
   status: string;
   skillIds: number[];
 }
@@ -274,11 +366,17 @@ export interface CVUpdate {
   email: string;
   phone: string;
   city: string;
-  company: string;
-  primaryDuties: string;
-  jobLevel: string;
-  startAt: string;
-  endAt: string;
+  employmentHistories: [
+    {
+      cvId: number;
+      companyName: string;
+      primaryDuties: string;
+      jobLevel: string;
+      startDate: string;
+      endDate: string;
+      isCurrentJob: boolean;
+    }
+  ];
   language: string;
   languageLevel: string;
   minSalary: number;
@@ -288,6 +386,11 @@ export interface CVUpdate {
   position: string;
   majorId: number;
   additionalContent: string;
+  schoolName: string;
+  degree: string;
+  fieldOfStudy: string;
+  graduationYear: number;
+  educationDescription: string;
   status: string;
   skillIds: number[];
 }
@@ -368,4 +471,19 @@ export interface RecruiterInfo {
   companyLogoUrl: string;
   companyCertificateUrl: string;
   status: boolean | string; // depends on whether "True" is boolean or string
+}
+
+export interface Setting {
+  mentorshipCleanup: {
+    totalHours: number;
+  };
+  jobPostCleanup: {
+    totalHours: number;
+  };
+  mentorshipSettings: {
+    maxPerDay: number;
+  };
+  scheduleSettings: {
+    maxPerDay: number;
+  };
 }

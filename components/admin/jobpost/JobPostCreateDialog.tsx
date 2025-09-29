@@ -70,10 +70,10 @@ export function JobPostCreateDialog({
   user: UserInfo;
 }) {
   const queryClient = useQueryClient();
-  const { data: skillsData } = useSkills({ page: 1, size: 100 });
+  const { data: skillsData } = useSkills({ page: 1, size: 300 });
   const { data: majorsData } = useMajorCodes({
     query: {
-      Size: "200",
+      Size: "300",
     },
   });
 

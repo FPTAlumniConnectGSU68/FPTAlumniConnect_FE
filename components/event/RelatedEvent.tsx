@@ -5,6 +5,7 @@ import { formatDateToDMY, formatTime, isApiSuccess } from "@/lib/utils";
 import { Event } from "@/types/interfaces";
 import { useRouter } from "next/navigation";
 import { Badge } from "../ui/badge";
+import { decode } from "entities";
 
 interface RelatedEventProps {
     eventId: number | string;
@@ -63,9 +64,7 @@ const RelatedEvent: React.FC<RelatedEventProps> = ({ eventId }) => {
                         <h3 className="text-base font-semibold mb-1">{event.eventName}</h3>
 
                         {/* Description */}
-                        <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-                            {event.description}
-                        </p>
+                        <div className="mb-4 line-clamp-2 min-h-[40px] max-h-[90px] overflow-hidden" dangerouslySetInnerHTML={{ __html: decode(event.description) }} />
 
                         {/* Date & Location */}
                         <div className="flex items-center text-sm text-gray-500 mb-1">

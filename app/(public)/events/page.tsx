@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import AutocompleteDropdown from "@/components/autocomplete/AutocompleteSelect";
 import PopularEvent from "@/components/event/PoppularEvent";
+import { decode } from "entities";
 
 const locations = ["All Locations", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng"];
 const eventStatusList = [{ value: "", label: "Tất cả" }, { value: "Active", label: 'Đang mở' }, { value: 'Completed', label: "Đã hoàn thành" }]
@@ -45,7 +46,10 @@ function EventsContent() {
   const pageSize = 6;
 
   const [majorSearch, setMajorSearch] = useState("");
-  const { data: majorsRes } = useMajorCodes({ searchString: majorSearch });
+  const { data: majorsRes } = useMajorCodes({
+    searchString: majorSearch,
+    query: { Size: "300" },
+  });
   const [major, setMajor] = useState<string | null>("All Majors");
 
   const [selectedEventId, setSelectedEventId] = useState<
@@ -371,7 +375,7 @@ function EventsContent() {
               <div>
                 <h3 className="font-semibold text-lg mb-2">{item.eventName}</h3>
                 <h4 className="font-normal mb-2">Diễn giả: {item.speaker}</h4>
-                <div className="mb-4 line-clamp-2 min-h-[40px] max-h-[90px] overflow-hidden" dangerouslySetInnerHTML={{ __html: item.description }} />
+                <div className="mb-4 line-clamp-2 min-h-[40px] max-h-[90px] overflow-hidden" dangerouslySetInnerHTML={{ __html: decode(item.description) }} />
               </div>
               <div>
                 {showJoinedEvents && (

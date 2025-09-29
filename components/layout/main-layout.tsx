@@ -86,6 +86,11 @@ const adminNavigation = [
     href: "/admin/skills",
     icon: GraduationCap,
   },
+  {
+    name: "Cài đặt hệ thống",
+    href: "/admin/settings",
+    icon: Settings,
+  },
 ];
 
 const alumniNavigation = [
@@ -273,9 +278,8 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
 
       <div className="flex h-[calc(100vh-65px)] overflow-y-auto">
         <aside
-          className={`${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
+          className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
         >
           <div className="flex flex-col h-full pt-16 lg:pt-0">
             <nav className="flex-1 px-4 py-6 space-y-2">
@@ -283,9 +287,8 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 ${
-                    isActive(item.href) && "bg-gray-100"
-                  }`}
+                  className={`flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 ${isActive(item.href) && "bg-gray-100"
+                    }`}
                 >
                   <item.icon className="mr-3 h-5 w-5" />
                   {item.name}
@@ -302,9 +305,8 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 ${
-                        isActive(item.href) && "bg-gray-100"
-                      }`}
+                      className={`flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 ${isActive(item.href) && "bg-gray-100"
+                        }`}
                     >
                       <item.icon className="mr-3 h-5 w-5" />
                       {item.name}
@@ -323,9 +325,8 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 ${
-                        isActive(item.href) && "bg-gray-100"
-                      }`}
+                      className={`flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 ${isActive(item.href) && "bg-gray-100"
+                        }`}
                     >
                       <item.icon className="mr-3 h-5 w-5" />
                       {item.name}
@@ -344,9 +345,8 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 ${
-                        isActive(item.href) && "bg-gray-100"
-                      }`}
+                      className={`flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 ${isActive(item.href) && "bg-gray-100"
+                        }`}
                     >
                       <item.icon className="mr-3 h-5 w-5" />
                       {item.name}
@@ -365,9 +365,8 @@ export default function MainLayout({ children, currentUser }: MainLayoutProps) {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 ${
-                        isActive(item.href) && "bg-gray-100"
-                      }`}
+                      className={`flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-gray-900 ${isActive(item.href) && "bg-gray-100"
+                        }`}
                     >
                       <item.icon className="mr-3 h-5 w-5" />
                       {item.name}

@@ -27,7 +27,7 @@ export default function SkillMultiSelect({
   disabled,
   maxDisplay = 3,
 }: SkillMultiSelectProps) {
-  const { data, isLoading } = useSkills({ page: 1, size: 100 });
+  const { data, isLoading } = useSkills({ page: 1, size: 300 });
 
   const allSkills: Skill[] = useMemo(() => {
     if (!data || data.status !== "success") return [];
@@ -88,17 +88,15 @@ export default function SkillMultiSelect({
                   <button
                     key={skill.skillId}
                     type="button"
-                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent ${
-                      selected ? "bg-accent" : ""
-                    }`}
+                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent ${selected ? "bg-accent" : ""
+                      }`}
                     onClick={() => toggleSkill(skill)}
                   >
                     <span
-                      className={`flex h-4 w-4 items-center justify-center rounded-sm border ${
-                        selected
+                      className={`flex h-4 w-4 items-center justify-center rounded-sm border ${selected
                           ? "bg-primary text-primary-foreground border-primary"
                           : "border-muted-foreground/30"
-                      }`}
+                        }`}
                     >
                       {selected && <Check className="h-3 w-3" />}
                     </span>

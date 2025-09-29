@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import Pagination from "@/components/ui/pagination";
 import TextEditor from "@/components/ui/text-editor";
 import { useAuth } from "@/contexts/auth-context";
 import { useAuthGuard } from "@/hooks/use-auth-guard";
@@ -25,6 +26,7 @@ import { CommentType, TopUser, TopUserApi } from "@/types/interfaces";
 import { CirclePlus, MessageSquare, Search } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, use, useEffect, useState } from "react";
+import { decode } from "entities";
 
 function ForumsContent() {
   const { user } = useAuth();
@@ -36,6 +38,7 @@ function ForumsContent() {
   const [search, setSearch] = useState("");
   const [major, setMajor] = useState<string>("Tất cả chuyên ngành");
   const [topUsers, setTopUsers] = useState<TopUser[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const openModal = searchParams.get("openModal") === "true";
@@ -67,6 +70,7 @@ function ForumsContent() {
     isLoading: postLoading,
     refetch,
   } = usePosts({
+    page: currentPage,
     size: 10,
     query: {
       title: search,
@@ -74,6 +78,7 @@ function ForumsContent() {
     },
   });
   const postItems = posts && isApiSuccess(posts) ? posts.data?.items ?? [] : [];
+  const totalPages = posts && isApiSuccess(posts) ? posts.data?.totalPages ?? 1 : 1;
 
   useEffect(() => {
     (async () => {
@@ -138,7 +143,7 @@ function ForumsContent() {
                       <h2 className=" font-bold text-gray-600 mb-2">{post.title}</h2>
                       <div
                         className="max-h-[150px] mb-2 overflow-hidden [&_img]:max-w-full [&_img]:h-auto [&_img]:max-h-[100px] [&_img]:object-contain"
-                        dangerouslySetInnerHTML={{ __html: post.content }}
+                        dangerouslySetInnerHTML={{ __html: decode(post.content) }}
                       />
                       <div className="flex items-center space-x-4 text-xs text-gray-500">
                         <span>{post.views} Lượt xem</span>
@@ -149,6 +154,11 @@ function ForumsContent() {
                     </div>
                   </div>
                 ))}
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={(page) => setCurrentPage(page)}
+                />
               </CardContent>
             </Card>
           </div>
@@ -277,7 +287,7 @@ const CommandDesktop = ({
   const [majorSearch, setMajorSearch] = useState("");
   const { data: majorsRes } = useMajorCodes({
     searchString: majorSearch,
-    query: { Size: "200" },
+    query: { Size: "300" },
   });
   const majors =
     majorsRes?.status === "success" ? majorsRes.data?.items ?? [] : [];
@@ -418,7 +428,7 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
             {/* <p className="text-gray-700 mt-1">{comment.content}</p> */}
             <div
               className="max-h-[150px] mb-2 overflow-hidden [&_img]:max-w-full [&_img]:h-auto [&_img]:max-h-[100px] [&_img]:object-contain"
-              dangerouslySetInnerHTML={{ __html: comment.content }}
+              dangerouslySetInnerHTML={{ __html: decode(comment.content) }}
             />
             {comment.parentCommentId === null && (
               <button
@@ -500,7 +510,7 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
               </div>
               <div
                 className="prose text-gray-700"
-                dangerouslySetInnerHTML={{ __html: data.content }}
+                dangerouslySetInnerHTML={{ __html: decode(data.content) }}
               />
               <div className="flex items-center gap-6 pt-2 border-t">
                 <Button variant="ghost" size="sm" className="gap-2">

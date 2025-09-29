@@ -52,6 +52,8 @@ export function MentoringCard({
     return `${startDate} ${startTime} - ${endDate} ${endTime}`;
   }
 
+  console.log("request 55:", request.requestMessage);
+
   return (
     <div className="relative overflow-hidden bg-white rounded-xl shadow p-6 flex flex-col justify-between min-h-[220px]">
       {request.status === "Completed" && (
@@ -131,6 +133,12 @@ export function MentoringCard({
                   )}
                 </div>
               </div>
+            </div>
+          )}
+          {request.status === "Cancelled" && (
+            <div className="text-sm mt-2">
+              <span className="text-gray-700 font-medium">Lý do: </span>
+              {request.resultMessage || "—"}
             </div>
           )}
         </div>

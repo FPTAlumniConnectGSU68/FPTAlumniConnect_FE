@@ -28,6 +28,15 @@ interface FormErrors {
   [key: string]: string;
 }
 
+type EmploymentHistory = {
+  companyName: string;
+  primaryDuties: string;
+  jobLevel: string;
+  startDate: string;
+  endDate: string;
+  isCurrentJob: boolean;
+};
+
 const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
   // skills arae fetched inside SkillMultiSelect; we manage only selected skills here
   console.log("initialData", initialData);
@@ -89,11 +98,78 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
+  const initialHistories = useMemo<EmploymentHistory[]>(() => {
+    const fromInitial = (initialData as any)?.employmentHistories as
+      | EmploymentHistory[]
+      | undefined;
+    if (fromInitial && Array.isArray(fromInitial) && fromInitial.length > 0) {
+      return fromInitial.map((h) => ({
+        companyName: h.companyName || "",
+        primaryDuties: h.primaryDuties || "",
+        jobLevel: h.jobLevel || "",
+        startDate: h.startDate || "",
+        endDate: h.endDate || "",
+        isCurrentJob: !!h.isCurrentJob,
+      }));
+    }
+    // fallback from flat fields
+
+    if (
+      initialData &&
+      (initialData.company || initialData.jobLevel || initialData.primaryDuties)
+    ) {
+      return [
+        {
+          companyName: initialData.company || "",
+          jobLevel: initialData.jobLevel || "",
+          primaryDuties: initialData.primaryDuties || "",
+          startDate: initialData.startAt || "",
+          endDate: initialData.endAt || "",
+          isCurrentJob: false,
+        },
+      ];
+    }
+    return [
+      {
+        companyName: "",
+        primaryDuties: "",
+        jobLevel: "",
+        startDate: "",
+        endDate: "",
+        isCurrentJob: false,
+      },
+    ];
+  }, [initialData]);
+
+  const [employmentHistories, setEmploymentHistories] =
+    useState<EmploymentHistory[]>(initialHistories);
+
+  const [education, setEducation] = useState({
+    schoolName: (initialData as any)?.schoolName || "",
+    degree: (initialData as any)?.degree || "",
+    fieldOfStudy: (initialData as any)?.fieldOfStudy || "",
+    graduationYear:
+      (initialData as any)?.graduationYear !== undefined
+        ? String((initialData as any)?.graduationYear)
+        : "",
+    educationDescription: (initialData as any)?.educationDescription || "",
+  });
+
   const validateForm = useCallback(() => {
     const newErrors: FormErrors = {};
 
+    // Validate basic form fields (exclude legacy employment fields handled below)
     Object.entries(formData)
-      .filter(([key]) => key !== "isDeal" && key !== "majorName")
+      .filter(
+        ([key]) =>
+          key !== "isDeal" &&
+          key !== "majorName" &&
+          key !== "company" &&
+          key !== "primaryDuties" &&
+          key !== "jobLevel" &&
+          key !== "startAt" &&
+          key !== "endAt"
+      )
       .forEach(([key, value]) => {
         if (!value && value !== 0) {
           newErrors[key] = `${
@@ -101,6 +177,36 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
           } is required`;
         }
       });
+
+    // Validate employment histories
+    if (!employmentHistories || employmentHistories.length === 0) {
+      newErrors["employmentHistories"] =
+        "At least one employment history is required";
+    } else {
+      employmentHistories.forEach((h, idx) => {
+        if (!h.companyName?.trim())
+          newErrors[`employmentHistories.${idx}.companyName`] =
+            "Company name is required";
+        if (!h.jobLevel?.trim())
+          newErrors[`employmentHistories.${idx}.jobLevel`] =
+            "Job level is required";
+        if (!h.startDate)
+          newErrors[`employmentHistories.${idx}.startDate`] =
+            "Start date is required";
+        if (!h.isCurrentJob && !h.endDate)
+          newErrors[`employmentHistories.${idx}.endDate`] =
+            "End date is required unless current job";
+      });
+    }
+
+    // Validate education
+    if (!education.schoolName?.trim())
+      newErrors["schoolName"] = "School name is required";
+    if (!education.degree?.trim()) newErrors["degree"] = "Degree is required";
+    if (!education.fieldOfStudy?.trim())
+      newErrors["fieldOfStudy"] = "Field of study is required";
+    if (!education.graduationYear?.toString().trim())
+      newErrors["graduationYear"] = "Graduation year is required";
 
     if (selectedSkills.length === 0) {
       newErrors.skills = "At least one skill is required";
@@ -113,7 +219,7 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
       return false;
     }
     return true;
-  }, [formData, selectedSkills]);
+  }, [formData, selectedSkills, employmentHistories, education]);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -171,11 +277,34 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
         const submissionData = {
           ...formData,
           skillIds: selectedSkills.map((s) => s.skillId),
-        };
-        onSubmit(submissionData);
+          employmentHistories: employmentHistories.map((h) => ({
+            cvId: formData.id || 0,
+            companyName: h.companyName,
+            primaryDuties: h.primaryDuties,
+            jobLevel: h.jobLevel,
+            startDate: h.startDate,
+            endDate: h.isCurrentJob ? "" : h.endDate,
+            isCurrentJob: h.isCurrentJob,
+          })),
+          schoolName: education.schoolName,
+          degree: education.degree,
+          fieldOfStudy: education.fieldOfStudy,
+          graduationYear: education.graduationYear
+            ? Number(education.graduationYear)
+            : undefined,
+          educationDescription: education.educationDescription,
+        } as any;
+        onSubmit(submissionData as unknown as CV);
       }
     },
-    [formData, selectedSkills, validateForm, onSubmit]
+    [
+      formData,
+      selectedSkills,
+      employmentHistories,
+      education,
+      validateForm,
+      onSubmit,
+    ]
   );
 
   // Keep form prefill in sync if initialData changes (e.g., when clicking Edit)
@@ -203,6 +332,48 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
       : [];
     setSelectedSkills(preselected);
   }, [initialData]);
+
+  const addHistory = () => {
+    setEmploymentHistories((prev) => [
+      ...prev,
+      {
+        companyName: "",
+        jobLevel: "",
+        primaryDuties: "",
+        startDate: "",
+        endDate: "",
+        isCurrentJob: false,
+      },
+    ]);
+  };
+
+  const removeHistory = (index: number) => {
+    setEmploymentHistories((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateHistory = (
+    index: number,
+    field: keyof EmploymentHistory,
+    value: string | boolean
+  ) => {
+    setEmploymentHistories((prev) =>
+      prev.map((item, i) =>
+        i === index
+          ? {
+              ...item,
+              [field]: value,
+              ...(field === "isCurrentJob" && value === true
+                ? { endDate: "" }
+                : {}),
+            }
+          : item
+      )
+    );
+    setErrors((prev) => ({
+      ...prev,
+      [`employmentHistories.${index}.${String(field)}`]: "",
+    }));
+  };
 
   return (
     <form id="cv-form" onSubmit={handleSubmit} className=" max-w-4xl space-y-6">
@@ -493,97 +664,141 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
         4. Kinh nghiệm làm việc
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="company">Công ty</Label>
-          <Input
-            id="company"
-            name="company"
-            value={formData.company}
-            onChange={handleInputChange}
-            placeholder="VD: FPT Software"
-            aria-invalid={!!errors.company}
-            className={
-              errors.company
-                ? "border-destructive focus-visible:ring-destructive"
-                : ""
-            }
-          />
-          {errors.company && (
-            <span className="text-sm text-destructive">{errors.company}</span>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="startAt">Ngày bắt đầu</Label>
-          <Input
-            id="startAt"
-            name="startAt"
-            type="date"
-            value={
-              formData.startAt
-                ? new Date(formData.startAt).toISOString().split("T")[0]
-                : ""
-            }
-            onChange={handleInputChange}
-            aria-invalid={!!errors.startAt}
-            className={
-              errors.startAt
-                ? "border-destructive focus-visible:ring-destructive"
-                : ""
-            }
-          />
-          {errors.startAt && (
-            <span className="text-sm text-destructive">{errors.startAt}</span>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="endAt">Ngày kết thúc</Label>
-          <Input
-            id="endAt"
-            name="endAt"
-            type="date"
-            value={
-              formData.endAt
-                ? new Date(formData.endAt).toISOString().split("T")[0]
-                : ""
-            }
-            onChange={handleInputChange}
-            aria-invalid={!!errors.endAt}
-            className={
-              errors.endAt
-                ? "border-destructive focus-visible:ring-destructive"
-                : ""
-            }
-          />
-          {errors.endAt && (
-            <span className="text-sm text-destructive">{errors.endAt}</span>
-          )}
-        </div>
-      </div>
-      <div>
-        <Label htmlFor="primaryDuties">Nhiệm vụ chính</Label>
-        <Textarea
-          id="primaryDuties"
-          name="primaryDuties"
-          value={formData.primaryDuties}
-          onChange={handleInputChange}
-          placeholder="Mô tả ngắn gọn trách nhiệm và thành tựu"
-          aria-invalid={!!errors.primaryDuties}
-          className={
-            errors.primaryDuties
-              ? "border-destructive focus-visible:ring-destructive"
-              : ""
-          }
-        />
-        {errors.primaryDuties && (
-          <span className="text-sm text-destructive">
-            {errors.primaryDuties}
-          </span>
-        )}
+      <div className="space-y-4">
+        {employmentHistories.map((h, idx) => (
+          <div key={idx} className="rounded-md border p-4 space-y-4 bg-white">
+            <div className="flex items-center justify-between">
+              <div className="font-medium">Kinh nghiệm #{idx + 1}</div>
+              {employmentHistories.length > 1 && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => removeHistory(idx)}
+                >
+                  Xóa
+                </Button>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Công ty</Label>
+                <Input
+                  value={h.companyName}
+                  onChange={(e) =>
+                    updateHistory(idx, "companyName", e.target.value)
+                  }
+                  placeholder="VD: FPT Software"
+                  aria-invalid={
+                    !!errors[`employmentHistories.${idx}.companyName`]
+                  }
+                  className={
+                    errors[`employmentHistories.${idx}.companyName`]
+                      ? "border-destructive focus-visible:ring-destructive"
+                      : ""
+                  }
+                />
+              </div>
+              <div>
+                <Label>Cấp bậc</Label>
+                <Input
+                  value={h.jobLevel}
+                  onChange={(e) =>
+                    updateHistory(idx, "jobLevel", e.target.value)
+                  }
+                  placeholder="VD: Junior / Mid / Senior"
+                  aria-invalid={!!errors[`employmentHistories.${idx}.jobLevel`]}
+                  className={
+                    errors[`employmentHistories.${idx}.jobLevel`]
+                      ? "border-destructive focus-visible:ring-destructive"
+                      : ""
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Ngày bắt đầu</Label>
+                <Input
+                  type="date"
+                  value={
+                    h.startDate
+                      ? new Date(h.startDate).toISOString().split("T")[0]
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateHistory(
+                      idx,
+                      "startDate",
+                      e.target.value
+                        ? new Date(e.target.value).toISOString()
+                        : ""
+                    )
+                  }
+                  aria-invalid={
+                    !!errors[`employmentHistories.${idx}.startDate`]
+                  }
+                  className={
+                    errors[`employmentHistories.${idx}.startDate`]
+                      ? "border-destructive focus-visible:ring-destructive"
+                      : ""
+                  }
+                />
+              </div>
+              <div>
+                <Label>Ngày kết thúc</Label>
+                <Input
+                  type="date"
+                  disabled={h.isCurrentJob}
+                  value={
+                    h.endDate
+                      ? new Date(h.endDate).toISOString().split("T")[0]
+                      : ""
+                  }
+                  onChange={(e) =>
+                    updateHistory(
+                      idx,
+                      "endDate",
+                      e.target.value
+                        ? new Date(e.target.value).toISOString()
+                        : ""
+                    )
+                  }
+                  aria-invalid={!!errors[`employmentHistories.${idx}.endDate`]}
+                  className={
+                    errors[`employmentHistories.${idx}.endDate`]
+                      ? "border-destructive focus-visible:ring-destructive"
+                      : ""
+                  }
+                />
+                <div className="mt-2 flex items-center gap-2">
+                  <input
+                    id={`isCurrentJob-${idx}`}
+                    type="checkbox"
+                    checked={h.isCurrentJob}
+                    onChange={(e) =>
+                      updateHistory(idx, "isCurrentJob", e.target.checked)
+                    }
+                    className="h-4 w-4"
+                  />
+                  <Label htmlFor={`isCurrentJob-${idx}`}>Đang làm việc</Label>
+                </div>
+              </div>
+            </div>
+            <div>
+              <Label>Nhiệm vụ chính</Label>
+              <Textarea
+                value={h.primaryDuties}
+                onChange={(e) =>
+                  updateHistory(idx, "primaryDuties", e.target.value)
+                }
+                placeholder="Mô tả ngắn gọn trách nhiệm và thành tựu"
+              />
+            </div>
+          </div>
+        ))}
+        <Button type="button" variant="outline" onClick={addHistory}>
+          Thêm kinh nghiệm
+        </Button>
       </div>
 
       <div className="text-base md:text-lg font-semibold text-primary">
@@ -688,6 +903,102 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
             {errors.additionalContent}
           </span>
         )}
+      </div>
+
+      <div className="text-base md:text-lg font-semibold text-primary">
+        7. Thông tin học vấn
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label>Trường</Label>
+          <Input
+            value={education.schoolName}
+            onChange={(e) => {
+              setEducation((prev) => ({ ...prev, schoolName: e.target.value }));
+              setErrors((prev) => ({ ...prev, schoolName: "" }));
+            }}
+            placeholder="VD: Đại học FPT"
+            aria-invalid={!!errors.schoolName}
+            className={
+              errors.schoolName
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
+          />
+        </div>
+        <div>
+          <Label>Bằng cấp</Label>
+          <Input
+            value={education.degree}
+            onChange={(e) => {
+              setEducation((prev) => ({ ...prev, degree: e.target.value }));
+              setErrors((prev) => ({ ...prev, degree: "" }));
+            }}
+            placeholder="VD: Cử nhân"
+            aria-invalid={!!errors.degree}
+            className={
+              errors.degree
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label>Chuyên ngành</Label>
+          <Input
+            value={education.fieldOfStudy}
+            onChange={(e) => {
+              setEducation((prev) => ({
+                ...prev,
+                fieldOfStudy: e.target.value,
+              }));
+              setErrors((prev) => ({ ...prev, fieldOfStudy: "" }));
+            }}
+            placeholder="VD: Khoa học máy tính"
+            aria-invalid={!!errors.fieldOfStudy}
+            className={
+              errors.fieldOfStudy
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
+          />
+        </div>
+        <div>
+          <Label>Năm tốt nghiệp</Label>
+          <Input
+            type="number"
+            value={education.graduationYear}
+            onChange={(e) => {
+              setEducation((prev) => ({
+                ...prev,
+                graduationYear: e.target.value,
+              }));
+              setErrors((prev) => ({ ...prev, graduationYear: "" }));
+            }}
+            placeholder="VD: 2025"
+            aria-invalid={!!errors.graduationYear}
+            className={
+              errors.graduationYear
+                ? "border-destructive focus-visible:ring-destructive"
+                : ""
+            }
+          />
+        </div>
+      </div>
+      <div>
+        <Label>Mô tả học vấn</Label>
+        <Textarea
+          value={education.educationDescription}
+          onChange={(e) =>
+            setEducation((prev) => ({
+              ...prev,
+              educationDescription: e.target.value,
+            }))
+          }
+          placeholder="Thành tích, dự án, hoạt động..."
+        />
       </div>
     </form>
   );

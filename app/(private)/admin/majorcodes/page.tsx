@@ -2,6 +2,8 @@
 
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Pagination from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -12,11 +14,8 @@ import {
 } from "@/components/ui/table";
 import { useMajorCodes } from "@/hooks/use-major-codes";
 import useMajorService, { MajorCodeItem } from "@/lib/services/major.service";
-import { ApiResponse, PaginatedData } from "@/lib/apiResponse";
 import { isApiSuccess } from "@/lib/utils";
-import { useEffect, useMemo, useState } from "react";
-import { Input } from "@/components/ui/input";
-import Pagination from "@/components/ui/pagination";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function AdminMajorCodesPage() {
@@ -41,7 +40,6 @@ export default function AdminMajorCodesPage() {
     const handler = setTimeout(() => setDebouncedSearch(searchInput), 400);
     return () => clearTimeout(handler);
   }, [searchInput]);
-  console.log(majors);
 
   const items = majors && isApiSuccess(majors) ? majors.data?.items ?? [] : [];
   const totalPages =
@@ -57,17 +55,17 @@ export default function AdminMajorCodesPage() {
     try {
       if (editing) {
         const res = await UPDATE_MAJOR(editing.majorId, form);
-        if (isApiSuccess(res)) toast("Cập nhật thành công");
+        if (isApiSuccess(res)) toast.success("Cập nhật thành công");
       } else {
         const res = await CREATE_MAJOR(form);
-        if (isApiSuccess(res)) toast("Tạo thành công");
+        if (isApiSuccess(res)) toast.success("Tạo thành công");
       }
       resetForm();
       setEditing(null);
       setOpen(false);
       refetch();
     } catch (e) {
-      toast("Thao tác thất bại");
+      toast.error("Thao tác thất bại");
     }
   };
 
