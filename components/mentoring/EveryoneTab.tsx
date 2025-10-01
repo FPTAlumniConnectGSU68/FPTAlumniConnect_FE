@@ -143,15 +143,15 @@ export function EveryoneTab({ currentPage, user }: EveryoneTabProps) {
           request={request}
           actionButton={
             user &&
-            request.aumniId !== user?.userId &&
-            user.mentorStatus === "Active"
+              request.aumniId !== user?.userId &&
+              user.mentorStatus === "Active"
               ? {
-                  label: "Chấp nhận yêu cầu",
-                  onClick: () => {
-                    setIsAcceptRequestModalOpen(true);
-                    setTempId(request.id);
-                  },
-                }
+                label: "Chấp nhận yêu cầu",
+                onClick: () => {
+                  setIsAcceptRequestModalOpen(true);
+                  setTempId(request.id);
+                },
+              }
               : undefined
           }
         />
@@ -159,6 +159,7 @@ export function EveryoneTab({ currentPage, user }: EveryoneTabProps) {
       <Dialog
         open={isAcceptRequestModalOpen}
         onOpenChange={setIsAcceptRequestModalOpen}
+        modal={false}
       >
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>

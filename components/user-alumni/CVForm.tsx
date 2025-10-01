@@ -33,7 +33,7 @@ type EmploymentHistory = {
   primaryDuties: string;
   jobLevel: string;
   startDate: string;
-  endDate: string;
+  endDate: string | null;
   isCurrentJob: boolean;
 };
 
@@ -41,45 +41,60 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
   // skills arae fetched inside SkillMultiSelect; we manage only selected skills here
   console.log("initialData", initialData);
   const normalizeCV = (data?: CV | null): CV => {
-    const base: CV = data
-      ? (data as CV)
-      : {
-          id: 0,
-          userId: 0,
-          fullName: "",
-          address: "",
-          birthday: "",
-          gender: "",
-          email: "",
-          phone: "",
-          city: "",
-          company: "",
+    if (data) {
+      return {
+        ...data,
+        majorId:
+          typeof data.majorId === "string"
+            ? parseInt(data.majorId) || 0
+            : data.majorId,
+        gender: data.gender ? data.gender.toLowerCase() : "",
+      };
+    }
+
+    // Default CV structure
+    return {
+      id: 0,
+      userId: 0,
+      fullName: "",
+      address: "",
+      birthday: "",
+      gender: "",
+      email: "",
+      phone: "",
+      city: "",
+      employmentHistories: [
+        {
+          cvId: 0,
+          companyName: "",
           primaryDuties: "",
           jobLevel: "",
-          startAt: "",
-          endAt: "",
-          language: "",
-          languageLevel: "",
-          minSalary: 0,
-          maxSalary: 0,
-          isDeal: true,
-          desiredJob: "",
-          position: "",
-          majorId: "",
-          majorName: "",
-          additionalContent: "",
-          status: "Public" as CV["status"],
-          skillIds: [],
-          skillNames: [],
-        };
-    return {
-      ...base,
-      majorId:
-        (base as any).majorId !== undefined
-          ? String((base as any).majorId)
-          : "",
-      gender: base.gender ? base.gender.toLowerCase() : "",
-    };
+          startDate: "",
+          endDate: null,
+          isCurrentJob: false,
+        },
+      ],
+      language: "",
+      languageLevel: "",
+      minSalary: 0,
+      maxSalary: 0,
+      isDeal: true,
+      desiredJob: "",
+      position: "",
+      majorId: 0,
+      majorName: "",
+      additionalContent: "",
+      status: "Public" as CV["status"],
+      skillIds: [],
+      skillNames: [],
+      schoolName: "",
+      degree: "",
+      fieldOfStudy: "",
+      graduationYear: 0,
+      educationDescription: "",
+      startAt: "",
+      endAt: "",
+    } as unknown as CV;
   };
 
   const [formData, setFormData] = useState<CV>(normalizeCV(initialData));
@@ -99,11 +114,12 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
   const [errors, setErrors] = useState<FormErrors>({});
 
   const initialHistories = useMemo<EmploymentHistory[]>(() => {
-    const fromInitial = (initialData as any)?.employmentHistories as
-      | EmploymentHistory[]
-      | undefined;
-    if (fromInitial && Array.isArray(fromInitial) && fromInitial.length > 0) {
-      return fromInitial.map((h) => ({
+    if (
+      initialData?.employmentHistories &&
+      Array.isArray(initialData.employmentHistories) &&
+      initialData.employmentHistories.length > 0
+    ) {
+      return initialData.employmentHistories.map((h) => ({
         companyName: h.companyName || "",
         primaryDuties: h.primaryDuties || "",
         jobLevel: h.jobLevel || "",
@@ -112,23 +128,7 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
         isCurrentJob: !!h.isCurrentJob,
       }));
     }
-    // fallback from flat fields
 
-    if (
-      initialData &&
-      (initialData.company || initialData.jobLevel || initialData.primaryDuties)
-    ) {
-      return [
-        {
-          companyName: initialData.company || "",
-          jobLevel: initialData.jobLevel || "",
-          primaryDuties: initialData.primaryDuties || "",
-          startDate: initialData.startAt || "",
-          endDate: initialData.endAt || "",
-          isCurrentJob: false,
-        },
-      ];
-    }
     return [
       {
         companyName: "",
@@ -158,25 +158,31 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
   const validateForm = useCallback(() => {
     const newErrors: FormErrors = {};
 
-    // Validate basic form fields (exclude legacy employment fields handled below)
-    Object.entries(formData)
-      .filter(
-        ([key]) =>
-          key !== "isDeal" &&
-          key !== "majorName" &&
-          key !== "company" &&
-          key !== "primaryDuties" &&
-          key !== "jobLevel" &&
-          key !== "startAt" &&
-          key !== "endAt"
-      )
-      .forEach(([key, value]) => {
-        if (!value && value !== 0) {
-          newErrors[key] = `${
-            key.charAt(0).toUpperCase() + key.slice(1)
-          } is required`;
-        }
-      });
+    // Validate basic form fields (exclude non-required fields)
+    const requiredFields = [
+      "fullName",
+      "address",
+      "birthday",
+      "gender",
+      "email",
+      "phone",
+      "city",
+      "language",
+      "languageLevel",
+      "desiredJob",
+      "position",
+      "majorId",
+      "additionalContent",
+    ];
+
+    requiredFields.forEach((key) => {
+      const value = formData[key as keyof CV];
+      if (!value && value !== 0) {
+        newErrors[key] = `${
+          key.charAt(0).toUpperCase() + key.slice(1)
+        } is required`;
+      }
+    });
 
     // Validate employment histories
     if (!employmentHistories || employmentHistories.length === 0) {
@@ -260,7 +266,7 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
   const handleSelectChange = useCallback((name: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "majorId" ? parseInt(value) || 0 : value,
     }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
   }, []);
@@ -283,7 +289,7 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
             primaryDuties: h.primaryDuties,
             jobLevel: h.jobLevel,
             startDate: h.startDate,
-            endDate: h.isCurrentJob ? "" : h.endDate,
+            endDate: h.isCurrentJob ? null : h.endDate,
             isCurrentJob: h.isCurrentJob,
           })),
           schoolName: education.schoolName,
@@ -293,7 +299,7 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
             ? Number(education.graduationYear)
             : undefined,
           educationDescription: education.educationDescription,
-        } as any;
+        };
         onSubmit(submissionData as unknown as CV);
       }
     },
@@ -310,18 +316,11 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
   // Keep form prefill in sync if initialData changes (e.g., when clicking Edit)
   useEffect(() => {
     if (!initialData) return;
-    const normalized = {
-      ...(initialData as unknown as CV),
-      majorId:
-        (initialData as any).majorId !== undefined
-          ? String((initialData as any).majorId)
-          : "",
-      gender: initialData.gender ? initialData.gender.toLowerCase() : "",
-    } as CV;
+    const normalized = normalizeCV(initialData);
     setFormData(normalized);
 
-    const ids = (initialData as any).skillIds as number[] | undefined;
-    const names = (initialData as any).skillNames as string[] | undefined;
+    const ids = initialData.skillIds as number[] | undefined;
+    const names = initialData.skillNames as string[] | undefined;
     const preselected = ids
       ? (ids.map((id, idx) => ({
           skillId: id,
@@ -354,7 +353,7 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
   const updateHistory = (
     index: number,
     field: keyof EmploymentHistory,
-    value: string | boolean
+    value: string | boolean | null
   ) => {
     setEmploymentHistories((prev) =>
       prev.map((item, i) =>
@@ -363,7 +362,7 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
               ...item,
               [field]: value,
               ...(field === "isCurrentJob" && value === true
-                ? { endDate: "" }
+                ? { endDate: null }
                 : {}),
             }
           : item
@@ -541,26 +540,6 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
             <span className="text-sm text-destructive">{errors.position}</span>
           )}
         </div>
-
-        <div>
-          <Label htmlFor="jobLevel">Cấp bậc</Label>
-          <Input
-            id="jobLevel"
-            name="jobLevel"
-            value={formData.jobLevel}
-            onChange={handleInputChange}
-            placeholder="VD: Junior / Mid / Senior"
-            aria-invalid={!!errors.jobLevel}
-            className={
-              errors.jobLevel
-                ? "border-destructive focus-visible:ring-destructive"
-                : ""
-            }
-          />
-          {errors.jobLevel && (
-            <span className="text-sm text-destructive">{errors.jobLevel}</span>
-          )}
-        </div>
       </div>
       <div>
         <Label htmlFor="desiredJob">Vị trí mong muốn</Label>
@@ -587,9 +566,8 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
       <div>
         <Label htmlFor="majorId">Chuyên ngành</Label>
         <Select
-          value={formData.majorId}
+          value={formData.majorId.toString()}
           onValueChange={(value) => handleSelectChange("majorId", value)}
-          defaultValue={formData.majorId}
         >
           <SelectTrigger>
             <SelectValue placeholder="Chọn chuyên ngành" />
@@ -697,6 +675,11 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
                       : ""
                   }
                 />
+                {errors[`employmentHistories.${idx}.companyName`] && (
+                  <span className="text-sm text-destructive">
+                    {errors[`employmentHistories.${idx}.companyName`]}
+                  </span>
+                )}
               </div>
               <div>
                 <Label>Cấp bậc</Label>
@@ -713,6 +696,11 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
                       : ""
                   }
                 />
+                {errors[`employmentHistories.${idx}.jobLevel`] && (
+                  <span className="text-sm text-destructive">
+                    {errors[`employmentHistories.${idx}.jobLevel`]}
+                  </span>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -743,6 +731,11 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
                       : ""
                   }
                 />
+                {errors[`employmentHistories.${idx}.startDate`] && (
+                  <span className="text-sm text-destructive">
+                    {errors[`employmentHistories.${idx}.startDate`]}
+                  </span>
+                )}
               </div>
               <div>
                 <Label>Ngày kết thúc</Label>
@@ -760,7 +753,7 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
                       "endDate",
                       e.target.value
                         ? new Date(e.target.value).toISOString()
-                        : ""
+                        : null
                     )
                   }
                   aria-invalid={!!errors[`employmentHistories.${idx}.endDate`]}
@@ -770,6 +763,11 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
                       : ""
                   }
                 />
+                {errors[`employmentHistories.${idx}.endDate`] && (
+                  <span className="text-sm text-destructive">
+                    {errors[`employmentHistories.${idx}.endDate`]}
+                  </span>
+                )}
                 <div className="mt-2 flex items-center gap-2">
                   <input
                     id={`isCurrentJob-${idx}`}
@@ -925,6 +923,11 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
                 : ""
             }
           />
+          {errors.schoolName && (
+            <span className="text-sm text-destructive">
+              {errors.schoolName}
+            </span>
+          )}
         </div>
         <div>
           <Label>Bằng cấp</Label>
@@ -942,6 +945,9 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
                 : ""
             }
           />
+          {errors.degree && (
+            <span className="text-sm text-destructive">{errors.degree}</span>
+          )}
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -964,6 +970,11 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
                 : ""
             }
           />
+          {errors.fieldOfStudy && (
+            <span className="text-sm text-destructive">
+              {errors.fieldOfStudy}
+            </span>
+          )}
         </div>
         <div>
           <Label>Năm tốt nghiệp</Label>
@@ -985,6 +996,11 @@ const CVForm = memo(({ initialData, onSubmit, majorItems }: CVFormProps) => {
                 : ""
             }
           />
+          {errors.graduationYear && (
+            <span className="text-sm text-destructive">
+              {errors.graduationYear}
+            </span>
+          )}
         </div>
       </div>
       <div>

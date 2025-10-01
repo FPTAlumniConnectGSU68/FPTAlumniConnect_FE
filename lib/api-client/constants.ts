@@ -18,7 +18,9 @@ export const END_POINTS: {
   updateEvent: { path: "/v1/events", method: "PUT", secure: true },
   getJobs: { path: "/v1/jobposts", method: "GET" },
   getRecuiters: { path: "/recruiter-info", method: "GET" },
-  updateRecuiter: { path: "/recruiter-info/status", method: "PATCH" },
+  updateRecuiterStatus: { path: "/recruiter-info/status", method: "PATCH" },
+  updateRecuiter: { path: "/recruiter-info", method: "PATCH" },
+  updateRecuiterInfo: { path: "/recruiter-info/user", method: "PATCH" },
   getRecuiterInfo: { path: "/recruiter-info", method: "GET" },
   createNewRecuiter: { path: "/recruiter-info", method: "POST" },
   getPosts: { path: "/v1/posts", method: "GET" },
@@ -169,6 +171,10 @@ export const END_POINTS: {
     path: "/v1/jobposts",
     method: "POST",
   },
+  updateJobPost: {
+    path: "/v1/jobposts",
+    method: "PATCH",
+  },
   getJobApplicationsByJobPostId: {
     path: "/v1/jobapplications/jobpost",
     method: "GET",
@@ -279,7 +285,7 @@ export enum ACTIONS {
   //Home
   GET_JOBS = "getJobs",
   GET_RECUITERS = "getRecuiters",
-  UPDATE_RECRUITER = "updateRecuiter",
+  UPDATE_RECRUITER_STATUS = "updateRecuiterStatus",
   GET_RECRUITER_INFO = "getRecuiterInfo",
   CREATE_RECRUITER = "createNewRecuiter",
   GET_UPCOMMING_EVENTS = "getEvents",
@@ -352,6 +358,7 @@ export enum ACTIONS {
   CREATE_JOB_APPLICATION = "createJobApplication",
   UPDATE_JOB_APPLICATION = "updateJobApplication",
   CREATE_JOB_POST = "createJobPost",
+  UPDATE_JOB_POST = "updateJobPost",
   GET_JOB_APPLICATIONS_BY_JOBPOST_ID = "getJobApplicationsByJobPostId",
   GET_JOB_APPLICATIONS_BY_CV_ID = "getJobApplicationsByCvid",
 
@@ -380,6 +387,8 @@ export enum ACTIONS {
   UPDATE_JOBPOST_CLEANUP = "updateJobPostCleanup",
   UPDATE_MENTORSHIP_SETTINGS = "updateMentorshipSettings",
   UPDATE_SCHEDULE_SETTINGS = "updateScheduleSettings",
+  UPDATE_RECRUITER = "updateRecuiter",
+  UPDATE_RECRUITER_INFO = "updateRecuiterInfo",
 }
 
 export const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;

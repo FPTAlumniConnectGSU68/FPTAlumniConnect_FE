@@ -52,8 +52,6 @@ export function MentoringCard({
     return `${startDate} ${startTime} - ${endDate} ${endTime}`;
   }
 
-  console.log("request 55:", request.requestMessage);
-
   return (
     <div className="relative overflow-hidden bg-white rounded-xl shadow p-6 flex flex-col justify-between min-h-[220px]">
       {request.status === "Completed" && (
@@ -158,7 +156,7 @@ export function MentoringCard({
           </Button>
         )}
         {request.status === "Completed" &&
-          request.schedules[0].rating === null && (
+          request.schedules[0]?.rating === null && (
             <Button
               variant="outline"
               size="sm"
@@ -176,20 +174,20 @@ export function MentoringCard({
             </Button>
           )}
         {request.status === "Completed" &&
-          request.schedules[0].rating !== null && (
+          request.schedules[0]?.rating !== null && (
             <div className="text-sm text-gray-600 flex items-center gap-1 justify-center">
               {[1, 2, 3, 4, 5].map((index) => (
                 <Star
                   key={index}
                   className={
-                    index <= Math.round(Number(request.schedules[0].rating))
+                    index <= Math.round(Number(request.schedules[0]?.rating))
                       ? "h-4 w-4 text-yellow-400 fill-current"
                       : "h-4 w-4 text-gray-300"
                   }
                 />
               ))}
               <span className="ml-1 font-medium">
-                {request.schedules[0].rating} / 5
+                {request.schedules[0]?.rating} / 5
               </span>
             </div>
           )}

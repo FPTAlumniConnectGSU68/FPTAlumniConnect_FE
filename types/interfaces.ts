@@ -52,6 +52,9 @@ export interface JobPost {
   city: string;
   minSalary: number;
   maxSalary: number;
+  recruitmentQuantity: number;
+  workType: string;
+  workHours: string;
   isDeal: boolean;
   requirements: string;
   benefits: string;
@@ -78,6 +81,9 @@ export interface JobPostCreate {
   maxSalary: number;
   isDeal: boolean;
   location: string;
+  recruitmentQuantity: number;
+  workType: string;
+  workHours: string;
   city: string;
   requirements: string;
   benefits: string;
@@ -194,6 +200,8 @@ export interface Schedule {
   status: "Completed" | "Active" | "Failed";
   rating: number | null;
   comment: string | null;
+  requestMessage?: string;
+  resultMessage?: string;
 }
 
 export interface ScheduleCreate {

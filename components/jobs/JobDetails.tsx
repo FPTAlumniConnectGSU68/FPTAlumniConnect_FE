@@ -10,6 +10,9 @@ import {
   Building2,
   GraduationCap,
   Loader2,
+  Users,
+  Briefcase,
+  Clock,
 } from "lucide-react";
 import { useRouteHistory } from "@/hooks/use-route-history";
 import { useState } from "react";
@@ -49,10 +52,15 @@ export function JobDetails({ job, user }: JobDetailsProps) {
       if (response.status === "success") {
         setIsApplicationDialogOpen(false);
       } else {
-        throw new Error("Failed to submit application. Please try again.");
+        toast.error(
+          response.message || "Failed to submit application. Please try again."
+        );
       }
     } catch (error) {
-      toast.error((error as Error).message);
+      toast.error(
+        (error as Error).message ||
+          "Failed to submit application. Please try again."
+      );
     }
   };
 
@@ -85,8 +93,20 @@ export function JobDetails({ job, user }: JobDetailsProps) {
                   {`${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()} VNĐ `}
                 </div>
                 <div className="flex items-center text-gray-600">
+                  <Users className="h-4 w-4 mr-2" />
+                  Tuyển: {job.recruitmentQuantity || "N/A"} người
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <Briefcase className="h-4 w-4 mr-2" />
+                  Hình thức: {job.workType || "N/A"}
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <Clock className="h-4 w-4 mr-2" />
+                  Thời gian làm việc: {job.workHours || "N/A"}
+                </div>
+                <div className="flex items-center text-gray-600">
                   <Building2 className="h-4 w-4 mr-2" />
-                  Email: {job.email}
+                  Email: {job.email || "Không xác định"}
                 </div>
               </div>
             </div>
@@ -97,25 +117,42 @@ export function JobDetails({ job, user }: JobDetailsProps) {
 
           <div className="space-y-6">
             <section>
-              <h3 className="text-lg font-semibold mb-2">Job Description</h3>
+              <h3 className="text-lg font-semibold mb-2">Mô tả công việc</h3>
               <p className="text-gray-600 whitespace-pre-wrap">
                 {job.jobDescription}
               </p>
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold mb-2">Requirements</h3>
+              <h3 className="text-lg font-semibold mb-2">Yêu cầu công việc</h3>
               <p className="text-gray-600 whitespace-pre-wrap">
                 {job.requirements}
               </p>
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold mb-2">Benefits</h3>
+              <h3 className="text-lg font-semibold mb-2">Quyền lợi</h3>
               <p className="text-gray-600 whitespace-pre-wrap">
                 {job.benefits}
               </p>
             </section>
+
+            {job.skills && job.skills.length > 0 && (
+              <section>
+                <h3 className="text-lg font-semibold mb-3">Kỹ năng yêu cầu</h3>
+                <div className="flex flex-wrap gap-2">
+                  {job.skills.map((skill) => (
+                    <Badge
+                      key={skill.skillId}
+                      variant="outline"
+                      className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                    >
+                      {skill.name}
+                    </Badge>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <Button
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"

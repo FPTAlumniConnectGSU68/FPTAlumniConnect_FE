@@ -168,8 +168,8 @@ const CVView = () => {
     const list = Array.isArray(data?.items)
       ? data.items
       : Array.isArray(data?.items)
-        ? data?.items
-        : [];
+      ? data?.items
+      : [];
     return list;
   }, [jobApplicationsData]);
 
@@ -347,8 +347,8 @@ const CVView = () => {
                     app.status === "Approved"
                       ? "bg-green-100 text-green-800"
                       : app.status === "Rejected"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-yellow-100 text-yellow-800";
+                      ? "bg-red-100 text-red-800"
+                      : "bg-yellow-100 text-yellow-800";
 
                   return (
                     <Card
@@ -434,10 +434,11 @@ const CVView = () => {
                     </div>
                     <div className="flex items-center mt-2">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs ${cv.status === "Public"
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          cv.status === "Public"
                             ? "bg-green-100 text-green-800"
                             : "bg-yellow-100 text-yellow-800"
-                          }`}
+                        }`}
                       >
                         {cv.status}
                       </span>
@@ -528,10 +529,11 @@ const CVView = () => {
                     <div className="text-sm text-gray-500">{job.location}</div>
                     <div className="flex items-center mt-2">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs ${job.status === "Open"
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          job.status === "Open"
                             ? "bg-green-100 text-green-800"
                             : "bg-yellow-100 text-yellow-800"
-                          }`}
+                        }`}
                       >
                         {job.status}
                       </span>

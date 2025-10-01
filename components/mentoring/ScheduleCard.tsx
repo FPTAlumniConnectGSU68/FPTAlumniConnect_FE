@@ -1,6 +1,6 @@
 import { Schedule } from "@/types/interfaces";
 import { Button } from "../ui/button";
-import { formatDateToDMY } from "@/lib/utils";
+import { formatDateToDMY, formatTime } from "@/lib/utils";
 import { CalendarDays, Clock, User, UserCheck } from "lucide-react";
 import { useState } from "react";
 import {
@@ -101,6 +101,23 @@ export function ScheduleCard({
     return `${hours} hour${hours !== 1 ? "s" : ""}`;
   };
 
+  function renderDateTimeRange(start?: string, end?: string) {
+    if (!start || !end) return "—";
+
+    const startDate = formatDateToDMY(start);
+    const startTime = formatTime(start);
+    const endDate = formatDateToDMY(end);
+    const endTime = formatTime(end);
+
+    // If same day → compact format
+    if (startDate === endDate) {
+      return `${startDate} ${startTime} - ${endTime}`;
+    }
+
+    // Different day → show both
+    return `${startDate} ${startTime} - ${endDate} ${endTime}`;
+  }
+
   return (
     <div className="relative overflow-hidden bg-white rounded-xl shadow-md border border-gray-100 p-6 transition-all duration-200">
       {/* Decorative Gradient Blob */}
@@ -116,6 +133,11 @@ export function ScheduleCard({
         <span className="px-2.5 py-1 rounded-full text-xs sm:text-sm font-medium bg-white/20 text-white border border-white/30">
           {getStatusLabel(schedule.status)}
         </span>
+      </div>
+
+      {/* request Section */}
+      <div className="mb-2">
+        <p className="text-gray-600 line-clamp-2">Yêu cầu: {schedule.requestMessage}</p>
       </div>
 
       {/* Participants Section */}
@@ -150,15 +172,20 @@ export function ScheduleCard({
 
       {/* Timeline Section */}
       <div
-        className={`rounded-lg p-4 mb-6 border ${statusConfig.border} bg-gradient-to-br ${statusConfig.panelFrom} ${statusConfig.panelTo}`}
+        className={`rounded-lg p-2 mb-6 border ${statusConfig.border} bg-gradient-to-br ${statusConfig.panelFrom} ${statusConfig.panelTo}`}
       >
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 text-gray-800">
             <Clock className={`w-4 h-4 ${statusConfig.text}`} />
-            <span className="font-medium text-gray-900">
-              {formatDateToDMY(schedule.startTime)} -{" "}
-              {formatDateToDMY(schedule.endTime)}
+            <span className="font-normal text-gray-900 text-xs md:text-sm">
+              {/* {formatDateToDMY(schedule.startTime)} -{" "}
+              {formatDateToDMY(schedule.endTime)} */}
+              {renderDateTimeRange(
+                schedule.startTime,
+                schedule.endTime
+              )}
             </span>
+
           </div>
           {formatDuration(schedule.startTime, schedule.endTime) && (
             <span className="inline-flex justify-center items-center rounded-full bg-white/80 border border-white/60 px-2 py-0.5 text-xs text-gray-800">
@@ -169,9 +196,30 @@ export function ScheduleCard({
       </div>
 
       {/* Content Section */}
-      <div className="mb-6">
-        <p className="text-gray-600 line-clamp-2">{schedule.content}</p>
+      <div className="mb-2">
+        <p className="text-gray-600 line-clamp-2">Nội dung: {schedule.content}</p>
       </div>
+
+      {/* Rating Section */}
+      <div className="mb-2">
+        <p className="text-gray-600 line-clamp-2">
+          Đánh giá: {schedule.rating ? `${schedule.rating} ⭐` : "Không có"}
+        </p>
+      </div>
+
+      {/* comment Section */}
+      {schedule.rating && (<div className="mb-2">
+        <p className="text-gray-600 line-clamp-2">
+          Nội dung đánh giá: {schedule.comment}
+        </p>
+      </div>)}
+
+
+      {/* Reason Section */}
+      {schedule.status === "Failed" && (<div className="mb-2">
+        <p className="text-gray-600 line-clamp-2">Lý do thất bại: {schedule.resultMessage}</p>
+      </div>)}
+
 
       {/* Actions */}
       {schedule.status === "Active" && (

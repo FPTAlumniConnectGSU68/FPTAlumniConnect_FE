@@ -39,8 +39,6 @@ function JobsPageContent() {
     },
   });
 
-  console.log("jobs: ", jobs);
-
   const router = useRouter();
 
   const clearAllRef = useRef<HTMLButtonElement>(null);
@@ -61,7 +59,9 @@ function JobsPageContent() {
   useEffect(() => {
     if (jobs && isApiSuccess(jobs) && jobs.data?.items) {
       if (page === 1) {
+        // Reset data for first page
         setData(jobs.data.items);
+        // Handle initial job selection
         const idNum = jobId ? Number(jobId) : NaN;
         if (jobId && Number.isFinite(idNum)) {
           const match = jobs.data.items.find(
@@ -74,35 +74,64 @@ function JobsPageContent() {
           );
         }
       } else {
+        // Append new data for subsequent pages
         setData((prev) => {
           const existingIds = new Set(prev.map((item) => item.jobPostId));
           const newItems = jobs.data!.items.filter(
             (item) => !existingIds.has(item.jobPostId)
           );
-          return [...prev, ...newItems];
+          const updatedData = [...prev, ...newItems];
+
+          // If there's a jobId in URL but no selected job, try to find it in the updated data
+          if (jobId && !selectedJob) {
+            const idNum = Number(jobId);
+            if (Number.isFinite(idNum)) {
+              const match = updatedData.find(
+                (item) => item.jobPostId === idNum
+              );
+              if (match) {
+                setSelectedJob(match);
+              }
+            }
+          }
+
+          return updatedData;
         });
       }
     }
-  }, [jobs, page, jobId]);
+  }, [jobs, page, jobId, selectedJob]);
 
-  // Select job based on URL id when data updates
+  // Sync selected job with URL and data changes
   useEffect(() => {
+    if (!data.length) return;
+
     const idNum = jobId ? Number(jobId) : NaN;
-    if (!jobId || !Number.isFinite(idNum)) return;
-    const found = data.find((j) => j.jobPostId === idNum) || null;
-    if (found && selectedJob?.jobPostId !== idNum) {
-      setSelectedJob(found);
+
+    if (jobId && Number.isFinite(idNum)) {
+      // Find job by URL id
+      const found = data.find((j) => j.jobPostId === idNum);
+      if (found && selectedJob?.jobPostId !== idNum) {
+        setSelectedJob(found);
+      } else if (!found && selectedJob?.jobPostId === idNum) {
+        // Job not found in current data, keep selected job if it matches URL
+        // This handles the case where job is not yet loaded
+        return;
+      }
+    } else if (!selectedJob && data.length > 0) {
+      // No URL id and no selected job, select first job
+      setSelectedJob(data[0]);
     }
   }, [jobId, data, selectedJob]);
 
-  // Reset pagination when filters change
+  // Reset pagination and data when filters change
   useEffect(() => {
     setPage(1);
-    // Keep selected job if URL has an id
+    setData([]); // Clear existing data when filters change
+    // Reset selected job unless URL has a specific id
     if (!jobId) {
       setSelectedJob(null);
     }
-  }, [major, location, search, jobId]);
+  }, [major, location, search]);
 
   // click clear all button once the page is loaded
   useEffect(() => {
@@ -110,13 +139,18 @@ function JobsPageContent() {
   }, []);
 
   // Event handlers
-  const handleJobClick = (job: JobPost) => {
-    router.push(
-      pathname + "?" + createQueryString("id", job.jobPostId.toString()),
-      { scroll: false }
-    );
-    setSelectedJob(job);
-  };
+  const handleJobClick = useCallback(
+    (job: JobPost) => {
+      // Update URL first
+      router.push(
+        pathname + "?" + createQueryString("id", job.jobPostId.toString()),
+        { scroll: false }
+      );
+      // Then update selected job state
+      setSelectedJob(job);
+    },
+    [router, pathname, createQueryString]
+  );
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 py-8">

@@ -4,17 +4,24 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { JobPostsManagement } from "@/components/shared/jobposts/JobPostsManagement";
 import { useAuth } from "@/contexts/auth-context";
 import { useJobs } from "@/hooks/use-jobs";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 
 const JobPostManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { user } = useAuth();
+
+  // Memoize the query object to prevent unnecessary re-renders
+  const jobQuery = useMemo(
+    () => ({
+      UserId: user?.userId?.toString() || "",
+    }),
+    [user?.userId]
+  );
+
   const { data: jobPosts, isLoading } = useJobs({
     page: currentPage,
     size: 5,
-    query: {
-      UserId: user?.userId?.toString() || "",
-    },
+    query: jobQuery,
   });
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

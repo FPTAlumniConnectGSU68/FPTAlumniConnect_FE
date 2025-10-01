@@ -80,6 +80,9 @@ export function useCreateMentorShipRequest() {
         });
         router.push("/mentoring");
       }
+      if (response.status !== "success") {
+        throw new Error(response.message || "Failed to create mentorship request");
+      }
     },
     onError: (error) => {
       toast.error(error.message);

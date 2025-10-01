@@ -13,8 +13,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDateToDMY, formatTime } from "@/lib/utils";
-import React from "react";
+import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { JobPostEditDialog } from "./JobPostEditDialog";
+import { Eye, Edit } from "lucide-react";
 interface StatusChipProps {
   status: "Open" | "Closed" | "Deleted";
 }
@@ -50,6 +52,26 @@ const JobPostTable = ({
   currentPage: number;
   onViewApplicants: (jobPostId: number) => void;
 }) => {
+  const [selectedJobPost, setSelectedJobPost] = useState<JobPost | null>(null);
+  const [dialogMode, setDialogMode] = useState<"view" | "edit">("view");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleViewJobPost = (jobPost: JobPost) => {
+    setSelectedJobPost(jobPost);
+    setDialogMode("view");
+    setIsDialogOpen(true);
+  };
+
+  const handleEditJobPost = (jobPost: JobPost) => {
+    setSelectedJobPost(jobPost);
+    setDialogMode("edit");
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedJobPost(null);
+  };
   if (isLoading) {
     return <LoadingSpinner text="Đang tải..." />;
   }
@@ -116,12 +138,31 @@ const JobPostTable = ({
                   />
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="outline"
-                    onClick={() => onViewApplicants(jobPost.jobPostId)}
-                  >
-                    Xem ứng viên
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewJobPost(jobPost)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditJobPost(jobPost)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onViewApplicants(jobPost.jobPostId)}
+                    >
+                      Ứng viên
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -133,6 +174,13 @@ const JobPostTable = ({
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={onPageChange}
+      />
+
+      <JobPostEditDialog
+        open={isDialogOpen}
+        onOpenChange={handleCloseDialog}
+        jobPost={selectedJobPost}
+        mode={dialogMode}
       />
     </div>
   );

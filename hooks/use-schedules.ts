@@ -84,6 +84,12 @@ export function useCreateSchedule() {
           queryClient.invalidateQueries({ queryKey: [key] });
         });
       }
+
+      if (response.status !== "success") {
+        throw new Error(
+          response.message || "Failed to accept mentorship request"
+        );
+      }
     },
     onError: (error) => {
       toast.error(error.message || "Lỗi khi chấp nhận yêu cầu");

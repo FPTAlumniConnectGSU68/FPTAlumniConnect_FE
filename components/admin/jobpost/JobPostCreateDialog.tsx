@@ -41,6 +41,9 @@ const schema = z
     jobDescription: z.string().min(1, "Required Job Description"),
     minSalary: z.coerce.number().nonnegative(),
     maxSalary: z.coerce.number().nonnegative(),
+    recruitmentQuantity: z.coerce.number().int().nonnegative(),
+    workType: z.string().min(1, "Required Work Type"),
+    workHours: z.string().min(1, "Required Work Hours"),
     isDeal: z.boolean().default(false),
     location: z.string().min(1, "Required Location"),
     city: z.string().min(1, "Required City"),
@@ -111,6 +114,9 @@ export function JobPostCreateDialog({
       jobDescription: "",
       minSalary: 0,
       maxSalary: 0,
+      recruitmentQuantity: 0,
+      workType: "",
+      workHours: "",
       isDeal: false,
       location: "",
       city: "",
@@ -207,6 +213,21 @@ export function JobPostCreateDialog({
             {errors.maxSalary && (
               <p className="text-sm text-red-600">{errors.maxSalary.message}</p>
             )}
+          </div>
+          <div>
+            <label className="text-sm font-medium">Số lượng tuyển dụng</label>
+            <Input
+              type="number"
+              {...register("recruitmentQuantity", { valueAsNumber: true })}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Loại hình làm việc</label>
+            <Input {...register("workType")} />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Số giờ làm việc</label>
+            <Input {...register("workHours")} />
           </div>
           <div>
             <label className="text-sm font-medium">Địa điểm</label>
