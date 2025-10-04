@@ -51,6 +51,5 @@ export async function fileFromBlob(
   blob: Blob,
   filename: string
 ): Promise<File> {
-  // Safari needs File constructor guarded; but we're targeting modern browsers for Next.js clients
   return new File([blob], filename, { type: blob.type });
 }

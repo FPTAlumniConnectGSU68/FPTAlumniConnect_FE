@@ -13,7 +13,9 @@ export default function MentoringPage() {
   const { user } = useAuth();
 
   const isAlumni = user?.roleName.toLowerCase() === "alumni";
+  const isLecturer = user?.roleName.toLowerCase() === "lecturer";
   const isMentor = user?.mentorStatus === "Active";
+  const showMentor = (isAlumni && isMentor) || isLecturer
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -29,7 +31,7 @@ export default function MentoringPage() {
               Yêu cầu của tôi
             </TabsTrigger>
           )}
-          {isAlumni && isMentor && (
+          {showMentor && (
             <TabsTrigger value="mentor" className="flex-1">
               Mentor
             </TabsTrigger>
@@ -46,7 +48,7 @@ export default function MentoringPage() {
           </TabsContent>
         )}
 
-        {isAlumni && isMentor && (
+        {showMentor && (
           <TabsContent value="mentor">
             <MentorTab
               currentPage={currentPage}

@@ -18,7 +18,7 @@ const useEventService = () => {
     eventId: string | number,
     userId: string | number
   ) => {
-    const res = await APIClient.invoke<ApiResponse<any>>({
+    const res = await APIClient.invoke<ApiResponse<any>>({ 
       action: ACTIONS.JOIN_EVENT,
       data: {
         EventId: eventId,

@@ -490,8 +490,8 @@ const CommentDialog = ({ id, setSelected, user }: any) => {
         setSelected(null);
       }}
     >
-      <DialogContent className="max-w-2xl">
-        <DialogTitle>{"Detail"}</DialogTitle>
+      <DialogContent className="max-w-2xl max-h-[90dvh] overflow-y-auto">
+        <DialogTitle>Chi tiết</DialogTitle>
         {data && (
           <div className="space-y-6">
             <div className="space-y-4">

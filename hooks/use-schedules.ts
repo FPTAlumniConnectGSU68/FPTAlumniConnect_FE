@@ -65,7 +65,6 @@ export function useCreateSchedule() {
   const queryClient = useQueryClient();
   return useMutation<ApiResponse<ScheduleCreate>, Error, ScheduleCreate>({
     mutationFn: async (data: ScheduleCreate) => {
-      console.log(data);
       const response = await APIClient.invoke<ApiResponse<ScheduleCreate>>({
         action: ACTIONS.ACCEPT_SCHEDULE,
         data,

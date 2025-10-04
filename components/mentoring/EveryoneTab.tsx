@@ -1,6 +1,6 @@
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useMentorShipRequests } from "@/hooks/use-mentoring-requests";
-import { isApiSuccess } from "@/lib/utils";
+import { isApiSuccess, formatLocal } from "@/lib/utils";
 import { User } from "@/types/interfaces";
 import { useState } from "react";
 import { Button } from "../ui/button";
@@ -84,8 +84,8 @@ export function EveryoneTab({ currentPage, user }: EveryoneTabProps) {
         mentorShipId: tempId ?? 0,
         mentorId: user.userId,
         content: content.trim(),
-        startTime: startDate?.toISOString() ?? "",
-        endTime: endDate?.toISOString() ?? "",
+        startTime: startDate ? formatLocal(startDate) : "",
+        endTime: endDate ? formatLocal(endDate) : "",
         status: "Active",
         rating: null,
         comment: null,

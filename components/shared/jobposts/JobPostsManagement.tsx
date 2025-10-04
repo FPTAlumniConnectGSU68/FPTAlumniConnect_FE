@@ -50,19 +50,29 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 // Components
-function NoRecruiterState({ onRegister }: { onRegister: () => void }) {
+function NoRecruiterState({
+  onRegister,
+  userRole,
+}: {
+  onRegister: () => void;
+  userRole: string;
+}) {
   return (
-    <div className="flex items-center justify-center h-56">
-      <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-gray-300 bg-white p-10 shadow-sm text-center max-w-md">
-        <p className="text-gray-600">
-          Bạn chưa thuộc nhà tuyển dụng nào. <br />
-          Đăng ký nhà tuyển dụng ngay!
-        </p>
-        <Button onClick={onRegister} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Đăng ký nhà tuyển dụng
-        </Button>
-      </div>
-    </div>
+    <>
+      {userRole !== "admin" ? (
+        <div className="flex items-center justify-center h-56">
+          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-gray-300 bg-white p-10 shadow-sm text-center max-w-md">
+            <p className="text-gray-600">
+              Bạn chưa thuộc nhà tuyển dụng nào. <br />
+              Đăng ký nhà tuyển dụng ngay!
+            </p>
+            <Button onClick={onRegister} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" /> Đăng ký nhà tuyển dụng
+            </Button>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -320,7 +330,10 @@ export function JobPostsManagement({
 
       {/* Recruiter Info Section */}
       {recruiterInfo.length === 0 ? (
-        <NoRecruiterState onRegister={handleOpenRegisterDialog} />
+        <NoRecruiterState
+          onRegister={handleOpenRegisterDialog}
+          userRole={user?.roleName.toLowerCase() || ""}
+        />
       ) : (
         <RecruiterInfoCard
           recruiter={currentRecruiter}

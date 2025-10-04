@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/auth-context";
 import { useCreateMentorShipRequest } from "@/hooks/use-mentoring-requests";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -67,8 +68,7 @@ const MentorshipAlumniRequestsView = () => {
                 <DialogTitle>Tạo yêu cầu cố vấn</DialogTitle>
               </DialogHeader>
               <DialogDescription className="space-y-4">
-                <Input
-                  type="text"
+                <Textarea
                   placeholder="Nội dung yêu cầu"
                   className="w-full"
                   value={requestMessage}

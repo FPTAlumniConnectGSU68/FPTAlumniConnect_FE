@@ -189,6 +189,8 @@ export default function EventDetailPage() {
       const res = await PUT_RATING(userJoinEventId, ratingObj);
       if (isApiSuccess(res)) {
         toast.success("Rating success");
+      } else {
+        toast.error((res as any).errors[0])
       }
     } catch (err) {
       toast.error("Failed to submit rating. Please try again.");

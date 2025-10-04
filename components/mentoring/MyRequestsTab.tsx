@@ -18,7 +18,6 @@ import { MentoringRequest, Schedule } from "@/types/interfaces";
 import { Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { MentoringCard } from "./MentoringCard";
 
@@ -102,13 +101,12 @@ export function MyRequestsTab({ userId }: MyRequestsTabProps) {
         scheduleObject={scheduleObject}
       />
       <Dialog open={isOpen || isCreate} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-2xl bg-white max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl bg-white max-h-[90vh] min-h-[30vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Tạo yêu cầu cố vấn</DialogTitle>
           </DialogHeader>
           <DialogDescription className="space-y-4">
-            <Input
-              type="text"
+            <Textarea
               placeholder="Nội dung yêu cầu"
               className="w-full"
               value={requestMessage}

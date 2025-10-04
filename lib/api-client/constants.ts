@@ -139,7 +139,7 @@ export const END_POINTS: {
   },
   updateSkill: {
     path: "/v1/skills",
-    method: "PUT",
+    method: "PATCH",
   },
   deleteSkill: {
     path: "/v1/skills",

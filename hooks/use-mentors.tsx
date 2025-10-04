@@ -12,7 +12,7 @@ interface UseMentorsOptions {
 
 export function useMentors({
   page = 1,
-  size = 5,
+  size = 50,
   query = {},
 }: UseMentorsOptions = {}) {
   return useQuery<ApiResponse<PaginatedData<Mentor>>>({

@@ -110,12 +110,12 @@ export default function AdminSkillsPage() {
                     >
                       Sửa
                     </Button>
-                    <Button
+                    {/* <Button
                       variant="destructive"
                       onClick={() => handleDelete(m)}
                     >
                       Xóa
-                    </Button>
+                    </Button> */}
                   </TableCell>
                 </TableRow>
               ))}

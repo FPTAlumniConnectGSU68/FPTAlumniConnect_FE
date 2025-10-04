@@ -19,7 +19,7 @@ function JobsPageContent() {
   // State management
   const [search, setSearch] = useState("");
   const [major, setMajor] = useState<string>("Tất cả chuyên ngành");
-  const [location, setLocation] = useState("all");
+  const [location, setLocation] = useState("All Locations");
   const [data, setData] = useState<JobPost[]>([]);
   const [selectedJob, setSelectedJob] = useState<JobPost | null>(null);
   const [page, setPage] = useState(1);
@@ -35,7 +35,7 @@ function JobsPageContent() {
     query: {
       status: "Open",
       majorId: major === "Tất cả chuyên ngành" ? "" : major,
-      location: location === "all" ? "" : location,
+      location: location === "All Locations" ? "" : location,
     },
   });
 
@@ -133,10 +133,7 @@ function JobsPageContent() {
     }
   }, [major, location, search]);
 
-  // click clear all button once the page is loaded
-  useEffect(() => {
-    clearAllRef.current?.click();
-  }, []);
+  // Removed auto clear-all click on mount to prevent wiping cached data
 
   // Event handlers
   const handleJobClick = useCallback(
@@ -163,7 +160,7 @@ function JobsPageContent() {
         location={location}
         onSearchChange={setSearch}
         onMajorChange={setMajor}
-        onLocationChange={setLocation}
+        onLocationChange={(val) => setLocation(val || "All Locations")}
         clearAllRef={clearAllRef as React.RefObject<HTMLButtonElement>}
       />
 
